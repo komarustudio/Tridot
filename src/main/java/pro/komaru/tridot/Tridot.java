@@ -16,6 +16,7 @@ import pro.komaru.tridot.api.level.loot.conditions.LootConditionsRegistry;
 import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.api.render.bossbars.*;
 import pro.komaru.tridot.client.ClientTick;
+import pro.komaru.tridot.client.cinema.CutsceneEvents;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.render.gui.overlay.*;
 import pro.komaru.tridot.common.Events;
@@ -80,8 +81,9 @@ public class Tridot {
         eventBus.addListener(this::setup);
         eventBus.addListener(TridotLibClient::clientSetup);
 
-        MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new Events());
+        forgeBus.register(this);
+        forgeBus.register(new CutsceneEvents());
+        forgeBus.register(new Events());
     }
 
     public static ResourceLocation ofTridot(String path) {

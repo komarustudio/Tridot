@@ -76,54 +76,11 @@ public class PercentageArmorItem extends ArmorItem{
     @Override
     @OnlyIn(Dist.CLIENT)
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced){
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
         if(CommonConfig.PERCENT_ARMOR.get() != null && CommonConfig.PERCENT_ARMOR.get()){
-            pStack.hideTooltipPart(TooltipPart.MODIFIERS);
             pTooltipComponents.add(Component.translatable("tooltip.tridot.total_armor", getTotalDefense(((PercentageArmorItem)pStack.getItem()).getMaterial()) + "%").withStyle(ChatFormatting.GRAY));
-            Player pPlayer = Minecraft.getInstance().player;
-            for(EquipmentSlot equipmentslot : EquipmentSlot.values()){
-                Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentslot, pStack);
-                if(!multimap.isEmpty()){
-                    pTooltipComponents.add(CommonComponents.EMPTY);
-                    pTooltipComponents.add(Component.translatable("item.modifiers." + equipmentslot.getName()).withStyle(ChatFormatting.GRAY));
-                    for(Map.Entry<Attribute, AttributeModifier> entry : multimap.entries()){
-                        AttributeModifier attributemodifier = entry.getValue();
-                        double d0 = attributemodifier.getAmount();
-                        boolean flag = false;
-                        if(pPlayer != null){
-                            if(attributemodifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID){
-                                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-                                d0 += EnchantmentHelper.getDamageBonus(pStack, MobType.UNDEFINED);
-                                flag = true;
-                            }else if(attributemodifier.getId() == Item.BASE_ATTACK_SPEED_UUID){
-                                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_SPEED);
-                                flag = true;
-                            }
-                        }
-
-                        double d1;
-                        if(attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL){
-                            if(entry.getKey().equals(Attributes.KNOCKBACK_RESISTANCE)){
-                                d1 = d0 * 100.0D;
-                            }else{
-                                d1 = d0;
-                            }
-                        }else{
-                            d1 = d0 * 100.0D;
-                        }
-
-                        if(flag){
-                            pTooltipComponents.add(CommonComponents.space().append(Component.translatable("attribute.modifier.equals." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
-                        }else if(d0 > 0.0D){
-                            pTooltipComponents.add(Component.translatable("attribute.modifier.plus.1", ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
-                        }else if(d0 < 0.0D){
-                            d1 *= -1.0D;
-                            pTooltipComponents.add(Component.translatable("attribute.modifier.take." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
-                        }
-                    }
-                }
-            }
         }
+
+        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
     }
 
     public float attrDist(AbstractArmorBuilder<?> builder, EquipmentSlot pEquipmentSlot, float percent) {

@@ -21,6 +21,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.state.*;
 import net.minecraftforge.api.distmarker.*;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.*;
 import net.minecraftforge.event.entity.*;
@@ -30,6 +31,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent.*;
 import net.minecraftforge.eventbus.api.*;
 import net.minecraftforge.registries.*;
 import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.events.CalculatePercentArmorEvent;
 import pro.komaru.tridot.api.render.bossbars.*;
 import pro.komaru.tridot.client.sound.MusicHandler;
 import pro.komaru.tridot.client.sound.MusicModifier;
@@ -229,17 +231,21 @@ public class Events{
     }
 
     @SubscribeEvent
-    public void onLivingHurt(LivingHurtEvent event){
-        if(!event.getSource().is(DamageTypeTags.BYPASSES_ARMOR)){
+    public void onLivingHurt(LivingHurtEvent event) {
+        if (!event.getSource().is(DamageTypeTags.BYPASSES_ARMOR)) {
             float incomingDamage = event.getAmount();
-            float totalMultiplier;
-            if(CommonConfig.PERCENT_ARMOR.get()){
-                if(event.getEntity().getAttribute(AttributeRegistry.PERCENT_ARMOR.get()) == null) return;
-                float armor = (float)event.getEntity().getAttributeValue(AttributeRegistry.PERCENT_ARMOR.get()) / 100;
-                totalMultiplier = Math.max(Math.min(1 - (armor), 1), 0);
-                float reducedDamage = incomingDamage * totalMultiplier;
+            if (CommonConfig.PERCENT_ARMOR.get()) {
+                if (event.getEntity().getAttribute(AttributeRegistry.PERCENT_ARMOR.get()) == null) return;
+                float armor = (float) event.getEntity().getAttributeValue(AttributeRegistry.PERCENT_ARMOR.get()) / 100;
+                float baseMultiplier = Math.max(Math.min(1 - armor, 1), 0);
+                var calcEvent = new CalculatePercentArmorEvent(event.getEntity(), incomingDamage, baseMultiplier);
+                if (MinecraftForge.EVENT_BUS.post(calcEvent)) {
+                    return;
+                }
+
+                float finalMultiplier = calcEvent.getMultiplier();
+                float reducedDamage = incomingDamage * finalMultiplier;
                 event.setAmount(reducedDamage);
             }
         }
-    }
-}
+    }}

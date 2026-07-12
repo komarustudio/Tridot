@@ -27,6 +27,7 @@ public class PacketHandler extends AbstractPacketHandler {
         HANDLER.registerMessage(id++, SynchronizeCapabilityPacket.class, SynchronizeCapabilityPacket::save, SynchronizeCapabilityPacket::new, SynchronizeCapabilityPacket::handle);
         HANDLER.registerMessage(id++, SyncStashObjectPacket.class, SyncStashObjectPacket::save, SyncStashObjectPacket::new, SyncStashObjectPacket::handle);
         HANDLER.registerMessage(id++, CutsceneSkippedPacket.class, CutsceneSkippedPacket::encode, CutsceneSkippedPacket::decode, CutsceneSkippedPacket::handle);
+        HANDLER.registerMessage(id++, ParryParticlePacket.class, ParryParticlePacket::encode, ParryParticlePacket::decode, ParryParticlePacket::handle);
     }
 
     public static SimpleChannel getHandler(){

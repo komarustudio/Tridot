@@ -9,6 +9,7 @@ import net.minecraft.world.item.*;
 import net.minecraftforge.api.distmarker.*;
 import net.minecraftforge.event.entity.player.PlayerEvent.*;
 import net.minecraftforge.fml.config.ModConfig.*;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.*;
 import org.slf4j.*;
 import pro.komaru.tridot.api.interfaces.*;
@@ -19,6 +20,7 @@ import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.cinema.CutsceneEvents;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.render.gui.overlay.*;
+import pro.komaru.tridot.common.ClientEvents;
 import pro.komaru.tridot.common.Events;
 import pro.komaru.tridot.common.commands.*;
 import pro.komaru.tridot.common.config.ClientConfig;
@@ -75,6 +77,10 @@ public class Tridot {
             TridotLibClient.clientInit();
             return new Object();
         });
+
+        if (FMLEnvironment.dist.isClient()) {
+            forgeBus.register(ClientEvents.class);
+        }
 
         ModLoadingContext.get().registerConfig(Type.COMMON, CommonConfig.SPEC);
         ModLoadingContext.get().registerConfig(Type.CLIENT, ClientConfig.SPEC);

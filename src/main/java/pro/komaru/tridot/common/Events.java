@@ -18,9 +18,11 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.state.*;
 import net.minecraftforge.api.distmarker.*;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.*;
@@ -100,10 +102,21 @@ public class Events{
         LivingEntity entity = ev.getEntity();
         ItemStack stack = entity.getUseItem();
         if(stack.getItem() instanceof ConfiguredShield shieldItem) {
+            if(shieldItem.canParry) {
+                int ticksUsing = entity.getTicksUsingItem();
+                int parryWindow = shieldItem.parryWindow;
+                if (ticksUsing <= parryWindow) {
+                    shieldItem.onParry(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
+                    ev.setBlockedDamage(ev.getOriginalBlockedDamage());
+                    return;
+                }
+            }
+
             float armor = shieldItem.blockedPercent / 100.0F;
-            armor = shieldItem.onPostBlock(stack, armor);
+            armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, armor);
             float totalMultiplier = Math.max(Math.min(1 - (armor), 1), 0);
             float reducedDamage = ev.getOriginalBlockedDamage() * totalMultiplier;
+
             shieldItem.onShieldBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
             ev.setBlockedDamage(reducedDamage);
         }

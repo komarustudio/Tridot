@@ -34,7 +34,7 @@ public class ClientEvents {
                     int barWidth = 15;
                     int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.parryWindow)));
 
-                    graphics.renderFakeItem(useItem, centerX - barWidth, centerY + 25);
+                    graphics.renderFakeItem(useItem, centerX - barWidth, centerY + 15);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, 0xFF00FF00);
                 }

@@ -26,5 +26,6 @@
   "tooltip.tridot.applies_to_attacker": "應用於攻擊者：",
   "tooltip.tridot.applies_with_chance_target": "有機率 %s 應用於目標：",
   "tooltip.tridot.shield.block": "格擋 %s 的受到傷害",
-  "tooltip.tridot.shield.time": "可使用 %s"
+  "tooltip.tridot.shield.time": "可使用 %s",
+  "tooltip.tridot.abilities": "技能"
 }

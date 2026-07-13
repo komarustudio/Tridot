@@ -12,21 +12,30 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.*;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.*;
 import org.jetbrains.annotations.*;
+import pro.komaru.tridot.Tridot;
+import pro.komaru.tridot.api.interfaces.CooldownReductionItem;
 import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.client.render.gui.overlay.OverlayHandler;
 import pro.komaru.tridot.client.render.gui.overlay.TimedOverlayInstance;
 import pro.komaru.tridot.client.render.screenshake.PositionedScreenshakeInstance;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.common.networking.packets.ParryParticlePacket;
+import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.item.TooltipComponentItem;
 import pro.komaru.tridot.common.registry.item.components.AbilityComponent;
+import pro.komaru.tridot.common.registry.item.components.EmptyComponent;
 import pro.komaru.tridot.common.registry.item.components.SeparatorComponent;
 import pro.komaru.tridot.common.registry.item.components.TextComponent;
 import pro.komaru.tridot.util.Tmp;
@@ -36,7 +45,7 @@ import pro.komaru.tridot.util.struct.data.Seq;
 
 import java.util.*;
 
-public class ConfiguredShield extends ShieldItem {
+public class ConfiguredShield extends ShieldItem implements TooltipComponentItem, CooldownReductionItem {
     public boolean infiniteUse = true;
     public float blockedPercent = 100;
     public int useDuration;
@@ -84,9 +93,16 @@ public class ConfiguredShield extends ShieldItem {
         return Component.literal(StringUtil.formatTickDuration(i));
     }
 
+    public int getParryWindow(ItemStack stack) {
+        int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.VIGILANCE.get());
+        return this.parryWindow + (lvl * 3);
+    }
+
     @Override
-    public int getUseDuration(ItemStack pStack){
-        return infiniteUse ? 72000 : useDuration;
+    public int getUseDuration(ItemStack stack) {
+        if (infiniteUse) return 72000;
+        int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.IRON_GRIP.get());
+        return this.useDuration + (lvl * 20);
     }
 
     public void onShieldDisable(ItemStack itemStack,Level level, Player player) {
@@ -119,27 +135,71 @@ public class ConfiguredShield extends ShieldItem {
     public void onShieldBlock(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity){
     }
 
+    @Override
+    public Seq<TooltipComponent> getTooltips(ItemStack pStack) {
+        if(canParry) {
+            return Seq.with(
+                    new SeparatorComponent(Component.translatable("tooltip.tridot.abilities")),
+                    new AbilityComponent(Component.translatable("tooltip.tridot.parry").withStyle(ChatFormatting.GRAY), Tridot.ofTridot("textures/gui/tooltips/parry.png")),
+                    new TextComponent(Component.translatable("tooltip.tridot.parry_window", parryWindow).withStyle(ChatFormatting.GRAY)),
+                    new EmptyComponent(12)
+            );
+        }
+
+        return Seq.with();
+    }
+
     @Nullable
     public SoundEvent parrySound() {
         return SoundEvents.SHIELD_BREAK;
     }
 
-    public void onParry(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity){
+    public void onParry(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity) {
         var level = entity.level();
-        if(entity instanceof Player player) {
-            if(source.getEntity() instanceof  LivingEntity attacker) {
-                attacker.hurt(player.damageSources().thorns(player), pAmount * 0.25f);
-                attacker.knockback(0.85F, attacker.getX(), attacker.getZ());
-                if(parrySound() != null) level.playSound(null, player.blockPosition(), parrySound(), SoundSource.PLAYERS);
+        int resonanceLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.RESONANCE.get());
+        if (entity instanceof Player player) {
+            if (resonanceLvl == 0 && player.getCooldowns().isOnCooldown(itemStack.getItem())) return;
+
+            int deflectLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.DEFLECT.get());
+            Entity directEntity = source.getDirectEntity();
+            if (directEntity instanceof Projectile projectile && deflectLvl > 0) {
+                Vec3 motion = projectile.getDeltaMovement();
+                projectile.setDeltaMovement(motion.scale(-1.5));
+                if (projectile instanceof AbstractArrow arrow) {
+                    byte pierceLevel = arrow.getPierceLevel();
+                    if (pierceLevel > 0) {
+                        arrow.setPierceLevel((byte) (pierceLevel - 1));
+                    }
+                }
+
+                projectile.hurtMarked = true;
+
+                // i hope it will prevent most of the issues that can appear
+                if (projectile instanceof AbstractHurtingProjectile) {
+                    projectile.setOwner(player);
+                } else if (projectile instanceof ThrownPotion) {
+                    projectile.setOwner(player);
+                }
             }
 
-            if(level instanceof ServerLevel server){
+            if (source.getEntity() instanceof LivingEntity attacker) {
+                attacker.hurt(player.damageSources().thorns(player), pAmount * 0.25f);
+                int pushLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.PUSH.get());
+                float knockbackStrength = Math.min(0.6F + (pushLvl * 0.3F), 2.5F);
+                double ratioX = attacker.getX() - player.getX();
+                double ratioZ = attacker.getZ() - player.getZ();
+                attacker.knockback(knockbackStrength, ratioX, ratioZ);
+                attacker.hurtMarked = true;
+                if (parrySound() != null) level.playSound(null, player.blockPosition(), parrySound(), SoundSource.PLAYERS);
+            }
+
+            if (level instanceof ServerLevel server) {
                 PacketHandler.sendToTracking(server, entity.blockPosition(), new ParryParticlePacket(entity.getX(), entity.getY() + 0.5f, entity.getZ()));
             }
 
-            ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float)entity.getX(), (float)entity.getY(), (float)entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
+            ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float) entity.getX(), (float) entity.getY(), (float) entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
             player.invulnerableTime = 20;
-            player.getCooldowns().addCooldown(itemStack.getItem(), this.cooldownTicks);
+            player.getCooldowns().addCooldown(itemStack.getItem(), getCooldownReduction(cooldownTicks, itemStack));
         }
     }
 

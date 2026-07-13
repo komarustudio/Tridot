@@ -40,6 +40,7 @@ import pro.komaru.tridot.client.sound.MusicModifier;
 import pro.komaru.tridot.common.config.ClientConfig;
 import pro.komaru.tridot.common.config.CommonConfig;
 import pro.komaru.tridot.common.networking.proxy.ClientProxy;
+import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.TagsRegistry;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.armor.*;

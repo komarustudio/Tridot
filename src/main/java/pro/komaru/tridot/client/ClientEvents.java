@@ -20,6 +20,7 @@ import pro.komaru.tridot.client.model.render.item.bow.*;
 import pro.komaru.tridot.client.render.gui.particle.*;
 import pro.komaru.tridot.client.render.screenshake.*;
 import pro.komaru.tridot.common.config.*;
+import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.common.registry.item.types.ConfiguredShield;
@@ -30,6 +31,24 @@ import java.util.*;
 import static pro.komaru.tridot.common.Events.GUI_ICONS_LOCATION;
 
 public class ClientEvents {
+
+    @SubscribeEvent
+    public void onMovementInput(MovementInputUpdateEvent event) {
+        Player player = event.getEntity();
+        if (player.isUsingItem()) {
+            ItemStack useItem = player.getUseItem();
+            if (useItem.getItem() instanceof ConfiguredShield) {
+                int vanguardLevel = useItem.getEnchantmentLevel(EnchantmentsRegistry.VANGUARD.get());
+                if (vanguardLevel == 0) return;
+
+                event.getInput().leftImpulse *= 5.0F;
+                event.getInput().forwardImpulse *= 5.0F;
+                if (Minecraft.getInstance().options.keySprint.isDown()) {
+                    player.setSprinting(true);
+                }
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onRenderCrosshair(RenderGuiOverlayEvent.Post event) {

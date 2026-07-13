@@ -27,5 +27,5 @@
   "tooltip.tridot.applies_to_attacker": "Накладывает на атакующего: ",
   "tooltip.tridot.applies_with_chance_target": "Накладывает с шансом %s на цель: ",
   "tooltip.tridot.shield.block": "Блокирует %s от исходимого урона",
-  "tooltip.tridot.shield.time": "Может быть использовано %s"
-}
+  "tooltip.tridot.shield.time": "Может быть использовано %s",
+  "tooltip.tridot.abilities": "Способности"}

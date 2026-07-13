@@ -27,5 +27,8 @@
   "tooltip.tridot.applies_to_attacker": "Applies to attacker: ",
   "tooltip.tridot.applies_with_chance_target": "Applies with chance %s to target: ",
   "tooltip.tridot.shield.block": "Blocks %s of incoming damage",
-  "tooltip.tridot.shield.time": "Can be used for %s"
+  "tooltip.tridot.shield.time": "Can be used for %s",
+  "tooltip.tridot.parry": "Can parry incoming attacks deflecting all the damage and returning some percent of the damage to Attacker",
+  "tooltip.tridot.parry_window": "Parry window: %s ticks",
+  "tooltip.tridot.abilities": "Abilities"
 }

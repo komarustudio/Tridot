@@ -27,5 +27,5 @@
   "tooltip.tridot.applies_to_attacker": "Applies to attacker: ",
   "tooltip.tridot.applies_with_chance_target": "Applies with chance %s to target: ",
   "tooltip.tridot.shield.block": "Блокує %s отриманої шкоди",
-  "tooltip.tridot.shield.time": "Може бути використано %s"
-}
+  "tooltip.tridot.shield.time": "Може бути використано %s",
+  "tooltip.tridot.abilities": "Здібності"}

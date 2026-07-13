@@ -14,5 +14,6 @@
   "tooltip.tridot.applies_with_chance": "Stosuje się z szansą: %s",
   "tooltip.tridot.applies": "Stosuje się: ",
   "tooltip.tridot.special_arrow": "Konwertowanie domyślnej strzałki na ",
-  "tooltip.tridot.bow_damage": "Obrażenia przy pełnym napięciu %s+, przy użyciu domyślnej strzałki"
+  "tooltip.tridot.bow_damage": "Obrażenia przy pełnym napięciu %s+, przy użyciu domyślnej strzałki",
+  "tooltip.tridot.abilities": "Abilities"
 }

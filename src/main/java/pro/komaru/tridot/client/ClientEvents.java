@@ -32,7 +32,7 @@ import static pro.komaru.tridot.common.Events.GUI_ICONS_LOCATION;
 public class ClientEvents {
 
     @SubscribeEvent
-    public static void onRenderCrosshair(RenderGuiOverlayEvent.Post event) {
+    public void onRenderCrosshair(RenderGuiOverlayEvent.Post event) {
         if (event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type()) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -63,7 +63,7 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void handleArmorLevelOverlay(RenderGuiOverlayEvent.Pre e){
+    public void handleArmorLevelOverlay(RenderGuiOverlayEvent.Pre e){
         if (e.getOverlay() == VanillaGuiOverlay.ARMOR_LEVEL.type() && CommonConfig.PERCENT_ARMOR.get()) {
             e.setCanceled(true);
         }

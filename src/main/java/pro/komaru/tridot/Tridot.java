@@ -16,6 +16,7 @@ import pro.komaru.tridot.api.interfaces.*;
 import pro.komaru.tridot.api.level.loot.conditions.LootConditionsRegistry;
 import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.api.render.bossbars.*;
+import pro.komaru.tridot.client.ClientEvents;
 import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.cinema.CutsceneEvents;
 import pro.komaru.tridot.client.gfx.*;
@@ -73,7 +74,6 @@ public class Tridot {
             forgeBus.addListener(OverlayHandler::renderInstances);
             forgeBus.addListener(OverlayRenderItem::onDrawScreenPost);
             forgeBus.addListener(ClientTick::clientTickEnd);
-            TridotLibClient.clientInit();
             return new Object();
         });
 
@@ -81,6 +81,10 @@ public class Tridot {
         ModLoadingContext.get().registerConfig(Type.CLIENT, ClientConfig.SPEC);
         eventBus.addListener(this::setup);
         eventBus.addListener(TridotLibClient::clientSetup);
+
+        if(FMLEnvironment.dist.isClient()){
+            forgeBus.register(new ClientEvents());
+        }
 
         forgeBus.register(this);
         forgeBus.register(new CutsceneEvents());

@@ -34,11 +34,6 @@ public class TridotLibClient{
         ShadersIntegration.init();
     }
 
-    public static void clientInit() {
-        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
-        forgeBus.register(new ClientEvents());
-    }
-
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class RegistryEvents {
         private static float lastArmorValue = -1.0F;

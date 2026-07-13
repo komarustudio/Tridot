@@ -22,6 +22,7 @@ import pro.komaru.tridot.client.render.screenshake.*;
 import pro.komaru.tridot.common.config.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
+import pro.komaru.tridot.common.registry.item.types.ConfiguredShield;
 import pro.komaru.tridot.util.struct.data.*;
 
 import java.util.*;
@@ -29,6 +30,37 @@ import java.util.*;
 import static pro.komaru.tridot.common.Events.GUI_ICONS_LOCATION;
 
 public class ClientEvents {
+
+    @SubscribeEvent
+    public static void onRenderCrosshair(RenderGuiOverlayEvent.Post event) {
+        if (event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type()) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+        if (player == null) return;
+
+        if (player.isUsingItem()) {
+            ItemStack useItem = player.getUseItem();
+            if (useItem.getItem() instanceof ConfiguredShield shield && shield.canParry) {
+                int ticksUsing = player.getTicksUsingItem();
+                if (ticksUsing <= shield.parryWindow) {
+                    GuiGraphics graphics = event.getGuiGraphics();
+                    int screenWidth = event.getWindow().getGuiScaledWidth();
+                    int screenHeight = event.getWindow().getGuiScaledHeight();
+
+                    int centerX = screenWidth / 2;
+                    int centerY = screenHeight / 2;
+
+                    int barWidth = 15;
+                    int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.parryWindow)));
+
+                    graphics.renderFakeItem(useItem, centerX - barWidth, centerY);
+                    graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);
+                    graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, 0xFF00FF00);
+                }
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void handleArmorLevelOverlay(RenderGuiOverlayEvent.Pre e){

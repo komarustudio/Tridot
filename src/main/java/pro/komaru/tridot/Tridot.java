@@ -20,7 +20,6 @@ import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.cinema.CutsceneEvents;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.render.gui.overlay.*;
-import pro.komaru.tridot.common.ClientEvents;
 import pro.komaru.tridot.common.Events;
 import pro.komaru.tridot.common.commands.*;
 import pro.komaru.tridot.common.config.ClientConfig;
@@ -77,10 +76,6 @@ public class Tridot {
             TridotLibClient.clientInit();
             return new Object();
         });
-
-        if (FMLEnvironment.dist.isClient()) {
-            forgeBus.register(ClientEvents.class);
-        }
 
         ModLoadingContext.get().registerConfig(Type.COMMON, CommonConfig.SPEC);
         ModLoadingContext.get().registerConfig(Type.CLIENT, ClientConfig.SPEC);

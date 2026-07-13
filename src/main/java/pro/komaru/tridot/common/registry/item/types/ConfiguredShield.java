@@ -138,6 +138,7 @@ public class ConfiguredShield extends ShieldItem {
             }
 
             ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float)entity.getX(), (float)entity.getY(), (float)entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
+            player.invulnerableTime = 10;
             player.getCooldowns().addCooldown(itemStack.getItem(), this.cooldownTicks);
         }
     }

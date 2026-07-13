@@ -33,7 +33,7 @@ public class ParryParticlePacket {
     public static void handle(ParryParticlePacket msg, Supplier<Context> ctx){
         if(ctx.get().getDirection().getReceptionSide().isClient()){
             ctx.get().enqueueWork(() -> {
-                Level level = ctx.get().getSender().level();
+                Level level = Tridot.PROXY.getLevel();
 
                 ParticleBuilder.create(TridotParticles.SQUARE)
                 .setBehavior(SparkParticleBehavior.create().build())

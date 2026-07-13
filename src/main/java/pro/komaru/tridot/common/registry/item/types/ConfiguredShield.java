@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -24,19 +25,24 @@ import pro.komaru.tridot.client.render.gui.overlay.TimedOverlayInstance;
 import pro.komaru.tridot.client.render.screenshake.PositionedScreenshakeInstance;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.common.networking.packets.ParryParticlePacket;
+import pro.komaru.tridot.common.registry.item.TooltipComponentItem;
+import pro.komaru.tridot.common.registry.item.components.AbilityComponent;
+import pro.komaru.tridot.common.registry.item.components.SeparatorComponent;
+import pro.komaru.tridot.common.registry.item.components.TextComponent;
 import pro.komaru.tridot.util.Tmp;
 import pro.komaru.tridot.util.comps.phys.Pos3;
 import pro.komaru.tridot.util.math.Interp;
+import pro.komaru.tridot.util.struct.data.Seq;
 
 import java.util.*;
 
-public class ConfiguredShield extends ShieldItem{
+public class ConfiguredShield extends ShieldItem {
     public boolean infiniteUse = true;
     public float blockedPercent = 100;
     public int useDuration;
     public int cooldownTicks = 135;
     public int parryWindow = 10;
-    public boolean canParry;
+    public boolean canParry = true;
 
     public ConfiguredShield(Properties pProperties){
         super(pProperties);
@@ -65,9 +71,8 @@ public class ConfiguredShield extends ShieldItem{
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag){
         super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
-
         pTooltip.add(Component.translatable("tooltip.tridot.shield.block", String.format("%.1f%%", this.blockedPercent)).withStyle(ChatFormatting.GRAY));
-        pTooltip.add(Component.translatable("tooltip.tridot.shield.time", formatDuration(this.useDuration)).withStyle(ChatFormatting.GRAY));
+        if(!this.infiniteUse) pTooltip.add(Component.translatable("tooltip.tridot.shield.time", formatDuration(this.useDuration)).withStyle(ChatFormatting.GRAY));
         if(!pStack.getItem().canBeDepleted()){
             pTooltip.add(Component.empty());
             pTooltip.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
@@ -75,12 +80,8 @@ public class ConfiguredShield extends ShieldItem{
     }   
 
     public Component formatDuration(int useDuration) {
-        if (this.infiniteUse) {
-            return Component.translatable("effect.duration.infinite");
-        } else {
-            int i = Mth.floor((float)useDuration);
-            return Component.literal(StringUtil.formatTickDuration(i));
-        }
+        int i = Mth.floor((float)useDuration);
+        return Component.literal(StringUtil.formatTickDuration(i));
     }
 
     @Override

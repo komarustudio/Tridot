@@ -103,7 +103,7 @@ public class Events{
         LivingEntity entity = ev.getEntity();
         ItemStack stack = entity.getUseItem();
         if(stack.getItem() instanceof ConfiguredShield shieldItem) {
-            if(shieldItem.canParry) {
+            if(shieldItem.builder.canParry) {
                 int ticksUsing = entity.getTicksUsingItem();
                 int parryWindow = shieldItem.getParryWindow(stack);
                 if (ticksUsing <= parryWindow) {
@@ -113,7 +113,7 @@ public class Events{
                 }
             }
 
-            float armor = shieldItem.blockedPercent / 100.0F;
+            float armor = shieldItem.builder.blockedPercent / 100.0F;
             armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, armor);
             float totalMultiplier = Math.max(Math.min(1 - (armor), 1), 0);
             float reducedDamage = ev.getOriginalBlockedDamage() * totalMultiplier;

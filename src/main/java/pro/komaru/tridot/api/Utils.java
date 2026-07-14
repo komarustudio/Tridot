@@ -1125,13 +1125,7 @@ public class Utils {
 
         public static void applyWithChance(LivingEntity pTarget, ImmutableList<MobEffectInstance> effects, float chance, ArcRandom arcRandom) {
             if (!effects.isEmpty()) {
-                if (chance < 1) {
-                    if (arcRandom.chance(chance)) {
-                        for (MobEffectInstance effectInstance : effects) {
-                            pTarget.addEffect(new MobEffectInstance(effectInstance));
-                        }
-                    }
-                } else {
+                if (arcRandom.chance(chance)) {
                     for (MobEffectInstance effectInstance : effects) {
                         pTarget.addEffect(new MobEffectInstance(effectInstance));
                     }

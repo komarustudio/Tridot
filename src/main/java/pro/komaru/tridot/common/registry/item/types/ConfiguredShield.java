@@ -2,39 +2,32 @@ package pro.komaru.tridot.common.registry.item.types;
 
 import net.minecraft.*;
 import net.minecraft.network.chat.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.*;
 import net.minecraft.util.*;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.Tridot;
+import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.api.interfaces.CooldownReductionItem;
 import pro.komaru.tridot.api.networking.PacketHandler;
-import pro.komaru.tridot.client.render.gui.overlay.OverlayHandler;
-import pro.komaru.tridot.client.render.gui.overlay.TimedOverlayInstance;
 import pro.komaru.tridot.client.render.screenshake.PositionedScreenshakeInstance;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.common.networking.packets.ParryParticlePacket;
 import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.item.TooltipComponentItem;
+import pro.komaru.tridot.common.registry.item.builders.AbstractShieldBuilder;
 import pro.komaru.tridot.common.registry.item.components.AbilityComponent;
 import pro.komaru.tridot.common.registry.item.components.EmptyComponent;
 import pro.komaru.tridot.common.registry.item.components.SeparatorComponent;
@@ -47,46 +40,32 @@ import pro.komaru.tridot.util.struct.data.Seq;
 import java.util.*;
 
 public class ConfiguredShield extends ShieldItem implements TooltipComponentItem, CooldownReductionItem {
-    public boolean infiniteUse = true;
-    public float blockedPercent = 100;
-    public int useDuration;
-    public int cooldownTicks = 135;
-    public int parryWindow = 10;
-    public boolean canParry = true;
+    public AbstractShieldBuilder<? extends ConfiguredShield> builder;
 
-    public ConfiguredShield(Properties pProperties){
-        super(pProperties);
+    public ConfiguredShield(AbstractShieldBuilder<? extends ConfiguredShield> builder){
+        super(builder.itemProperties);
+        this.builder = builder;
     }
 
-    public ConfiguredShield(float defPercent, Properties pProperties){
-        this(pProperties);
-        this.blockedPercent = defPercent;
-    }
-
-    public ConfiguredShield(float defPercent, int useDuration, Properties pProperties){
-        this(pProperties);
-        this.blockedPercent = defPercent;
-        this.useDuration = useDuration;
-        this.infiniteUse = false;
-    }
-
-    public ConfiguredShield(float defPercent, int useDuration, int cooldown, Properties pProperties){
-        this(pProperties);
-        this.blockedPercent = defPercent;
-        this.useDuration = useDuration;
-        this.cooldownTicks = cooldown;
-        this.infiniteUse = false;
-    }
-
+    /**
+     * Return the enchantability factor of the item, most of the time is based on material.
+     */
     public int getEnchantmentValue() {
-        return 1;
+        return builder.tier.getEnchantmentValue();
+    }
+
+    /**
+     * Return whether this item is repairable in an anvil.
+     */
+    public boolean isValidRepairItem(ItemStack pToRepair, ItemStack pRepair) {
+        return builder.tier.getRepairIngredient().test(pRepair) || super.isValidRepairItem(pToRepair, pRepair);
     }
 
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag){
         super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
-        pTooltip.add(Component.translatable("tooltip.tridot.shield.block", String.format("%.1f%%", this.blockedPercent)).withStyle(ChatFormatting.GRAY));
-        if(!this.infiniteUse) pTooltip.add(Component.translatable("tooltip.tridot.shield.time", formatDuration(this.useDuration)).withStyle(ChatFormatting.GRAY));
+        pTooltip.add(Component.translatable("tooltip.tridot.shield.block", String.format("%.1f%%", builder.blockedPercent)).withStyle(ChatFormatting.GRAY));
+        if(!builder.infiniteUse) pTooltip.add(Component.translatable("tooltip.tridot.shield.time", formatDuration(builder.useDuration)).withStyle(ChatFormatting.GRAY));
         if(!pStack.getItem().canBeDepleted()){
             pTooltip.add(Component.empty());
             pTooltip.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
@@ -100,14 +79,14 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     public int getParryWindow(ItemStack stack) {
         int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.VIGILANCE.get());
-        return this.parryWindow + (lvl * 4);
+        return builder.parryWindow + (lvl * 4);
     }
 
     @Override
     public int getUseDuration(ItemStack stack) {
-        if (infiniteUse) return 72000;
+        if (builder.infiniteUse) return 72000;
         int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.IRON_GRIP.get());
-        return this.useDuration + (lvl * 20);
+        return builder.useDuration + (lvl * 20);
     }
 
     public void onShieldDisable(ItemStack itemStack,Level level, Player player) {
@@ -127,7 +106,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
                 }
 
                 if(Tmp.rnd.nextFloat() < f){
-                    player.getCooldowns().addCooldown(itemStack.getItem(), cooldownTicks);
+                    player.getCooldowns().addCooldown(itemStack.getItem(), builder.cooldownTicks);
                     player.level().broadcastEntityEvent(player, (byte)30);
                     return 0;
                 }
@@ -142,7 +121,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     @Override
     public Seq<TooltipComponent> getTooltips(ItemStack pStack) {
-        if(canParry) {
+        if(builder.canParry) {
             return Seq.with(
                     new SeparatorComponent(Component.translatable("tooltip.tridot.abilities")),
                     new AbilityComponent(Component.translatable("tooltip.tridot.parry").withStyle(ChatFormatting.GRAY), Tridot.ofTridot("textures/gui/tooltips/parry.png")),
@@ -152,11 +131,6 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         }
 
         return Seq.with();
-    }
-
-    @Nullable
-    public SoundEvent parrySound() {
-        return SoundEvents.SHIELD_BREAK;
     }
 
     public void onParry(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity) {
@@ -175,51 +149,54 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
                     }
                 }
 
-                projectile.hurtMarked = true;
                 Vec3 reboundAngle = player.getLookAngle();
                 projectile.setDeltaMovement(reboundAngle);
-
                 // i hope it will prevent most of the issues that can appear
                 if (projectile instanceof AbstractHurtingProjectile hurtingProjectile) {
                     hurtingProjectile.xPower = reboundAngle.x * 0.1D;
                     hurtingProjectile.yPower = reboundAngle.y * 0.1D;
                     hurtingProjectile.zPower = reboundAngle.z * 0.1D;
                     hurtingProjectile.setOwner(player);
-                } else if (projectile instanceof ThrownPotion) {
-                    projectile.setOwner(player);
                 }
+
+                projectile.hurtMarked = true;
             }
 
-            if (source.getEntity() instanceof LivingEntity attacker) {
+            var attacker = source.getEntity();
+            if(attacker != null) {
                 attacker.hurt(player.damageSources().thorns(player), pAmount * 0.25f);
                 int pushLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.PUSH.get());
                 float knockbackStrength = Math.min(0.6F + (pushLvl * 0.3F), 2.5F);
-                double ratioX = attacker.getX() - player.getX();
-                double ratioZ = attacker.getZ() - player.getZ();
-                attacker.knockback(knockbackStrength, ratioX, ratioZ);
+                if (attacker instanceof LivingEntity livingAttacker) {
+                    Utils.Entities.applyWithChance(livingAttacker, builder.onParryEffects, builder.chance, Tmp.rnd);
+                    livingAttacker.knockback(knockbackStrength * 0.5F, Mth.sin(player.getYRot() * ((float) Math.PI / 180F)), -Mth.cos(player.getYRot() * ((float) Math.PI / 180F)));
+                } else {
+                    attacker.push(-Mth.sin(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F, 0.1D, Mth.cos(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F);
+                }
+
                 attacker.hurtMarked = true;
-                if (parrySound() != null) level.playSound(null, player.blockPosition(), parrySound(), SoundSource.PLAYERS);
             }
 
+            if (builder.parrySound != null) level.playSound(null, player.blockPosition(), builder.parrySound, SoundSource.PLAYERS);
             if (level instanceof ServerLevel server) {
                 PacketHandler.sendToTracking(server, entity.blockPosition(), new ParryParticlePacket(entity.getX(), entity.getY() + 0.5f, entity.getZ()));
             }
 
             ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float) entity.getX(), (float) entity.getY(), (float) entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
             player.invulnerableTime = 20;
-            player.getCooldowns().addCooldown(itemStack.getItem(), getCooldownReduction(cooldownTicks, itemStack));
+            player.getCooldowns().addCooldown(itemStack.getItem(), getCooldownReduction(builder.cooldownTicks, itemStack));
         }
     }
 
     @Override
     @NotNull
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity entity) {
-        if (entity instanceof Player player && !infiniteUse) {
+        if (entity instanceof Player player && !builder.infiniteUse) {
             player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS);
             itemStack.hurtAndBreak((int) (itemStack.getMaxDamage()*0.075f), player, (p1) -> p1.broadcastBreakEvent(player.getUsedItemHand()));
             for (Item item : ForgeRegistries.ITEMS) {
                 if(item instanceof ConfiguredShield) {
-                    player.getCooldowns().addCooldown(item, cooldownTicks);
+                    player.getCooldowns().addCooldown(item, builder.cooldownTicks);
                     onShieldDisable(itemStack, level, player);
                     player.disableShield(false);
                 }
@@ -228,4 +205,21 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
         return super.finishUsingItem(itemStack, level, entity);
     }
+
+    public static class Builder extends AbstractShieldBuilder<ConfiguredShield>{
+
+        public Builder(Properties itemProperties) {
+            super(itemProperties);
+        }
+
+        public Builder(float defPercent, Properties itemProperties) {
+            super(defPercent, itemProperties);
+        }
+
+        @Override
+        public ConfiguredShield build(){
+            return new ConfiguredShield(this);
+        }
+    }
+
 }

@@ -15,6 +15,6 @@ public class ParryWindowEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) || pEnchantment != EnchantmentsRegistry.OVERDRIVE.get();
+        return super.checkCompatibility(pEnchantment) || pEnchantment != EnchantmentsRegistry.RESONANCE.get() || pEnchantment != EnchantmentsRegistry.OVERDRIVE.get();
     }
 }

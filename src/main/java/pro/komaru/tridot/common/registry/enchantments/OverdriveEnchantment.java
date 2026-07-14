@@ -15,6 +15,6 @@ public class OverdriveEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) || pEnchantment != EnchantmentsRegistry.RADIUS.get() || pEnchantment != EnchantmentsRegistry.DASH.get();
+        return super.checkCompatibility(pEnchantment) && pEnchantment != EnchantmentsRegistry.RADIUS.get() && pEnchantment != EnchantmentsRegistry.DASH.get();
     }
 }

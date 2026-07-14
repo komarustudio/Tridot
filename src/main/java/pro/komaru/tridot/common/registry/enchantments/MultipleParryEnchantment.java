@@ -15,6 +15,6 @@ public class MultipleParryEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) || pEnchantment != EnchantmentsRegistry.OVERDRIVE.get() || pEnchantment != EnchantmentsRegistry.VIGILANCE.get();
+        return super.checkCompatibility(pEnchantment) && pEnchantment != EnchantmentsRegistry.OVERDRIVE.get() && pEnchantment != EnchantmentsRegistry.VIGILANCE.get();
     }
 }

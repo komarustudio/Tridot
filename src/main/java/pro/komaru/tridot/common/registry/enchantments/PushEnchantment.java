@@ -15,6 +15,6 @@ public class PushEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) || pEnchantment != EnchantmentsRegistry.OVERDRIVE.get();
+        return super.checkCompatibility(pEnchantment) && pEnchantment != EnchantmentsRegistry.OVERDRIVE.get();
     }
 }

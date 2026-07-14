@@ -105,7 +105,7 @@ public class Events{
         if(stack.getItem() instanceof ConfiguredShield shieldItem) {
             if(shieldItem.canParry) {
                 int ticksUsing = entity.getTicksUsingItem();
-                int parryWindow = shieldItem.parryWindow;
+                int parryWindow = shieldItem.getParryWindow(stack);
                 if (ticksUsing <= parryWindow) {
                     shieldItem.onParry(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
                     ev.setBlockedDamage(ev.getOriginalBlockedDamage());

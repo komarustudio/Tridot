@@ -95,7 +95,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     public int getParryWindow(ItemStack stack) {
         int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.VIGILANCE.get());
-        return this.parryWindow + (lvl * 3);
+        return this.parryWindow + (lvl * 4);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             return Seq.with(
                     new SeparatorComponent(Component.translatable("tooltip.tridot.abilities")),
                     new AbilityComponent(Component.translatable("tooltip.tridot.parry").withStyle(ChatFormatting.GRAY), Tridot.ofTridot("textures/gui/tooltips/parry.png")),
-                    new TextComponent(Component.translatable("tooltip.tridot.parry_window", parryWindow).withStyle(ChatFormatting.GRAY)),
+                    new TextComponent(Component.translatable("tooltip.tridot.parry_window", getParryWindow(pStack)).withStyle(ChatFormatting.GRAY)),
                     new EmptyComponent(12)
             );
         }
@@ -163,8 +163,6 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             int deflectLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.DEFLECT.get());
             Entity directEntity = source.getDirectEntity();
             if (directEntity instanceof Projectile projectile && deflectLvl > 0) {
-                Vec3 motion = projectile.getDeltaMovement();
-                projectile.setDeltaMovement(motion.scale(-1.5));
                 if (projectile instanceof AbstractArrow arrow) {
                     byte pierceLevel = arrow.getPierceLevel();
                     if (pierceLevel > 0) {
@@ -173,10 +171,15 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
                 }
 
                 projectile.hurtMarked = true;
+                Vec3 reboundAngle = player.getLookAngle();
+                projectile.setDeltaMovement(reboundAngle);
 
                 // i hope it will prevent most of the issues that can appear
-                if (projectile instanceof AbstractHurtingProjectile) {
-                    projectile.setOwner(player);
+                if (projectile instanceof AbstractHurtingProjectile hurtingProjectile) {
+                    hurtingProjectile.xPower = reboundAngle.x * 0.1D;
+                    hurtingProjectile.yPower = reboundAngle.y * 0.1D;
+                    hurtingProjectile.zPower = reboundAngle.z * 0.1D;
+                    hurtingProjectile.setOwner(player);
                 } else if (projectile instanceof ThrownPotion) {
                     projectile.setOwner(player);
                 }

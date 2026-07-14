@@ -41,8 +41,8 @@ public class ClientEvents {
                 int vanguardLevel = useItem.getEnchantmentLevel(EnchantmentsRegistry.VANGUARD.get());
                 if (vanguardLevel == 0) return;
 
-                event.getInput().leftImpulse *= 5.0F;
-                event.getInput().forwardImpulse *= 5.0F;
+                event.getInput().leftImpulse *= 3.5F;
+                event.getInput().forwardImpulse *= 3.5F;
                 if (Minecraft.getInstance().options.keySprint.isDown()) {
                     player.setSprinting(true);
                 }
@@ -62,7 +62,7 @@ public class ClientEvents {
             ItemStack useItem = player.getUseItem();
             if (useItem.getItem() instanceof ConfiguredShield shield && shield.canParry) {
                 int ticksUsing = player.getTicksUsingItem();
-                if (ticksUsing <= shield.parryWindow) {
+                if (ticksUsing <= shield.getParryWindow(useItem)) {
                     GuiGraphics graphics = event.getGuiGraphics();
                     int screenWidth = event.getWindow().getGuiScaledWidth();
                     int screenHeight = event.getWindow().getGuiScaledHeight();
@@ -71,7 +71,7 @@ public class ClientEvents {
                     int centerY = screenHeight / 2;
 
                     int barWidth = 15;
-                    int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.parryWindow)));
+                    int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.getParryWindow(useItem))));
 
                     graphics.renderFakeItem(useItem, centerX - barWidth, centerY);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);

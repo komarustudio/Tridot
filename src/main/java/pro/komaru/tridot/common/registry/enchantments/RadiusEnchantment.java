@@ -25,6 +25,6 @@ public class RadiusEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(@NotNull Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) && pEnchantment != Enchantments.SWEEPING_EDGE;
+        return super.checkCompatibility(pEnchantment) || pEnchantment != Enchantments.SWEEPING_EDGE;
     }
 }

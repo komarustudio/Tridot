@@ -13,8 +13,4 @@ public class IronGripEnchantment extends Enchantment {
     public int getMaxLevel() {
         return 3;
     }
-
-    public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment);
-    }
 }

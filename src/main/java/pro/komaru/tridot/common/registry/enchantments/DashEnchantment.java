@@ -24,6 +24,6 @@ public class DashEnchantment extends Enchantment {
     }
 
     public boolean checkCompatibility(@NotNull Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment) && pEnchantment != Enchantments.FIRE_ASPECT || pEnchantment != EnchantmentsRegistry.RADIUS.get();
+        return super.checkCompatibility(pEnchantment) || pEnchantment != Enchantments.FIRE_ASPECT || pEnchantment != EnchantmentsRegistry.RADIUS.get();
     }
 }

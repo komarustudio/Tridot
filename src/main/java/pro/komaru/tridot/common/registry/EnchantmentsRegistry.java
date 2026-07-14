@@ -23,9 +23,9 @@ public class EnchantmentsRegistry {
     public static final RegistryObject<Enchantment> RESONANCE = registerEnchantment("resonance", MultipleParryEnchantment::new);
     public static final RegistryObject<Enchantment> VIGILANCE = registerEnchantment("vigilance", ParryWindowEnchantment::new);
     public static final RegistryObject<Enchantment> VANGUARD = registerEnchantment("vanguard", VanguardEnchantment::new);
-    public static final RegistryObject<Enchantment> IRON_GRIP = registerEnchantment("iron_grip", VanguardEnchantment::new);
+    public static final RegistryObject<Enchantment> IRON_GRIP = registerEnchantment("iron_grip", IronGripEnchantment::new);
     public static final RegistryObject<Enchantment> DEFLECT = registerEnchantment("deflect", DeflectEnchantment::new);
-    public static final RegistryObject<Enchantment> PUSH = registerEnchantment("push", DeflectEnchantment::new);
+    public static final RegistryObject<Enchantment> PUSH = registerEnchantment("push", PushEnchantment::new);
 
     private static RegistryObject<Enchantment> registerEnchantment(String id, Supplier<Enchantment> enchantment) {
         return ENCHANTMENTS.register(id, enchantment);

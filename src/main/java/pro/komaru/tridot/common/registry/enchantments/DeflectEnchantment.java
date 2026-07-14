@@ -13,8 +13,4 @@ public class DeflectEnchantment extends Enchantment {
     public int getMaxLevel() {
         return 1;
     }
-
-    public boolean checkCompatibility(Enchantment pEnchantment) {
-        return super.checkCompatibility(pEnchantment);
-    }
 }

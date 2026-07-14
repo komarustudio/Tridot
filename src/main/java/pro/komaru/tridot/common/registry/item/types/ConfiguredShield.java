@@ -19,6 +19,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.Vec3;
@@ -75,6 +76,10 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         this.useDuration = useDuration;
         this.cooldownTicks = cooldown;
         this.infiniteUse = false;
+    }
+
+    public int getEnchantmentValue() {
+        return 1;
     }
 
     @Override

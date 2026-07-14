@@ -60,7 +60,7 @@ public class ClientEvents {
 
         if (player.isUsingItem()) {
             ItemStack useItem = player.getUseItem();
-            if (useItem.getItem() instanceof ConfiguredShield shield && shield.canParry) {
+            if (useItem.getItem() instanceof ConfiguredShield shield && shield.builder.canParry) {
                 int ticksUsing = player.getTicksUsingItem();
                 if (ticksUsing <= shield.getParryWindow(useItem)) {
                     GuiGraphics graphics = event.getGuiGraphics();

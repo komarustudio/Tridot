@@ -15,6 +15,11 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
     public Tier tier = Tiers.WOOD;
     public Properties itemProperties;
     @Nullable public SoundEvent parrySound = SoundEvents.SHIELD_BREAK;
+
+    /**
+     * This sound will be played on the block if the blockPercent is less than 100
+     */
+    @Nullable public SoundEvent blockSound = SoundEvents.SHIELD_BLOCK;
     public boolean infiniteUse = true;
     public float blockedPercent = 100;
     public int useDuration;

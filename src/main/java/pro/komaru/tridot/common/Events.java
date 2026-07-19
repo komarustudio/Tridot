@@ -120,6 +120,10 @@ public class Events{
 
             shieldItem.onShieldBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
             ev.setBlockedDamage(blockedDamage);
+            if(blockedDamage < 1) {
+                var sound = shieldItem.builder.blockSound;
+                if(sound != null) entity.playSound(sound, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);
+            }
         }
     }
 

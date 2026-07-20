@@ -80,11 +80,11 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         }
 
         addEffectTooltip(pTooltip, builder.attackerBlockEffects, "attacker.block");
-        addEffectTooltip(pTooltip, builder.attackerParryEffects, "attacker.parry");
-        addEffectTooltip(pTooltip, builder.attackerParryEffects, "attacker.disable");
         addEffectTooltip(pTooltip, builder.defenderBlockEffects, "defender.block");
+        addEffectTooltip(pTooltip, builder.attackerParryEffects, "attacker.parry");
         addEffectTooltip(pTooltip, builder.defenderParryEffects, "defender.parry");
-        addEffectTooltip(pTooltip, builder.defenderParryEffects, "defender.disable");
+        addEffectTooltip(pTooltip, builder.attackerShieldDisableEffects , "attacker.disable");
+        addEffectTooltip(pTooltip, builder.defenderShieldDisableEffects , "defender.disable");
     }
 
     private void addEffectTooltip(List<Component> pTooltip, EffectList effectData, String key) {

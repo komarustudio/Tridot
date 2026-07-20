@@ -113,7 +113,7 @@ public class Events{
                 }
             }
 
-            float armor = shieldItem.builder.blockedPercent / 100.0F;
+            float armor = shieldItem.builder.blockedPercent;
             armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, armor);
             float blockMultiplier = Math.max(Math.min(armor, 1.0F), 0.0F);
             float blockedDamage = ev.getOriginalBlockedDamage() * blockMultiplier;

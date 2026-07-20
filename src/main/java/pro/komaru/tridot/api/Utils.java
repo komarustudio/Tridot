@@ -857,7 +857,7 @@ public class Utils {
             }
         }
 
-        private static void effectLines(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration){
+        public static void effectLines(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration){
             for (MobEffectInstance mobeffectinstance : effects) {
                 MutableComponent mutablecomponent = Component.translatable(mobeffectinstance.getDescriptionId());
                 MobEffect mobeffect = mobeffectinstance.getEffect();

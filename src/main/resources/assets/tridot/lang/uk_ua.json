@@ -15,7 +15,7 @@
   "enchantment.tridot.overdrive": "Перегрів",
   "enchantment.tridot.overdrive.desc": "Зменшує час перезарядки",
   "attribute.tridot.projectile_damage": "шкода від снаряду",
-  "attribute.tridot.percent_armor": "Зменшення шкоди",
+  "attribute.tridot.percent_armor": "Зменшення шкоди (%)",
   "tooltip.tridot.applies_with_chance": "Застосовується з шансом: %s",
   "tooltip.tridot.applies": "Накладає: ",
   "tooltip.tridot.special_arrow": "Перетворює звичайну стрілу в ",

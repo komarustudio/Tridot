@@ -15,7 +15,7 @@
   "enchantment.tridot.overdrive": "Перегрев",
   "enchantment.tridot.overdrive.desc": "Уменьшает время отката",
   "attribute.tridot.projectile_damage": "Урон от снаряда",
-  "attribute.tridot.percent_armor": "Поглощение урона",
+  "attribute.tridot.percent_armor": "Поглощение урона (%)",
   "tooltip.tridot.applies_with_chance": "Применяется с шансом: %s",
   "tooltip.tridot.applies": "Накладывает: ",
   "tooltip.tridot.special_arrow": "Превращает обычную стрелу в ",

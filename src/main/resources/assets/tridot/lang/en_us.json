@@ -27,7 +27,7 @@
   "enchantment.tridot.overdrive": "Overdrive",
   "enchantment.tridot.overdrive.desc": "Cooldown reduction",
   "attribute.tridot.projectile_damage": "Projectile Damage",
-  "attribute.tridot.percent_armor": "Damage Reduction",
+  "attribute.tridot.percent_armor": "Damage Reduction (%)",
   "tooltip.tridot.applies_with_chance": "Applies with chance: %s",
   "tooltip.tridot.applies": "Applies: ",
   "tooltip.tridot.special_arrow": "Convert Default arrow to ",

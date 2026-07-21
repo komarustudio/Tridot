@@ -29,8 +29,6 @@ import pro.komaru.tridot.util.struct.data.*;
 
 import java.util.*;
 
-import static pro.komaru.tridot.common.Events.GUI_ICONS_LOCATION;
-
 public class ClientEvents {
 
     @SubscribeEvent

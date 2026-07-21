@@ -1,5 +1,6 @@
 package pro.komaru.tridot.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;

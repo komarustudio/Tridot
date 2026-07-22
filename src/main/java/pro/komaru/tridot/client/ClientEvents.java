@@ -30,7 +30,6 @@ import pro.komaru.tridot.util.struct.data.*;
 import java.util.*;
 
 public class ClientEvents {
-
     @SubscribeEvent
     public void onMovementInput(MovementInputUpdateEvent event) {
         Player player = event.getEntity();
@@ -42,6 +41,7 @@ public class ClientEvents {
 
                 event.getInput().leftImpulse *= 3.5F;
                 event.getInput().forwardImpulse *= 3.5F;
+
                 if (Minecraft.getInstance().options.keySprint.isDown()) {
                     player.setSprinting(true);
                 }
@@ -175,9 +175,7 @@ public class ClientEvents {
         float f1 = (float)i / 20.0F;
         if(f1 > 1.0F){
             f1 = 1.0F;
-        }else {
-            f1 *= f1;
-        }
+        } else f1 *= f1;
 
         return f1;
     }

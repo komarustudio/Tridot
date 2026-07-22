@@ -43,7 +43,8 @@ public class TridotLibClient{
         public static void registerComponents(RegisterClientTooltipComponentFactoriesEvent e) {
             e.register(SeparatorComponent.class, c -> SeparatorClientComponent.create(c.component()));
             e.register(LineSeparatorComponent.class, c -> LineSeparatorClientComponent.create());
-            e.register(AbilityComponent.class, c -> AbilityClientComponent.create(c.component(), c.icon(), c.paddingTop(), c.iconSize()));
+            e.register(AbilityComponent.class, c -> AbilityClientComponent.create(c.component(), c.icon(), c.paddingTop(), c.textPaddingTop(), c.iconSize()));
+            e.register(ObjectComponent.class, c -> ObjectClientComponent.create(c.component(), c.icon(), c.paddingTop(), c.textPaddingTop()));
             e.register(TextComponent.class, c -> TextClientComponent.create(c.component()));
             e.register(EffectsListComponent.class, c -> EffectListClientComponent.create(c.list(), c.component()));
             e.register(EmptyComponent.class, c -> EmptyClientComponent.create(c.height()));

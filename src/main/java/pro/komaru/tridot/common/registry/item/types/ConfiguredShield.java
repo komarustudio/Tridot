@@ -1,13 +1,11 @@
 package pro.komaru.tridot.common.registry.item.types;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.*;
 import net.minecraft.util.*;
 import net.minecraft.world.damagesource.*;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -54,6 +52,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
     /**
      * Return the enchantability factor of the item, most of the time is based on material.
      */
+    @Override
     public int getEnchantmentValue() {
         return builder.tier.getEnchantmentValue();
     }
@@ -61,6 +60,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
     /**
      * Return whether this item is repairable in an anvil.
      */
+    @Override
     public boolean isValidRepairItem(ItemStack pToRepair, ItemStack pRepair) {
         return builder.tier.getRepairIngredient().test(pRepair) || super.isValidRepairItem(pToRepair, pRepair);
     }
@@ -95,9 +95,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         pTooltip.add(Component.empty());
         if (chance > 0 && chance < 1) {
             pTooltip.add(Component.translatable("tooltip.tridot.applies_with_chance_to_" + key, String.format("%.1f%%", chance * 100)).withStyle(ChatFormatting.GRAY));
-        } else {
-            pTooltip.add(Component.translatable("tooltip.tridot.applies_to_" + key).withStyle(ChatFormatting.GRAY));
-        }
+        } else pTooltip.add(Component.translatable("tooltip.tridot.applies_to_" + key).withStyle(ChatFormatting.GRAY));
 
         Utils.Items.effectLines(effects, pTooltip, 1);
     }
@@ -109,7 +107,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     public int getParryWindow(ItemStack stack) {
         int lvl = stack.getEnchantmentLevel(EnchantmentsRegistry.VIGILANCE.get());
-        return builder.parryWindow + (lvl * 4);
+        return Math.round(builder.parryWindow + (lvl * 1.5f));
     }
 
     @Override
@@ -119,26 +117,34 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         return builder.useDuration + (lvl * 20);
     }
 
+    @Override
+    public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity, int pTimeCharged) {
+        if (!(pLivingEntity instanceof Player player)) return;
+
+        var ticks = builder.onShieldReleaseTicks;
+        if (!player.getCooldowns().isOnCooldown(this) && ticks != 0) {
+            player.getCooldowns().addCooldown(this, ticks);
+        }
+
+        super.releaseUsing(pStack, pLevel, pLivingEntity, pTimeCharged);
+    }
+
     public void onShieldDisable(ItemStack itemStack, Level level, Player player, @Nullable LivingEntity attacker, boolean pBecauseOfAxe) {
         if(!pBecauseOfAxe) return;
 
         Utils.Entities.applyWithChance(player, builder.defenderShieldDisableEffects.getEffects(), builder.defenderShieldDisableEffects.getChance(), Tmp.rnd);
-        if(attacker != null) {
-            Utils.Entities.applyWithChance(attacker, builder.attackerShieldDisableEffects.getEffects(), builder.attackerShieldDisableEffects.getChance(), Tmp.rnd);
-        }
+        if (attacker != null) Utils.Entities.applyWithChance(attacker, builder.attackerShieldDisableEffects.getEffects(), builder.attackerShieldDisableEffects.getChance(), Tmp.rnd);
     }
 
     public float onPostBlock(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity, float armor){
-        if(source.getEntity() instanceof LivingEntity attacker && entity instanceof Player player){
+        if (source.getEntity() instanceof LivingEntity attacker && entity instanceof Player player){
             var pMobItemStack = attacker.getMainHandItem(); // the weapon
             var pPlayerItemStack = player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY;
-            if(!pMobItemStack.isEmpty() && !pPlayerItemStack.isEmpty() && (pMobItemStack.getItem().canDisableShield(pPlayerItemStack, itemStack, entity, attacker) || pMobItemStack.is(TagsRegistry.CAN_DISABLE_SHIELD))){
+            if (!pMobItemStack.isEmpty() && !pPlayerItemStack.isEmpty() && (pMobItemStack.getItem().canDisableShield(pPlayerItemStack, itemStack, entity, attacker) || pMobItemStack.is(TagsRegistry.CAN_DISABLE_SHIELD))){
                 float f = 0.25F + (float) EnchantmentHelper.getBlockEfficiency(player) * 0.05F;
                 if (attacker instanceof Player attackingPlayer) {
                     float attackStrength = attackingPlayer.getAttackStrengthScale(0.5F);
-                    if (attackStrength < 0.9F) {
-                        return armor;
-                    }
+                    if (attackStrength < 0.9F) return armor;
                 }
 
                 if(Tmp.rnd.nextFloat() < f){
@@ -217,9 +223,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
                 if (attacker instanceof LivingEntity livingAttacker) {
                     Utils.Entities.applyWithChance(livingAttacker, builder.attackerParryEffects.getEffects(), builder.attackerParryEffects.getChance(), Tmp.rnd);
                     livingAttacker.knockback(knockbackStrength * 0.5F, Mth.sin(player.getYRot() * ((float) Math.PI / 180F)), -Mth.cos(player.getYRot() * ((float) Math.PI / 180F)));
-                } else {
-                    attacker.push(-Mth.sin(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F, 0.1D, Mth.cos(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F);
-                }
+                } else attacker.push(-Mth.sin(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F, 0.1D, Mth.cos(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F);
 
                 attacker.hurtMarked = true;
             }
@@ -258,20 +262,20 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     public void disableShield(Player player, boolean pBecauseOfAxe) {
         float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(player) * 0.05F;
-        if (pBecauseOfAxe) {
-            f += 0.75F;
-        }
+        if (pBecauseOfAxe) f += 0.75F;
 
         if (Tmp.rnd.nextFloat() < f) {
-            player.getCooldowns().addCooldown(player.getUseItem().getItem(), getCooldownReduction(builder.shieldDisableTicks, player.getUseItem()));
+            player.getCooldowns().addCooldown(player.getUseItem().getItem(), builder.shieldDisableTicks);
             player.stopUsingItem();
-            player.level().broadcastEntityEvent(player, (byte)30);
+
+            var level = player.level();
+            level.playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);
+            level.broadcastEntityEvent(player, (byte)30);
         }
 
     }
 
     public static class Builder extends AbstractShieldBuilder<ConfiguredShield>{
-
         public Builder(Properties itemProperties) {
             super(itemProperties);
         }

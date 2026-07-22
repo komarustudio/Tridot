@@ -102,10 +102,19 @@ public class Events{
     public void onShieldBlock(ShieldBlockEvent ev) {
         LivingEntity entity = ev.getEntity();
         ItemStack stack = entity.getUseItem();
-        if(stack.getItem() instanceof ConfiguredShield shieldItem) {
-            if(shieldItem.builder.canParry) {
+
+        if (stack.getItem() instanceof ConfiguredShield shieldItem) {
+            float armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, shieldItem.builder.blockedPercent);
+
+            if (armor == 0) {
+                ev.setBlockedDamage(0);
+                return;
+            }
+
+            if (shieldItem.builder.canParry) {
                 int ticksUsing = entity.getTicksUsingItem();
                 int parryWindow = shieldItem.getParryWindow(stack);
+
                 if (ticksUsing <= parryWindow) {
                     shieldItem.onParry(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
                     ev.setBlockedDamage(ev.getOriginalBlockedDamage());
@@ -113,16 +122,15 @@ public class Events{
                 }
             }
 
-            float armor = shieldItem.builder.blockedPercent;
-            armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, armor);
             float blockMultiplier = Math.max(Math.min(armor, 1.0F), 0.0F);
             float blockedDamage = ev.getOriginalBlockedDamage() * blockMultiplier;
 
             shieldItem.onShieldBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);
             ev.setBlockedDamage(blockedDamage);
-            if(blockedDamage < 1) {
+
+            if (blockedDamage < 1) {
                 var sound = shieldItem.builder.blockSound;
-                if(sound != null) entity.playSound(sound, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);
+                if (sound != null) entity.playSound(sound, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);
             }
         }
     }
@@ -233,7 +241,7 @@ public class Events{
                         BlockState blockState = blockItem.getBlock().defaultBlockState();
                         Stream<ResourceLocation> blockTagStream = blockState.getTags().map(TagKey::location);
                         if(!blockState.getTags().map(TagKey::location).toList().isEmpty()){
-                            if(itemStack.getTags().toList().isEmpty()){
+                            if(itemStack.getTags().toList().isEmpty()){ //аа вайбкод
                                 e.getToolTip().add(net.minecraft.network.chat.Component.empty());
                             }
 

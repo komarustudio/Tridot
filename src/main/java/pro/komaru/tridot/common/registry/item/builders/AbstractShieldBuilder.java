@@ -26,9 +26,10 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
     public float returnedDamagePercent = 0;
     public int useDuration;
     public int cooldownTicks = 45;
-    public int parryCooldownTicks = 20;
-    public int shieldDisableTicks = 100;
-    public int parryWindow = 10;
+    public int parryCooldownTicks = 100;
+    public int shieldDisableTicks = 200;
+    public int parryWindow = 8;
+    public int onShieldReleaseTicks = 32;
 
     public EffectList defenderBlockEffects = EffectList.EMPTY;
     public EffectList defenderParryEffects = EffectList.EMPTY;
@@ -142,6 +143,11 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
 
     public AbstractShieldBuilder<T> setParryWindow(int window){
         this.parryWindow = window;
+        return this;
+    }
+
+    public AbstractShieldBuilder<T> setonShieldReleaseTicks(int ticks) {
+        this.onShieldReleaseTicks = ticks;
         return this;
     }
 

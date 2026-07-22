@@ -75,15 +75,15 @@ public class ClientEvents {
                 
                     graphics.pose().pushPose();
 
-                    Col col = ticksUsing > 5 ? Col.white : Col.red;
+                    Col col = ticksUsing > 5 ? Col.green : Col.red;
 
-                    RenderSystem.setShaderColor(col.red(), col.blue(), col.green(), col.alpha());
+                    RenderSystem.setShaderColor(1,1,1,1);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                 
                     graphics.renderFakeItem(useItem, centerX - barWidth, centerY + 8);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);
-                    graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, 0xFF00FF00);
+                    graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, col.argb8888());
                     
                     graphics.pose().popPose();
                 }

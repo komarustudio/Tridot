@@ -43,7 +43,7 @@
   "tooltip.tridot.applies_to_attacker.block": "При блоке -> Атакующий: ",
   "tooltip.tridot.applies_with_chance_to_attacker.block": "При блоке (%s шанс) -> Атакующий: ",
   "tooltip.tridot.applies_to_attacker.parry": "При парировании -> Атакующий: ",
-  "tooltip.tridot.applies_with_chance_to_attacker.parry": "On Parry (%s шанс) -> Атакующий: ",
+  "tooltip.tridot.applies_with_chance_to_attacker.parry": "При парировании (%s шанс) -> Атакующий: ",
   "tooltip.tridot.applies_to_defender.block": "При блоке -> Защищающийся: ",
   "tooltip.tridot.applies_with_chance_to_defender.block": "При блоке (%s шанс) -> Защищающийся: ",
   "tooltip.tridot.applies_to_defender.parry": "При парировании -> Защищающийся: ",

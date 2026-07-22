@@ -25,6 +25,7 @@ import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.common.registry.item.types.ConfiguredShield;
+import pro.komaru.tridot.util.Col;
 import pro.komaru.tridot.util.struct.data.*;
 
 import java.util.*;
@@ -73,12 +74,14 @@ public class ClientEvents {
                     int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.getParryWindow(useItem))));
                 
                     graphics.pose().pushPose();
-                    
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+                    Col col = ticksUsing > 5 ? Col.white : Col.red;
+
+                    RenderSystem.setShaderColor(col.red(), col.blue(), col.green(), col.alpha());
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                 
-                    graphics.renderFakeItem(useItem, centerX - barWidth, centerY);
+                    graphics.renderFakeItem(useItem, centerX - barWidth, centerY + 8);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, 0xFF00FF00);
                     

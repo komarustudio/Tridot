@@ -76,7 +76,7 @@ public class ClientEvents {
                     graphics.pose().pushPose();
 
 //                    Col col = ticksUsing > 5 ? Col.green : Col.red;
-                    Col col = Col.green;
+                    Col col = Col.white;
 
                     RenderSystem.setShaderColor(1,1,1,1);
                     RenderSystem.enableBlend();

@@ -28,7 +28,7 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
     public int cooldownTicks = 45;
     public int parryCooldownTicks = 100;
     public int shieldDisableTicks = 200;
-    public int parryWindow = 8;
+    public int parryWindow = 12;
     public int onShieldReleaseTicks = 32;
 
     public EffectList defenderBlockEffects = EffectList.EMPTY;

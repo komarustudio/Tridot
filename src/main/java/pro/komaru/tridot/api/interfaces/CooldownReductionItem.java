@@ -8,6 +8,6 @@ public interface CooldownReductionItem{
         var level = stack.getEnchantmentLevel(EnchantmentsRegistry.OVERDRIVE.get());
         float factor = level >= 5 ? 0.015f : 0.02f;
 
-        return Math.max(0, Math.round(cooldown * factor * level));
+        return Math.max(0, Math.round(cooldown * (1.0f - factor * level)));
     }
 }

@@ -3,6 +3,7 @@ package pro.komaru.tridot.common.registry.item.types;
 import net.minecraft.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.*;
 import net.minecraft.util.*;
 import net.minecraft.world.damagesource.*;
@@ -229,9 +230,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             }
 
             if (builder.parrySound != null) level.playSound(null, player.blockPosition(), builder.parrySound, SoundSource.PLAYERS);
-            if (level instanceof ServerLevel server) {
-                PacketHandler.sendToTracking(server, entity.blockPosition(), new ParryParticlePacket(entity.getX(), entity.getY() + 0.5f, entity.getZ()));
-            }
+            if (player instanceof ServerPlayer server) PacketHandler.sendTo(server, new ParryParticlePacket(entity.getX(), entity.getY() + 0.5f, entity.getZ()));
 
             ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float) entity.getX(), (float) entity.getY(), (float) entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
             player.invulnerableTime = 20;

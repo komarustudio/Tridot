@@ -102,7 +102,6 @@ public class Events{
     public void onShieldBlock(ShieldBlockEvent ev) {
         LivingEntity entity = ev.getEntity();
         ItemStack stack = entity.getUseItem();
-
         if (stack.getItem() instanceof ConfiguredShield shieldItem) {
             float armor = shieldItem.onPostBlock(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity, shieldItem.builder.blockedPercent);
 
@@ -114,6 +113,7 @@ public class Events{
             if (shieldItem.builder.canParry) {
                 int ticksUsing = entity.getTicksUsingItem();
                 int parryWindow = shieldItem.getParryWindow(stack);
+                if(ev.getDamageSource().is(TagsRegistry.BYPASSES_PARRY)) return;
 
                 if (ticksUsing <= parryWindow) {
                     shieldItem.onParry(ev.getDamageSource(), ev.getOriginalBlockedDamage(), stack, entity);

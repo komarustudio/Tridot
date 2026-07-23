@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#minecraft:is_fire",
+    "#minecraft:is_explosion",
+    "#minecraft:is_freezing",
+    "minecraft:thorns",
+    "minecraft:dry_out",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ]
+}

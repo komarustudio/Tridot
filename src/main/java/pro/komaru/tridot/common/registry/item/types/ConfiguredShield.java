@@ -6,6 +6,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.*;
 import net.minecraft.util.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
@@ -236,8 +238,25 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             player.invulnerableTime = 20;
             onShieldDisable(itemStack, level, player, null, false);
             if(resonanceLvl == 0) player.stopUsingItem();
-            player.getCooldowns().addCooldown(itemStack.getItem(), getCooldownReduction(builder.parryCooldownTicks, itemStack));
+            applyCooldown(player, builder.parryCooldownTicks, false);
             Utils.Entities.applyWithChance(player, builder.defenderParryEffects.getEffects(), builder.defenderParryEffects.getChance(), Tmp.rnd);
+        }
+    }
+
+    @Override
+    public void onStopUsing(ItemStack stack, LivingEntity entity, int count) {
+        if (entity instanceof Player player && !player.level().isClientSide) {
+            if (!player.getCooldowns().isOnCooldown(this)) {
+                applyCooldown(player, builder.cooldownTicks, false); // prevents shield parry abuse
+            }
+        }
+    }
+
+    public void applyCooldown(Player playerIn, int cooldownTime, boolean applyReduction){
+        for(Item item : ForgeRegistries.ITEMS){
+            if(item instanceof ShieldItem){
+                playerIn.getCooldowns().addCooldown(item, applyReduction ? getCooldownReduction(cooldownTime, playerIn.getUseItem()) : cooldownTime);
+            }
         }
     }
 
@@ -247,13 +266,9 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         if (entity instanceof Player player && !builder.infiniteUse) {
             player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS);
             itemStack.hurtAndBreak((int) (itemStack.getMaxDamage()*0.075f), player, (p1) -> p1.broadcastBreakEvent(player.getUsedItemHand()));
-            for (Item item : ForgeRegistries.ITEMS) {
-                if(item instanceof ConfiguredShield) {
-                    player.stopUsingItem();
-                    player.getCooldowns().addCooldown(item, getCooldownReduction(builder.cooldownTicks, itemStack));
-                    onShieldDisable(itemStack, level, player, null, false);
-                }
-            }
+            player.stopUsingItem();
+            applyCooldown(player, builder.cooldownTicks, true);
+            onShieldDisable(itemStack, level, player, null, false);
         }
 
         return super.finishUsingItem(itemStack, level, entity);
@@ -266,6 +281,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         if (Tmp.rnd.nextFloat() < f) {
             player.getCooldowns().addCooldown(player.getUseItem().getItem(), builder.shieldDisableTicks);
             player.stopUsingItem();
+            applyCooldown(player, builder.shieldDisableTicks, false);
 
             var level = player.level();
             level.playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);

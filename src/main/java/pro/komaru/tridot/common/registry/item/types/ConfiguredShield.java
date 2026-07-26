@@ -126,7 +126,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
         var ticks = builder.onShieldReleaseTicks;
         if (!player.getCooldowns().isOnCooldown(this) && ticks != 0) {
-            player.getCooldowns().addCooldown(this, ticks);
+            applyCooldown(player, ticks, false);
         }
 
         super.releaseUsing(pStack, pLevel, pLivingEntity, pTimeCharged);
@@ -237,8 +237,8 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float) entity.getX(), (float) entity.getY(), (float) entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
             player.invulnerableTime = 20;
             onShieldDisable(itemStack, level, player, null, false);
-            if(resonanceLvl == 0) player.stopUsingItem();
             applyCooldown(player, builder.parryCooldownTicks, false);
+            if(resonanceLvl == 0) player.stopUsingItem();
             Utils.Entities.applyWithChance(player, builder.defenderParryEffects.getEffects(), builder.defenderParryEffects.getChance(), Tmp.rnd);
         }
     }
@@ -247,7 +247,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
     public void onStopUsing(ItemStack stack, LivingEntity entity, int count) {
         if (entity instanceof Player player && !player.level().isClientSide) {
             if (!player.getCooldowns().isOnCooldown(this)) {
-                applyCooldown(player, builder.cooldownTicks, false); // prevents shield parry abuse
+                applyCooldown(player, builder.onShieldReleaseTicks, false); // prevents shield parry abuse
             }
         }
     }
@@ -266,8 +266,8 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         if (entity instanceof Player player && !builder.infiniteUse) {
             player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS);
             itemStack.hurtAndBreak((int) (itemStack.getMaxDamage()*0.075f), player, (p1) -> p1.broadcastBreakEvent(player.getUsedItemHand()));
-            player.stopUsingItem();
             applyCooldown(player, builder.cooldownTicks, true);
+            player.stopUsingItem();
             onShieldDisable(itemStack, level, player, null, false);
         }
 
@@ -279,9 +279,8 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         if (pBecauseOfAxe) f += 0.75F;
 
         if (Tmp.rnd.nextFloat() < f) {
-            player.getCooldowns().addCooldown(player.getUseItem().getItem(), builder.shieldDisableTicks);
-            player.stopUsingItem();
             applyCooldown(player, builder.shieldDisableTicks, false);
+            player.stopUsingItem();
 
             var level = player.level();
             level.playSound(null, player.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F + Tmp.rnd.nextFloat() * 0.4F);

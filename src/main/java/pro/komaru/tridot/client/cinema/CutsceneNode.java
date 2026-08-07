@@ -25,7 +25,7 @@ public class CutsceneNode{
     public Runnable onReach = () -> {};
     public Runnable onPlay = () -> {};
     public Runnable onEnd = () -> {};
-    public Map<Integer, Runnable> timedEvents = new HashMap<>();
+    public Map<Integer, Consumer<CutsceneNode>> timedEvents = new HashMap<>();
 
     public CutsceneNode(Vec3 pos, Interp easing, float pitch, float yaw, int duration){
         this.pos = pos;
@@ -74,9 +74,9 @@ public class CutsceneNode{
         return this;
     }
 
-    public CutsceneNode runAt(int tick, Runnable action) {
+    public CutsceneNode runAt(int tick, Consumer<CutsceneNode> action) {
         this.timedEvents.compute(tick, (k, existingAction) ->
-                existingAction == null ? action : () -> { existingAction.run(); action.run(); }
+                existingAction == null ? action : (node) -> { existingAction.accept(node); action.accept(node); }
         );
 
         return this;

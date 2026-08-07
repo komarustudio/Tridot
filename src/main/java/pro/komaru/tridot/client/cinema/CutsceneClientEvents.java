@@ -42,19 +42,15 @@ public class CutsceneClientEvents {
                 CutsceneManager.currentFadeAlpha = Mth.clamp(CutsceneManager.currentFadeAlpha, 0.0f, 1.0f);
             }
 
-            CutsceneManager.ticks++;
-            CutsceneManager.ticksInCurrentNode++;
             if (CutsceneManager.nodes != null && CutsceneManager.currentNodeIndex < CutsceneManager.nodes.size) {
                 CutsceneNode currentNode = CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex);
                 currentNode.onPlay.run();
-                if (CutsceneManager.ticksInCurrentNode == 0) {
-                    currentNode.onReach.run();
-                    CutsceneManager.ticksInCurrentNode = 0;
-                }
-
                 if (currentNode.timedEvents.containsKey(CutsceneManager.ticksInCurrentNode)) {
                     currentNode.timedEvents.get(CutsceneManager.ticksInCurrentNode).accept(currentNode);
                 }
+
+                CutsceneManager.ticks++;
+                CutsceneManager.ticksInCurrentNode++;
 
                 float nodeDelta = (float) CutsceneManager.ticksInCurrentNode / currentNode.duration;
                 Vec3 prevPos = CutsceneManager.currentNodeIndex == 0 ? CutsceneManager.startPos : CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex - 1).pos;
@@ -88,7 +84,6 @@ public class CutsceneClientEvents {
                 }
 
                 if (CutsceneManager.ticksInCurrentNode >= currentNode.duration) {
-                    currentNode.onEnd.run();
                     CutsceneManager.ticksInCurrentNode = 0;
                     CutsceneManager.currentNodeIndex++;
                 }

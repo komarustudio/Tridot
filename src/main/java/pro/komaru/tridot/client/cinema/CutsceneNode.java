@@ -10,6 +10,7 @@ import pro.komaru.tridot.util.math.Interp;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class CutsceneNode{
     public Vec3 pos;
@@ -22,9 +23,7 @@ public class CutsceneNode{
     @Nullable public Component component;
     @Nullable public SoundEvent event;
     @Nullable public ScreenshakeInstance screenshakeInstance;
-    public Runnable onReach = () -> {};
     public Runnable onPlay = () -> {};
-    public Runnable onEnd = () -> {};
     public Map<Integer, Consumer<CutsceneNode>> timedEvents = new HashMap<>();
 
     public CutsceneNode(Vec3 pos, Interp easing, float pitch, float yaw, int duration){
@@ -44,11 +43,11 @@ public class CutsceneNode{
     }
 
     public CutsceneNode fade(float targetAlpha, int durationTicks) {
-        return this.onReach(() -> CutsceneManager.fade(targetAlpha, durationTicks));
+        return this.onStart((node) -> CutsceneManager.fade(targetAlpha, durationTicks));
     }
 
     public CutsceneNode fadeOut(float targetAlpha, int durationTicks) {
-        return this.onEnd(() -> CutsceneManager.fade(targetAlpha, durationTicks));
+        return this.onEnd((node) -> CutsceneManager.fade(targetAlpha, durationTicks));
     }
 
     public CutsceneNode setTargetGlow(Entity target, boolean glowing) {
@@ -56,7 +55,7 @@ public class CutsceneNode{
     }
 
     public CutsceneNode disableGlow(Entity target) {
-        return this.onEnd(() -> target.setGlowingTag(false));
+        return this.onEnd((node) -> target.setGlowingTag(false));
     }
 
     public CutsceneNode onPlay(Runnable action) {
@@ -64,14 +63,12 @@ public class CutsceneNode{
         return this;
     }
 
-    public CutsceneNode onEnd(Runnable action) {
-        this.onEnd = action;
-        return this;
+    public CutsceneNode onEnd(Consumer<CutsceneNode> action) {
+        return this.runAt(duration, action);
     }
 
-    public CutsceneNode onReach(Runnable action) {
-        this.onReach = action;
-        return this;
+    public CutsceneNode onStart(Consumer<CutsceneNode> action) {
+        return this.runAt(0, action);
     }
 
     public CutsceneNode runAt(int tick, Consumer<CutsceneNode> action) {

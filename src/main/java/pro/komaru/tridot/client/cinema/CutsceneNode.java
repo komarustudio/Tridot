@@ -1,9 +1,11 @@
 package pro.komaru.tridot.client.cinema;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeInstance;
 import pro.komaru.tridot.util.math.Interp;
 
@@ -21,8 +23,6 @@ public class CutsceneNode{
     public int duration;
     public int fov = 90;
     @Nullable public Component component;
-    @Nullable public SoundEvent event;
-    @Nullable public ScreenshakeInstance screenshakeInstance;
     public Runnable onPlay = () -> {};
     public Map<Integer, Consumer<CutsceneNode>> timedEvents = new HashMap<>();
 
@@ -85,18 +85,25 @@ public class CutsceneNode{
         return node;
     }
 
+    public CutsceneNode playSoundAt(int tick, SoundEvent event, float volume, float pitch) {
+        return this.runAt(tick, node -> node.playSound(event, volume, pitch));
+    }
+
+    public CutsceneNode playSound(SoundEvent event, float volume, float pitch) {
+        return this.onStart(node -> Minecraft.getInstance().player.playSound(event, volume, pitch));
+    }
+
     public CutsceneNode playSound(SoundEvent event) {
-        this.event = event;
+        return this.playSound(event, 1.0f, 1.0f);
+    }
+
+    public CutsceneNode addScreenShake(ScreenshakeInstance screenshakeInstance) {
+        ScreenshakeHandler.add(screenshakeInstance);
         return this;
     }
 
     public CutsceneNode addSubtitle(Component component) {
         this.component = component;
-        return this;
-    }
-
-    public CutsceneNode addScreenShake(ScreenshakeInstance screenshakeInstance) {
-        this.screenshakeInstance = screenshakeInstance;
         return this;
     }
 

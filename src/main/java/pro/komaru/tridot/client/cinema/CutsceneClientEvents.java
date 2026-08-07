@@ -71,18 +71,6 @@ public class CutsceneClientEvents {
 
                 dummy.setYRot(currentNode.yaw);
                 dummy.setXRot(currentNode.pitch);
-
-                if (CutsceneManager.lastTriggeredNodeIndex != CutsceneManager.currentNodeIndex) {
-                    CutsceneManager.lastTriggeredNodeIndex = CutsceneManager.currentNodeIndex;
-                    if (currentNode.event != null) {
-                        mc.player.playSound(currentNode.event, 1, 1);
-                    }
-
-                    if (currentNode.screenshakeInstance != null) {
-                        ScreenshakeHandler.add(currentNode.screenshakeInstance);
-                    }
-                }
-
                 if (CutsceneManager.ticksInCurrentNode >= currentNode.duration) {
                     CutsceneManager.ticksInCurrentNode = 0;
                     CutsceneManager.currentNodeIndex++;

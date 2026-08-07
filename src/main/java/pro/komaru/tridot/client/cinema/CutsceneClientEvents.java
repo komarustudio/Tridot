@@ -53,7 +53,7 @@ public class CutsceneClientEvents {
                 }
 
                 if (currentNode.timedEvents.containsKey(CutsceneManager.ticksInCurrentNode)) {
-                    currentNode.timedEvents.get(CutsceneManager.ticksInCurrentNode).run();
+                    currentNode.timedEvents.get(CutsceneManager.ticksInCurrentNode).accept(currentNode);
                 }
 
                 float nodeDelta = (float) CutsceneManager.ticksInCurrentNode / currentNode.duration;

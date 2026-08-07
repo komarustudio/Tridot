@@ -47,7 +47,8 @@ public class CutsceneNode{
     }
 
     public CutsceneNode fadeOut(float targetAlpha, int durationTicks) {
-        return this.onEnd((node) -> CutsceneManager.fade(targetAlpha, durationTicks));
+        int startTick = Math.max(0, this.duration - durationTicks);
+        return this.runAt(startTick, (node) -> CutsceneManager.fade(targetAlpha, durationTicks));
     }
 
     public CutsceneNode setTargetGlow(Entity target, boolean glowing) {

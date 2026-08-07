@@ -90,18 +90,30 @@ public class CutsceneNode{
         return this.runAt(tick, node -> node.playSound(event, volume, pitch));
     }
 
+    /**
+     * Plays the sounds at start of the node
+     */
     public CutsceneNode playSound(SoundEvent event, float volume, float pitch) {
-        Minecraft.getInstance().player.playSound(event, volume, pitch);
-        return this;
+        return this.onStart((node) -> Minecraft.getInstance().player.playSound(event, volume, pitch));
     }
 
+    /**
+     * Plays the sounds at start of the node
+     */
     public CutsceneNode playSound(SoundEvent event) {
         return this.playSound(event, 1.0f, 1.0f);
     }
 
+    /**
+     * Shakes the screen at start of the node
+     */
     public CutsceneNode addScreenShake(ScreenshakeInstance screenshakeInstance) {
-        ScreenshakeHandler.add(screenshakeInstance);
-        return this;
+        return this.onStart((node) -> ScreenshakeHandler.add(screenshakeInstance));
+
+    }
+
+    public CutsceneNode addScreenShakeAt(int tick, ScreenshakeInstance screenshakeInstance) {
+        return this.runAt(tick, (node) -> ScreenshakeHandler.add(screenshakeInstance));
     }
 
     public CutsceneNode addSubtitle(Component component) {

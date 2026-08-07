@@ -2,11 +2,14 @@ package pro.komaru.tridot.client.cinema;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeInstance;
 import pro.komaru.tridot.util.math.Interp;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CutsceneNode{
     public Vec3 pos;
@@ -19,6 +22,10 @@ public class CutsceneNode{
     @Nullable public Component component;
     @Nullable public SoundEvent event;
     @Nullable public ScreenshakeInstance screenshakeInstance;
+    public Runnable onReach = () -> {};
+    public Runnable onPlay = () -> {};
+    public Runnable onEnd = () -> {};
+    public Map<Integer, Runnable> timedEvents = new HashMap<>();
 
     public CutsceneNode(Vec3 pos, Interp easing, float pitch, float yaw, int duration){
         this.pos = pos;
@@ -34,6 +41,51 @@ public class CutsceneNode{
         this.pitch = 0;
         this.yaw = 0;
         this.duration = duration;
+    }
+
+    public CutsceneNode fade(float targetAlpha, int durationTicks) {
+        return this.onReach(() -> CutsceneManager.fade(targetAlpha, durationTicks));
+    }
+
+    public CutsceneNode fadeOut(float targetAlpha, int durationTicks) {
+        return this.onEnd(() -> CutsceneManager.fade(targetAlpha, durationTicks));
+    }
+
+    public CutsceneNode setTargetGlow(Entity target, boolean glowing) {
+        return this.onPlay(() -> target.setGlowingTag(glowing));
+    }
+
+    public CutsceneNode disableGlow(Entity target) {
+        return this.onEnd(() -> target.setGlowingTag(false));
+    }
+
+    public CutsceneNode onPlay(Runnable action) {
+        this.onPlay = action;
+        return this;
+    }
+
+    public CutsceneNode onEnd(Runnable action) {
+        this.onEnd = action;
+        return this;
+    }
+
+    public CutsceneNode onReach(Runnable action) {
+        this.onReach = action;
+        return this;
+    }
+
+    public CutsceneNode runAt(int tick, Runnable action) {
+        this.timedEvents.compute(tick, (k, existingAction) ->
+                existingAction == null ? action : () -> { existingAction.run(); action.run(); }
+        );
+
+        return this;
+    }
+
+    public CutsceneNode copy(int duration) {
+        CutsceneNode node = new CutsceneNode(this.pos, this.easing, this.pitch, this.yaw, duration);
+        node.fov = this.fov;
+        return node;
     }
 
     public CutsceneNode playSound(SoundEvent event) {

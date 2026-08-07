@@ -55,5 +55,7 @@
   "tooltip.tridot.shield.time": "Can be used for %s",
   "tooltip.tridot.parry": "Can parry incoming attacks deflecting all the damage and returning some percent to the Attacker",
   "tooltip.tridot.parry_window": "Parry window: %s seconds",
-  "tooltip.tridot.abilities": "Abilities"
+  "tooltip.tridot.abilities": "Abilities",
+  "tridot.cutscenes.skip_hold": "Skipping...",
+  "tridot.cutscenes.skip_hint": "Hold Space to skip"
 }

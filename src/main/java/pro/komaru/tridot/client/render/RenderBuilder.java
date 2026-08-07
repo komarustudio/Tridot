@@ -128,11 +128,7 @@ public class RenderBuilder{
     }
 
     public RenderBuilder setColor(Col color){
-        return setColor(color.r, color.g, color.b);
-    }
-
-    public RenderBuilder setColor(Col color, float a){
-        return setFirstColor(color).setFirstAlpha(a).setSecondColor(color).setSecondAlpha(a).setThirdColor(color).setThirdAlpha(a);
+        return setColor(color.r, color.g, color.b, color.a);
     }
 
     public RenderBuilder setColor(float r, float g, float b, float a){

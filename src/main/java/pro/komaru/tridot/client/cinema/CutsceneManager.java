@@ -25,12 +25,23 @@ public class CutsceneManager {
     public static int lastTriggeredNodeIndex = -1;
     public static int skipTicks = 0;
     public static final int skipThreshold = 20;
+    public static float currentFadeAlpha = 0.0f;
+    public static float targetFadeAlpha = 0.0f;
+    public static float fadeStep = 0.0f;
+
+    public static void fade(float targetAlpha, int durationTicks) {
+        targetFadeAlpha = targetAlpha;
+        fadeStep = (targetFadeAlpha - currentFadeAlpha) / durationTicks;
+    }
 
     public static void start(Seq<CutsceneNode> pathNodes) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || pathNodes == null || pathNodes.isEmpty()) return;
 
         active = true;
+        currentFadeAlpha = 0.0f;
+        targetFadeAlpha = 0.0f;
+        fadeStep = 0.0f;
         skipTicks = 0;
         startFov = 90;
         ticks = 0;

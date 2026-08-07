@@ -6,6 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -19,7 +20,7 @@ import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.common.networking.packets.CutsceneSkippedPacket;
 
 @Mod.EventBusSubscriber(modid = Tridot.ID, value = Dist.CLIENT)
-public class CutsceneClientEvents{
+public class CutsceneClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -36,10 +37,24 @@ public class CutsceneClientEvents{
                 CutsceneManager.skipTicks = Math.max(0, CutsceneManager.skipTicks - 2);
             }
 
+            if (Math.abs(CutsceneManager.currentFadeAlpha - CutsceneManager.targetFadeAlpha) > 0.01f) {
+                CutsceneManager.currentFadeAlpha += CutsceneManager.fadeStep;
+                CutsceneManager.currentFadeAlpha = Mth.clamp(CutsceneManager.currentFadeAlpha, 0.0f, 1.0f);
+            }
+
             CutsceneManager.ticks++;
             CutsceneManager.ticksInCurrentNode++;
             if (CutsceneManager.nodes != null && CutsceneManager.currentNodeIndex < CutsceneManager.nodes.size) {
                 CutsceneNode currentNode = CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex);
+                currentNode.onPlay.run();
+                if (CutsceneManager.ticksInCurrentNode == 0) {
+                    currentNode.onReach.run();
+                    CutsceneManager.ticksInCurrentNode = 0;
+                }
+
+                if (currentNode.timedEvents.containsKey(CutsceneManager.ticksInCurrentNode)) {
+                    currentNode.timedEvents.get(CutsceneManager.ticksInCurrentNode).run();
+                }
 
                 float nodeDelta = (float) CutsceneManager.ticksInCurrentNode / currentNode.duration;
                 Vec3 prevPos = CutsceneManager.currentNodeIndex == 0 ? CutsceneManager.startPos : CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex - 1).pos;
@@ -63,15 +78,17 @@ public class CutsceneClientEvents{
 
                 if (CutsceneManager.lastTriggeredNodeIndex != CutsceneManager.currentNodeIndex) {
                     CutsceneManager.lastTriggeredNodeIndex = CutsceneManager.currentNodeIndex;
-                    if(currentNode.event != null) {
+                    if (currentNode.event != null) {
                         mc.player.playSound(currentNode.event, 1, 1);
                     }
-                    if(currentNode.screenshakeInstance != null) {
+
+                    if (currentNode.screenshakeInstance != null) {
                         ScreenshakeHandler.add(currentNode.screenshakeInstance);
                     }
                 }
 
                 if (CutsceneManager.ticksInCurrentNode >= currentNode.duration) {
+                    currentNode.onEnd.run();
                     CutsceneManager.ticksInCurrentNode = 0;
                     CutsceneManager.currentNodeIndex++;
                 }
@@ -167,30 +184,31 @@ public class CutsceneClientEvents{
                 int y = 20;
 
                 event.getGuiGraphics().fill(x, y, x + barWidth, y + barHeight, 0x88000000);
-                event.getGuiGraphics().fill(x, y, x + (int)(barWidth * skipPercent), y + barHeight, 0xFFFFFFFF);
+                event.getGuiGraphics().fill(x, y, x + (int) (barWidth * skipPercent), y + barHeight, 0xFFFFFFFF);
 
-                event.getGuiGraphics().drawCenteredString(mc.font, Component.translatable("valoria.cutscenes.skip_hold"), screenWidth / 2, y + 5, 0xFFFFFF);
+                event.getGuiGraphics().drawCenteredString(mc.font, Component.translatable("tridot.cutscenes.skip_hold"), screenWidth / 2, y + 5, 0xFFFFFF);
             } else {
-                event.getGuiGraphics().drawCenteredString(mc.font, Component.translatable("valoria.cutscenes.skip_hint"), screenWidth / 2, 20, 0xAAFFFFFF);
+                event.getGuiGraphics().drawCenteredString(mc.font, Component.translatable("tridot.cutscenes.skip_hint"), screenWidth / 2, 20, 0xAAFFFFFF);
             }
 
             if (CutsceneManager.nodes != null && CutsceneManager.currentNodeIndex < CutsceneManager.nodes.size) {
                 CutsceneNode currentNode = CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex);
-                if (currentNode.component != null) {
-                    int textWidth = mc.font.width(currentNode.component);
-                    int x = (screenWidth - textWidth) / 2;
+                if (CutsceneManager.currentFadeAlpha > 0) {
+                    int alphaInt = (int) (CutsceneManager.currentFadeAlpha * 255.0f);
+                    event.getGuiGraphics().fill(0, 0, screenWidth, screenHeight, (alphaInt << 24));
+                }
 
+                if (currentNode.component != null) {
+                    int x = screenWidth / 2;
                     int y = screenHeight - currentBarHeight - 30;
-                    event.getGuiGraphics().drawCenteredString(mc.font, currentNode.component, screenWidth / 2, y, 0xFFFFFF);
+                    event.getGuiGraphics().drawCenteredString(mc.font, currentNode.component, x, y, 0xFFFFFF);
                 }
             }
-
-            int ticksLeft = CutsceneManager.maxTicks - CutsceneManager.ticks;
-            if (ticksLeft <= 20) {
-                float alphaFloat = 1.0f - ((float) ticksLeft / 20);
-                int alphaInt = (int) (alphaFloat * 255.0f);
-                event.getGuiGraphics().fill(0, 0, screenWidth, screenHeight, (alphaInt << 24));
-            }
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogOut(ClientPlayerNetworkEvent.LoggingOut e) {
+        if(CutsceneManager.active) CutsceneManager.stop();
     }
 }

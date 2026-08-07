@@ -55,5 +55,7 @@
   "tooltip.tridot.applies_to_attacker.disable": "При сбитии щита -> Атакующий: ",
   "tooltip.tridot.applies_with_chance_to_attacker.disable": "При сбитии щита (%s шанс) -> Атакующий: ",
   "tooltip.tridot.applies_to_defender.disable": "При сбитии щита -> Защищающийся: ",
-  "tooltip.tridot.applies_with_chance_to_defender.disable": "При сбитии щита (%s шанс) -> Защищающийся: "
+  "tooltip.tridot.applies_with_chance_to_defender.disable": "При сбитии щита (%s шанс) -> Защищающийся: ",
+  "tridot.cutscenes.skip_hold": "Пропуск...",
+  "tridot.cutscenes.skip_hint": "Зажми Пробел для пропуска"
 }

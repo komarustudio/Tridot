@@ -90,7 +90,8 @@ public class CutsceneNode{
     }
 
     public CutsceneNode playSound(SoundEvent event, float volume, float pitch) {
-        return this.onStart(node -> Minecraft.getInstance().player.playSound(event, volume, pitch));
+        Minecraft.getInstance().player.playSound(event, volume, pitch);
+        return this;
     }
 
     public CutsceneNode playSound(SoundEvent event) {

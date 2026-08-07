@@ -18,7 +18,7 @@ import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.api.render.bossbars.*;
 import pro.komaru.tridot.client.ClientEvents;
 import pro.komaru.tridot.client.ClientTick;
-import pro.komaru.tridot.client.cinema.CutsceneEvents;
+import pro.komaru.tridot.client.cinema.CutsceneHelper;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.render.gui.overlay.*;
 import pro.komaru.tridot.common.Events;
@@ -87,7 +87,7 @@ public class Tridot {
         }
 
         forgeBus.register(this);
-        forgeBus.register(new CutsceneEvents());
+        forgeBus.register(new CutsceneHelper());
         forgeBus.register(new Events());
     }
 

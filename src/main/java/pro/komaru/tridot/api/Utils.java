@@ -787,6 +787,31 @@ public class Utils {
             }
         }
 
+        public static String formatTickDuration(int ticks) {
+            double totalSeconds = ticks / 20.0;
+            int days = (int) (totalSeconds / 86400);
+            totalSeconds %= 86400;
+            int hours = (int) (totalSeconds / 3600);
+            totalSeconds %= 3600;
+            int minutes = (int) (totalSeconds / 60);
+            totalSeconds %= 60;
+
+            StringBuilder sb = new StringBuilder();
+            if (days > 0) sb.append(days).append("d ");
+            if (hours > 0) sb.append(hours).append("h ");
+            if (minutes > 0) sb.append(minutes).append("m ");
+
+            if (totalSeconds > 0 || sb.isEmpty()) {
+                if (totalSeconds == (int) totalSeconds) {
+                    sb.append((int) totalSeconds).append("s");
+                } else {
+                    sb.append(String.format("%.2fs", totalSeconds));
+                }
+            }
+
+            return sb.toString().trim();
+        }
+
         /**
          * Searches for itemstack that matches the predicate and
          * @param player player to search the inventory for

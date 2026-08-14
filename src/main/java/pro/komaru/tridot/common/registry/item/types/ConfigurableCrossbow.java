@@ -18,7 +18,9 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
+import org.jetbrains.annotations.NotNull;
 import org.joml.*;
+import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.common.registry.entity.projectiles.*;
 
 import javax.annotation.*;
@@ -56,6 +58,10 @@ public class ConfigurableCrossbow extends CrossbowItem implements Vanishable{
         this.arrowBaseDamage = pArrowBaseDamage;
         this.arrow = arrow;
         this.chargeTime = chargeTime;
+    }
+
+    public @NotNull EntityType<? extends AbstractArrow> getDefaultType(){
+        return arrow.get();
     }
 
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
@@ -355,34 +361,11 @@ public class ConfigurableCrossbow extends CrossbowItem implements Vanishable{
         return f;
     }
 
-    public String formatTickDuration(int ticks) {
-        double totalSeconds = ticks / 20.0;
-        int days = (int) (totalSeconds / 86400);
-        totalSeconds %= 86400;
-        int hours = (int) (totalSeconds / 3600);
-        totalSeconds %= 3600;
-        int minutes = (int) (totalSeconds / 60);
-        totalSeconds %= 60;
-
-        StringBuilder sb = new StringBuilder();
-        if (days > 0) sb.append(days).append("d ");
-        if (hours > 0) sb.append(hours).append("h ");
-        if (minutes > 0) sb.append(minutes).append("m ");
-
-        if (totalSeconds > 0 || sb.isEmpty()) {
-            if (totalSeconds == (int) totalSeconds) {
-                sb.append((int) totalSeconds).append("s");
-            } else {
-                sb.append(String.format("%.2fs", totalSeconds));
-            }
-        }
-
-        return sb.toString().trim();
-    }
-
     private double calculateAverageDamage(ItemStack pStack){
         double baseArrowDamage = this.baseDamage + 2;
-        return (baseArrowDamage) * (2 * 2.0F) - 2;
+        int powerLevel = EnchantmentHelper.getTagEnchantmentLevel(Enchantments.POWER_ARROWS, pStack);
+        double powerBonus = powerLevel > 0 ? (powerLevel * 0.5D + 0.5D) : 0.0D;
+        return (baseArrowDamage + powerBonus) * (2 * 2.0F) - 2;
     }
 
     /**
@@ -404,7 +387,15 @@ public class ConfigurableCrossbow extends CrossbowItem implements Vanishable{
             }
         }
 
-        pTooltip.add(Component.translatable("tooltip.tridot.crossbow.speed", formatTickDuration(getCustomChargeDuration(pStack))).withStyle(ChatFormatting.GRAY));
+        pTooltip.add(Component.translatable("tooltip.tridot.crossbow.speed", Utils.Items.formatTickDuration(getCustomChargeDuration(pStack))).withStyle(ChatFormatting.GRAY));
+        double damage = calculateAverageDamage(pStack);
+        if(arrow.get() != EntityType.ARROW){
+            pTooltip.add(Component.translatable("tooltip.tridot.special_arrow").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal(getDefaultType().getDescription().getString()).withStyle(pStack.getRarity().getStyleModifier())));
+        }
+
+        pTooltip.add(Component.translatable("tooltip.tridot.bow_damage", Math.floor(damage)).withStyle(ChatFormatting.GRAY));
+
     }
 
     // used by entities

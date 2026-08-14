@@ -11,6 +11,7 @@
     "common.CrossbowMixin",
     "common.ForgeHooksMixin",
     "common.ItemEntityMixin",
+    "common.ServerItemCooldownsMixin",
     "common.TntBlockMixin"
   ],
   "client": [

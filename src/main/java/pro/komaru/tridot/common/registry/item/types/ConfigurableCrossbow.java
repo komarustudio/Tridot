@@ -404,7 +404,7 @@ public class ConfigurableCrossbow extends CrossbowItem implements Vanishable{
             }
         }
 
-        pTooltip.add(Component.translatable("tooltip.valoria.crossbow.speed", formatTickDuration(getCustomChargeDuration(pStack))).withStyle(ChatFormatting.GRAY));
+        pTooltip.add(Component.translatable("tooltip.tridot.crossbow.speed", formatTickDuration(getCustomChargeDuration(pStack))).withStyle(ChatFormatting.GRAY));
     }
 
     // used by entities

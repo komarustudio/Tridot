@@ -57,5 +57,6 @@
   "tooltip.tridot.parry_window": "Parry window: %s seconds",
   "tooltip.tridot.abilities": "Abilities",
   "tridot.cutscenes.skip_hold": "Skipping...",
-  "tridot.cutscenes.skip_hint": "Hold Space to skip"
+  "tridot.cutscenes.skip_hint": "Hold Space to skip",
+  "tooltip.tridot.crossbow.speed": "Charging time: %s"
 }

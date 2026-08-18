@@ -11,7 +11,7 @@ public class GlowPostProcess extends PostProcess{
     public static final GlowPostProcess INSTANCE = new GlowPostProcess();
     public final PostProcessInstanceData data = new GlowPostProcessInstanceData();
     public EffectInstance effectInstance;
-    public ResourceLocation shader = new ResourceLocation(Tridot.ID, "shaders/post/glow.json");
+    public ResourceLocation shader = Tridot.ofTridot("shaders/post/glow.json");
 
     public GlowPostProcess addInstance(GlowPostProcessInstance instance){
         data.addInstance(instance);

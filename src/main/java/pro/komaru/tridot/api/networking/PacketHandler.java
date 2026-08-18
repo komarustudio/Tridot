@@ -16,7 +16,7 @@ import pro.komaru.tridot.util.struct.stash.net.SyncStashObjectPacket;
 
 public class PacketHandler extends AbstractPacketHandler {
     public static final String PROTOCOL = "10";
-    public static final SimpleChannel HANDLER = NetworkRegistry.newSimpleChannel(new ResourceLocation(Tridot.ID, "network"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
+    public static final SimpleChannel HANDLER = NetworkRegistry.newSimpleChannel(Tridot.ofTridot("network"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
 
     public static void init(){
         int id = 0;

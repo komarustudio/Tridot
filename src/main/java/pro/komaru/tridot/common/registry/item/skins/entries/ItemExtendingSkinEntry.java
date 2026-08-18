@@ -12,7 +12,7 @@ public class ItemExtendingSkinEntry implements SkinEntry{
     public String model;
 
     /**
-     * @param modelLoc location, ex. new ResourceLocation(Tridot.ID, "my_skin");
+     * @param modelLoc location, ex. Tridot.ofTridot("my_skin");
      */
     public ItemExtendingSkinEntry(Class<? extends Item> item, ResourceLocation modelLoc){
         this.item = item;

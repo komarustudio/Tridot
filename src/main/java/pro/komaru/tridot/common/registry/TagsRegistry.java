@@ -31,7 +31,7 @@ public class TagsRegistry{
         return TagKey.create(Registries.PAINTING_VARIANT, name);
     }
 
-    public static final TagKey<Item> BOWS = item(new ResourceLocation(Tridot.ID, "bows"));
-    public static final TagKey<Item> CAN_DISABLE_SHIELD = item(new ResourceLocation(Tridot.ID, "can_disable_shield"));
-    public static final TagKey<DamageType> BYPASSES_PARRY = damage(new ResourceLocation(Tridot.ID, "bypasses_parry"));
+    public static final TagKey<Item> BOWS = item(Tridot.ofTridot("bows"));
+    public static final TagKey<Item> CAN_DISABLE_SHIELD = item(Tridot.ofTridot("can_disable_shield"));
+    public static final TagKey<DamageType> BYPASSES_PARRY = damage(Tridot.ofTridot("bypasses_parry"));
 }

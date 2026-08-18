@@ -44,7 +44,7 @@ public class ParryParticlePacket {
                 .setHasPhysics(false)
                 .repeat(level, msg.posX, msg.posY, msg.posZ, 12);
 
-                OverlayHandler.addInstance(new TimedOverlayInstance().setTexture(new ResourceLocation(Tridot.ID, "textures/gui/overlay/flash.png")).setShowTime(10).setOpacity(0.25f).setFadeIn(0));
+                OverlayHandler.addInstance(new TimedOverlayInstance().setTexture(Tridot.ofTridot("textures/gui/overlay/flash.png")).setShowTime(10).setOpacity(0.25f).setFadeIn(0));
                 ctx.get().setPacketHandled(true);
             });
         }

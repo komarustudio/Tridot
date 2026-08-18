@@ -26,11 +26,11 @@ public class TridotShaders{
 
         @SubscribeEvent
         public static void shaderRegistry(RegisterShadersEvent event) throws IOException{
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Tridot.ID, "additive_texture"), DefaultVertexFormat.POSITION_TEX_COLOR), shader -> ADDITIVE_TEXTURE = shader);
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Tridot.ID, "additive"), DefaultVertexFormat.POSITION_COLOR), shader -> ADDITIVE = shader);
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Tridot.ID, "translucent_texture"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT_TEXTURE = shader);
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Tridot.ID, "translucent"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT = shader);
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(Tridot.ID, "screen_particle"), DefaultVertexFormat.POSITION_TEX_COLOR), shader -> SCREEN_PARTICLE = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("additive_texture"), DefaultVertexFormat.POSITION_TEX_COLOR), shader -> ADDITIVE_TEXTURE = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("additive"), DefaultVertexFormat.POSITION_COLOR), shader -> ADDITIVE = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("translucent_texture"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT_TEXTURE = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("translucent"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("screen_particle"), DefaultVertexFormat.POSITION_TEX_COLOR), shader -> SCREEN_PARTICLE = shader);
         }
     }
 

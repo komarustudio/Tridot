@@ -19,7 +19,7 @@ public class TridotTrappedChestRender extends ChestRenderer<TridotTrappedChestBl
     }
 
     private static Material chestMaterial(String pChestName) {
-        return new Material(CHEST_SHEET, new ResourceLocation(Tridot.ID, "entity/chest/" + pChestName));
+        return new Material(CHEST_SHEET, Tridot.ofTridot("entity/chest/" + pChestName));
     }
 
     @Override

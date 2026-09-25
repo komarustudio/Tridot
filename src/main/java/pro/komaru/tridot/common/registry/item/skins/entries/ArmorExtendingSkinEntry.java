@@ -6,7 +6,7 @@ import pro.komaru.tridot.client.model.armor.*;
 import net.minecraft.client.model.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 
 import java.util.*;
 

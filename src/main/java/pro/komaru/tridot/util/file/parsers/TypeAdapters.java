@@ -2,10 +2,12 @@ package pro.komaru.tridot.util.file.parsers;
 
 import com.google.gson.*;
 import com.mojang.brigadier.exceptions.*;
+import net.minecraft.core.component.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.registries.*;
+import net.minecraft.world.item.component.*;
 
 public class TypeAdapters {
     public static JsonDeserializer<ItemStack> itemStackDeserializer() {
@@ -18,7 +20,7 @@ public class TypeAdapters {
                     itemCount = Integer.parseInt(splits[0]);
                     itemLocation = splits[1];
                 }
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemLocation));
+                Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemLocation));
                 return new ItemStack(item,itemCount);
             }
             JsonObject object = json.getAsJsonObject();
@@ -35,16 +37,16 @@ public class TypeAdapters {
                 }
 
             }
-            Item item = ForgeRegistries.ITEMS.getValue(itemLocation);
+            Item item = BuiltInRegistries.ITEM.get(itemLocation);
             ItemStack stack = new ItemStack(item,itemCount);
-            stack.setTag(nbt);
+            if(!nbt.isEmpty()) stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
             return stack;
         };
     }
     public static JsonDeserializer<ResourceLocation> resourceLocationDeserializer() {
         return (json, typeOfT, context) -> {
             String id = json.getAsString();
-            return new ResourceLocation(id);
+            return ResourceLocation.parse(id);
         };
     }
 

@@ -2,7 +2,7 @@ package pro.komaru.tridot.client.gfx.particle;
 
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.client.particle.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.client.gfx.particle.data.GenericParticleData;
 import pro.komaru.tridot.client.gfx.particle.options.GenericParticleOptions;
 

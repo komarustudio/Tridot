@@ -1,5 +1,6 @@
 package pro.komaru.tridot.client.tooltip;
 
+import net.minecraft.core.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
@@ -10,7 +11,7 @@ public class AttributeTooltipModifier{
         return false;
     }
 
-    public boolean isModifiable(Attribute key, AttributeModifier modifier, Player player, TooltipFlag flag){
+    public boolean isModifiable(Holder<Attribute> key, AttributeModifier modifier, Player player, TooltipFlag flag){
         return isToolBase(modifier, player, flag);
     }
 
@@ -39,6 +40,10 @@ public class AttributeTooltipModifier{
 
         public AttributeModifier.Operation getOperation(){
             return operation;
+        }
+
+        public AttributeModifier toModifier(){
+            return new AttributeModifier(modifier.id(), amount, operation);
         }
     }
 }

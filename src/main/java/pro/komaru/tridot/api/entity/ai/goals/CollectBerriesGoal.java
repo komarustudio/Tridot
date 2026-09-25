@@ -8,6 +8,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.*;
 
 public class CollectBerriesGoal extends MoveToBlockGoal{
@@ -43,7 +44,7 @@ public class CollectBerriesGoal extends MoveToBlockGoal{
     }
 
     protected void onReachedTarget(){
-        if(net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(mob.level(), mob)){
+        if(EventHooks.canEntityGrief(mob.level(), mob)){
             BlockState blockstate = mob.level().getBlockState(this.blockPos);
             if(blockstate.is(Blocks.SWEET_BERRY_BUSH)){
                 this.pickSweetBerries(blockstate);

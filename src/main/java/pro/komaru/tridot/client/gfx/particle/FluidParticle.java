@@ -3,9 +3,9 @@ package pro.komaru.tridot.client.gfx.particle;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.world.level.material.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.extensions.common.*;
-import net.minecraftforge.fluids.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.neoforge.client.extensions.common.*;
+import net.neoforged.neoforge.fluids.*;
 import pro.komaru.tridot.api.*;
 import pro.komaru.tridot.client.gfx.particle.options.FluidParticleOptions;
 

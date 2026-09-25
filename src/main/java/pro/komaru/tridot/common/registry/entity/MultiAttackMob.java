@@ -30,9 +30,9 @@ public abstract class MultiAttackMob extends PathfinderMob{
         super(pEntityType, pLevel);
     }
 
-    protected void defineSynchedData(){
-        super.defineSynchedData();
-        this.entityData.define(DATA_ID, AttackRegistry.NONE.toString());
+    protected void defineSynchedData(SynchedEntityData.Builder builder){
+        super.defineSynchedData(builder);
+        builder.define(DATA_ID, AttackRegistry.NONE.toString());
     }
 
     public void readAdditionalSaveData(CompoundTag pCompound){
@@ -212,7 +212,7 @@ public abstract class MultiAttackMob extends PathfinderMob{
             }
 
             if (!mob.isPreparingAttack() && mob.attackWarmupDelay == 0 && mob.globalCooldown == 0 && mob.attackAnimationTick <= 5) {
-                double distSq = this.mob.getPerceivedTargetDistanceSquareForMeleeAttack(target);
+                double distSq = this.mob.distanceToSqr(target);
                 if(distSq > 1024.0D){
                     this.ticksUntilNextPathRecalc += 10;
                 }else if(distSq > 256.0D){

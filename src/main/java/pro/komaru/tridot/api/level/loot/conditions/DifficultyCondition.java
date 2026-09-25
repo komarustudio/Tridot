@@ -1,17 +1,19 @@
 package pro.komaru.tridot.api.level.loot.conditions;
 
-import com.google.gson.*;
-import net.minecraft.util.*;
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.*;
 import net.minecraft.world.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
 import org.jetbrains.annotations.*;
 
-import javax.annotation.Nullable;
-import java.time.*;
-
 public class DifficultyCondition implements LootItemCondition{
+    public static final MapCodec<DifficultyCondition> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+        Difficulty.CODEC.fieldOf("difficulty").forGetter(c -> c.difficulty),
+        Codec.BOOL.optionalFieldOf("exact_match", false).forGetter(c -> c.exactMatch)
+    ).apply(inst, DifficultyCondition::new));
+
     public final Difficulty difficulty;
     public final boolean exactMatch;
 
@@ -47,21 +49,6 @@ public class DifficultyCondition implements LootItemCondition{
 
         public DifficultyCondition build(){
             return new DifficultyCondition(this.difficulty, exactMatch);
-        }
-    }
-
-    public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<DifficultyCondition>{
-        @Override
-        public void serialize(JsonObject json, DifficultyCondition condition, JsonSerializationContext context){
-            json.add("difficulty", context.serialize(condition.difficulty));
-            json.add("exact_match", context.serialize(condition.exactMatch));
-        }
-
-        @Override
-        public DifficultyCondition deserialize(JsonObject json, JsonDeserializationContext context){
-            Difficulty difficulty = GsonHelper.getAsObject(json, "difficulty", context, Difficulty.class);
-            boolean exactMatch = GsonHelper.getAsBoolean(json, "exact_match", false);
-            return new DifficultyCondition(difficulty, exactMatch);
         }
     }
 }

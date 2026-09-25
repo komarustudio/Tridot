@@ -1,32 +1,28 @@
 package pro.komaru.tridot.common.networking.packets;
 
 import net.minecraft.network.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.fml.*;
-import net.minecraftforge.network.*;
+import net.minecraft.network.protocol.common.custom.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.neoforge.network.handling.*;
 
-import java.util.*;
-import java.util.function.*;
-
-public abstract class ClientPacket{
+public abstract class ClientPacket implements CustomPacketPayload{
     public void encode(FriendlyByteBuf buf){
     }
 
-    public final void handle(Supplier<NetworkEvent.Context> context){
-        context.get().enqueueWork(() -> {
-            if(context.get().getDirection().getReceptionSide().equals(LogicalSide.CLIENT)){
+    public final void handle(IPayloadContext context){
+        context.enqueueWork(() -> {
+            if(context.flow().isClientbound()){
                 ClientOnly.clientData(this, context);
             }
         });
-        context.get().setPacketHandled(true);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void execute(Supplier<NetworkEvent.Context> context){
+    public void execute(IPayloadContext context){
     }
 
     public static class ClientOnly{
-        public static void clientData(ClientPacket packet, Supplier<NetworkEvent.Context> context){
+        public static void clientData(ClientPacket packet, IPayloadContext context){
             packet.execute(context);
         }
     }

@@ -3,19 +3,15 @@ package pro.komaru.tridot.common.registry.entity.projectiles;
 import com.google.common.collect.*;
 import net.minecraft.core.*;
 import net.minecraft.nbt.*;
-import net.minecraft.network.protocol.*;
-import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.network.*;
+import net.neoforged.api.distmarker.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.util.Log;
 
@@ -30,12 +26,12 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
     }
 
     public AbstractTridotArrow(EntityType<? extends AbstractArrow> pEntityType, Level worldIn, LivingEntity thrower, double baseDamage){
-        super(pEntityType, thrower, worldIn);
+        super(pEntityType, thrower, worldIn, ItemStack.EMPTY, null);
         this.baseDamage = baseDamage == 0 ? 2 : baseDamage;
     }
 
     public AbstractTridotArrow(EntityType<? extends AbstractArrow> pEntityType, Level worldIn, LivingEntity thrower, ItemStack thrownStackIn, double baseDamage){
-        super(pEntityType, thrower, worldIn);
+        super(pEntityType, thrower, worldIn, new ItemStack(thrownStackIn.getItem()), null);
         arrowItem = new ItemStack(thrownStackIn.getItem());
         this.baseDamage = baseDamage == 0 ? 2 : baseDamage;
     }
@@ -68,12 +64,6 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
         }
     }
 
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(){
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
     public void addEffect(MobEffectInstance pEffectInstance){
         this.effects.add(pEffectInstance);
     }
@@ -83,7 +73,7 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
         if(!this.effects.isEmpty()){
             ListTag listtag = new ListTag();
             for(MobEffectInstance mobeffectinstance : this.effects){
-                listtag.add(mobeffectinstance.save(new CompoundTag()));
+                listtag.add(mobeffectinstance.save());
             }
 
             compound.put("CustomPotionEffects", listtag);
@@ -92,9 +82,21 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
 
     public void readAdditionalSaveData(CompoundTag pCompound){
         super.readAdditionalSaveData(pCompound);
-        for(MobEffectInstance mobeffectinstance : PotionUtils.getCustomEffects(pCompound)){
+        for(MobEffectInstance mobeffectinstance : loadCustomEffects(pCompound)){
             this.addEffect(mobeffectinstance);
         }
+    }
+
+    public static List<MobEffectInstance> loadCustomEffects(CompoundTag compound){
+        List<MobEffectInstance> list = new ArrayList<>();
+        if(compound.contains("CustomPotionEffects", Tag.TAG_LIST)){
+            ListTag listtag = compound.getList("CustomPotionEffects", Tag.TAG_COMPOUND);
+            for(int i = 0; i < listtag.size(); i++){
+                MobEffectInstance instance = MobEffectInstance.load(listtag.getCompound(i));
+                if(instance != null) list.add(instance);
+            }
+        }
+        return list;
     }
 
     protected void doPostHurtEffects(LivingEntity pLiving){
@@ -126,5 +128,10 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
     @Override
     public ItemStack getPickupItem(){
         return arrowItem;
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem(){
+        return arrowItem == null || arrowItem.isEmpty() ? new ItemStack(Items.ARROW) : arrowItem;
     }
 }

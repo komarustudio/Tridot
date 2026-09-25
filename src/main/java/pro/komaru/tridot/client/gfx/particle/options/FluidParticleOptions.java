@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client.gfx.particle.options;
 
 import net.minecraft.core.particles.*;
-import net.minecraftforge.fluids.*;
+import net.neoforged.neoforge.fluids.*;
 
 public class FluidParticleOptions extends GenericParticleOptions{
     public final FluidStack fluidStack;

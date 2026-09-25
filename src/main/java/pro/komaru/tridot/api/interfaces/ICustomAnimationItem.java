@@ -1,7 +1,7 @@
 package pro.komaru.tridot.api.interfaces;
 
 import net.minecraft.world.item.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.api.render.animation.*;
 
 public interface ICustomAnimationItem{

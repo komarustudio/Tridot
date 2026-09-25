@@ -6,9 +6,10 @@ import net.minecraft.client.*;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.core.Direction.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import org.jetbrains.annotations.*;
 import org.joml.*;
+import pro.komaru.tridot.client.ClientTick;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class QuadScreenParticle extends ScreenParticle {
@@ -24,7 +25,7 @@ public abstract class QuadScreenParticle extends ScreenParticle {
 
     @Override
     public void render(BufferBuilder bufferBuilder) {
-        float partialTicks = Minecraft.getInstance().getPartialTick();
+        float partialTicks = ClientTick.mcPartialTick();
         float size = getQuadSize(partialTicks) * 10;
         float u0 = getU0();
         float u1 = getU1();
@@ -32,10 +33,10 @@ public abstract class QuadScreenParticle extends ScreenParticle {
         float v1 = getV1();
         Vector3f[] vectors = getVector3fs(partialTicks, size);
         float quadZ = getQuadZPosition();
-        bufferBuilder.vertex(vectors[0].x(), vectors[0].y(), quadZ).uv(u1, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[1].x(), vectors[1].y(), quadZ).uv(u1, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[2].x(), vectors[2].y(), quadZ).uv(u0, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[3].x(), vectors[3].y(), quadZ).uv(u0, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
+        bufferBuilder.addVertex(vectors[0].x(), vectors[0].y(), quadZ).setUv(u1, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(vectors[1].x(), vectors[1].y(), quadZ).setUv(u1, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(vectors[2].x(), vectors[2].y(), quadZ).setUv(u0, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(vectors[3].x(), vectors[3].y(), quadZ).setUv(u0, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
     }
 
     private Vector3f @NotNull [] getVector3fs(float partialTicks, float size){

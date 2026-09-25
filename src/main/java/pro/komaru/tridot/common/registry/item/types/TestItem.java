@@ -1,13 +1,11 @@
 package pro.komaru.tridot.common.registry.item.types;
 
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.*;
 import net.minecraft.world.*;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.api.render.text.DotStyleEffects;
 import pro.komaru.tridot.api.render.text.DotText;
@@ -15,7 +13,6 @@ import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.gfx.particle.*;
 import pro.komaru.tridot.client.gfx.particle.data.*;
 import pro.komaru.tridot.client.render.*;
-import pro.komaru.tridot.client.render.gui.overlay.*;
 import pro.komaru.tridot.client.render.screenshake.*;
 import pro.komaru.tridot.util.*;
 import pro.komaru.tridot.util.math.*;
@@ -50,8 +47,8 @@ public class TestItem extends Item{
                             DotStyleEffects.ShakeFX.of(1f),
                             DotStyleEffects.OutlineFX.of(Col.black,true)
                     ))
-                .get());
-            var b = Component.Serializer.fromJson(a);
+                .get(), worldIn.registryAccess());
+            var b = Component.Serializer.fromJson(a, worldIn.registryAccess());
             playerIn.sendSystemMessage(b);
         }
 
@@ -59,7 +56,8 @@ public class TestItem extends Item{
         return InteractionResultHolder.consume(itemstack);
     }
 
-    public int getUseDuration(@NotNull ItemStack stack) {
+    @Override
+    public int getUseDuration(@NotNull ItemStack stack, @NotNull LivingEntity entity) {
         return 72000;
     }
 }

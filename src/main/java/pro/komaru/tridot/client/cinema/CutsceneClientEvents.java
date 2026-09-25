@@ -5,26 +5,26 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
 import pro.komaru.tridot.common.networking.packets.CutsceneSkippedPacket;
 
-@Mod.EventBusSubscriber(modid = Tridot.ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class CutsceneClientEvents {
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && CutsceneManager.active) {
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (CutsceneManager.active) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.options.keyJump.isDown()) {
                 CutsceneManager.skipTicks++;
@@ -90,7 +90,7 @@ public class CutsceneClientEvents {
     public static void onCameraSetup(ViewportEvent.ComputeFov event) {
         if (CutsceneManager.active && CutsceneManager.nodes != null && CutsceneManager.currentNodeIndex < CutsceneManager.nodes.size) {
             CutsceneNode currentNode = CutsceneManager.nodes.get(CutsceneManager.currentNodeIndex);
-            float partialTicks = Minecraft.getInstance().getPartialTick();
+            float partialTicks = ClientTick.mcPartialTick();
             float nodeDelta = (CutsceneManager.ticksInCurrentNode + partialTicks) / currentNode.duration;
             nodeDelta = Mth.clamp(nodeDelta, 0.0f, 1.0f);
 
@@ -153,8 +153,8 @@ public class CutsceneClientEvents {
             Minecraft mc = Minecraft.getInstance();
             float progress = Math.min(1.0f, CutsceneManager.ticks / 60.0f);
 
-            int screenWidth = event.getWindow().getGuiScaledWidth();
-            int screenHeight = event.getWindow().getGuiScaledHeight();
+            int screenWidth = event.getGuiGraphics().guiWidth();
+            int screenHeight = event.getGuiGraphics().guiHeight();
 
             int maxBarHeight = (int) (screenHeight * 0.15f);
             int currentBarHeight = (int) (maxBarHeight * progress);

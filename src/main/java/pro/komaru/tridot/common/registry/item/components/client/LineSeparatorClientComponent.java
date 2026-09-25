@@ -2,7 +2,7 @@ package pro.komaru.tridot.common.registry.item.components.client;
 
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.api.*;
 
 @OnlyIn(Dist.CLIENT)

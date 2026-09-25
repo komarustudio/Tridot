@@ -20,17 +20,19 @@ public abstract class NameableBlockSimpleInventory extends BlockSimpleInventory 
         super(type, pos, blockState);
     }
 
-    public void load(CompoundTag tag){
-        super.load(tag);
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries){
+        super.loadAdditional(tag, registries);
         if(tag.contains("CustomName", 8)){
-            this.name = Component.Serializer.fromJson(tag.getString("CustomName"));
+            this.name = Component.Serializer.fromJson(tag.getString("CustomName"), registries);
         }
     }
 
-    public void saveAdditional(CompoundTag tag){
-        super.saveAdditional(tag);
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries){
+        super.saveAdditional(tag, registries);
         if(this.name != null){
-            tag.putString("CustomName", Component.Serializer.toJson(this.name));
+            tag.putString("CustomName", Component.Serializer.toJson(this.name, registries));
         }
     }
 

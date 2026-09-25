@@ -47,9 +47,9 @@ public abstract class AbstractMultiAttackMinion extends MultiAttackMob implement
     }
 
     @Override
-    protected void defineSynchedData(){
-        super.defineSynchedData();
-        this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
+    protected void defineSynchedData(SynchedEntityData.Builder builder){
+        super.defineSynchedData(builder);
+        builder.define(DATA_OWNERUUID_ID, Optional.empty());
     }
 
     /**
@@ -114,7 +114,7 @@ public abstract class AbstractMultiAttackMinion extends MultiAttackMob implement
         return this.getOwner() != null;
     }
 
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         if (this.isOwned()) {
             LivingEntity livingentity = this.getOwner();
             if (livingentity != null) {

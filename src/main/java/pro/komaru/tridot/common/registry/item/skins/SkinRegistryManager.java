@@ -3,13 +3,11 @@ package pro.komaru.tridot.common.registry.item.skins;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.common.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.*;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.event.lifecycle.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.fml.loading.*;
+import net.neoforged.neoforge.client.event.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.client.model.item.*;
 import pro.komaru.tridot.client.model.render.item.*;
@@ -70,21 +68,20 @@ public class SkinRegistryManager {
 
     public void registerSkinProvider(ISkinProvider provider) {
         provider.initializeSkins();
-        DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> {
+        if(FMLEnvironment.dist.isClient()){
             provider.registerModels();
-            return new Object();
-        });
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void addSkinModel(Map<ResourceLocation, BakedModel> map, ResourceLocation id){
-        BakedModel model = map.get(new ModelResourceLocation(id, "inventory"));
+    public static void addSkinModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation id){
+        BakedModel model = map.get(ModelResourceLocation.inventory(id));
         CustomModel newModel = new CustomModel(model, new ItemSkinItemOverrides());
-        map.replace(new ModelResourceLocation(id, "inventory"), newModel);
+        map.replace(ModelResourceLocation.inventory(id), newModel);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void addLargeModel(Map<ResourceLocation, BakedModel> map, String modId, String skin){
+    public static void addLargeModel(Map<ModelResourceLocation, BakedModel> map, String modId, String skin){
         LargeItemRenderer.bakeModel(map, modId, "skin/" + skin);
         ItemSkinModels.addModelSkins(modId + ":" + skin, map.get(SkinRegistryManager.getModelLocationSkin(modId + ":" + skin)));
     }
@@ -93,10 +90,10 @@ public class SkinRegistryManager {
         int i = id.indexOf(":");
         String modId = id.substring(0, i);
         String skinId = id.substring(i + 1);
-        return new ModelResourceLocation(new ResourceLocation(modId, "skin/" + skinId), "inventory");
+        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(modId, "item/skin/" + skinId));
     }
 
-    @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
         @SubscribeEvent
         public static void modelRegistrySkins(ModelEvent.RegisterAdditional event){
@@ -107,7 +104,7 @@ public class SkinRegistryManager {
 
         @SubscribeEvent
         public static void modelBakeSkins(ModelEvent.ModifyBakingResult event){
-            Map<ResourceLocation, BakedModel> map = event.getModels();
+            Map<ModelResourceLocation, BakedModel> map = event.getModels();
 
             for(String skin : ItemSkinModels.getSkins()){
                 BakedModel model = map.get(getModelLocationSkin(skin));

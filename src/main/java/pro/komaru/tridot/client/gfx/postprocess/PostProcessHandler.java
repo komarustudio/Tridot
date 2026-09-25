@@ -1,14 +1,14 @@
 package pro.komaru.tridot.client.gfx.postprocess;
 
 import net.minecraft.client.renderer.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.neoforge.client.event.*;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class PostProcessHandler{
     public static final List<PostProcess> instances = new ArrayList<>();
     public static boolean didCopyDepth = false;

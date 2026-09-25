@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.gfx.lightningBolt;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.*;
 import net.minecraft.client.renderer.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import org.joml.*;
 import pro.komaru.tridot.util.*;
 import pro.komaru.tridot.util.phys.*;
@@ -58,32 +58,28 @@ public class LightningEffect{
     }
 
     private static void addSegmentQuad(Matrix4f matrix4f, VertexConsumer builder, float x1, float yOffset, float z1, int segIndex, float x2, float z2, float red, float green, float blue, float alpha, float offsetA, float offsetB, boolean invA, boolean invB, boolean invC, boolean invD, float segHeight){
-        builder.vertex(matrix4f,
+        builder.addVertex(matrix4f,
         x1 + (invA ? offsetB : -offsetB),
         yOffset + segIndex * segHeight,
         z1 + (invB ? offsetB : -offsetB))
-        .color(red, green, blue, alpha)
-        .endVertex();
+        .setColor(red, green, blue, alpha);
 
-        builder.vertex(matrix4f,
+        builder.addVertex(matrix4f,
         x2 + (invA ? offsetA : -offsetA),
         yOffset + (segIndex + 1F) * segHeight,
         z2 + (invB ? offsetA : -offsetA))
-        .color(red, green, blue, alpha)
-        .endVertex();
+        .setColor(red, green, blue, alpha);
 
-        builder.vertex(matrix4f,
+        builder.addVertex(matrix4f,
         x2 + (invC ? offsetA : -offsetA),
         yOffset + (segIndex + 1F) * segHeight,
         z2 + (invD ? offsetA : -offsetA))
-        .color(red, green, blue, alpha)
-        .endVertex();
+        .setColor(red, green, blue, alpha);
 
-        builder.vertex(matrix4f,
+        builder.addVertex(matrix4f,
         x1 + (invC ? offsetB : -offsetB),
         yOffset + segIndex * segHeight,
         z1 + (invD ? offsetB : -offsetB))
-        .color(red, green, blue, alpha)
-        .endVertex();
+        .setColor(red, green, blue, alpha);
     }
 }

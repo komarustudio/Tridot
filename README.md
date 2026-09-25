@@ -2,16 +2,23 @@
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/KomaruPRO/Tridot/total?style=for-the-badge&logo=github&labelColor=black&color=white)
 
 # What do we offer?
-> **Tridot** offers utilities in almost every way needed for a developer; 
+> **Tridot** offers utilities in almost every way needed for a developer;
 > - Simplifying your calculations and data storing with custom structures
 > - Providing useful rendering methods for "le beauty"
 > - Fixing Minecraft Forge's modding experience for more robust additions
-> ...and more!
----
-# For developers
-To install, add the following code to your `build.gradle`
-```kotlin
+    > ...and more!
+
+## For developers
+Build locally and publish to your Maven local repository: (Optional)
+
+```bash
+./gradlew build publishToMavenLocal
+```
+
+Then in your mod's `build.gradle`:
+```groovy
 repositories {
+    mavenLocal() // if you are building locally
     maven { url = "https://repo.komaru.studio/releases" }
 }
 

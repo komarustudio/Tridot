@@ -1,6 +1,6 @@
 package pro.komaru.tridot.client.gfx.postprocess;
 
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import org.joml.*;
 import pro.komaru.tridot.client.ClientTick;
 

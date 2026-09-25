@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
 import net.minecraft.sounds.*;
-import net.minecraftforge.client.gui.overlay.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.api.render.bossbars.*;
 import pro.komaru.tridot.common.config.*;
@@ -18,7 +17,7 @@ import pro.komaru.tridot.util.*;
 
 import java.util.*;
 
-public class BossBarsOverlay implements IGuiOverlay {
+public class BossBarsOverlay implements LayeredDraw.Layer {
     public static final BossBarsOverlay INSTANCE = new BossBarsOverlay();
     public static final Map<UUID, ClientBossbar> events = Maps.newLinkedHashMap();
 
@@ -85,8 +84,8 @@ public class BossBarsOverlay implements IGuiOverlay {
     }
 
     @Override
-    public void render(ForgeGui gui, GuiGraphics pGuiGraphics, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft minecraft = gui.getMinecraft();
+    public void render(GuiGraphics pGuiGraphics, DeltaTracker deltaTracker) {
+        Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui && events.isEmpty()) return;
         PoseStack pose = pGuiGraphics.pose();
         pose.pushPose();

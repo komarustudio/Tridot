@@ -30,7 +30,7 @@ public class BowItemOverrides extends CustomItemOverrides{
             return 0.0F;
         }else{
             float time = stack.getItem() instanceof ConfigurableBowItem bow ? bow.time : 20.0F;
-            return entity.getUseItem() != stack ? 0.0F : (float)(stack.getUseDuration() - entity.getUseItemRemainingTicks()) / time;
+            return entity.getUseItem() != stack ? 0.0F : (float)(stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / time;
         }
     }
 

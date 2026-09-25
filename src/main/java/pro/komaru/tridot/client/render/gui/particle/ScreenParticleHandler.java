@@ -4,8 +4,9 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.*;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.client.event.*;
 import org.joml.*;
+import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.gfx.particle.*;
 import pro.komaru.tridot.client.gfx.particle.options.*;
 import pro.komaru.tridot.client.gfx.particle.type.*;
@@ -36,10 +37,8 @@ public class ScreenParticleHandler{
         canSpawnParticles = true;
     }
 
-    public static void renderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase.equals(TickEvent.Phase.END)) {
-            canSpawnParticles = false;
-        }
+    public static void renderTick(RenderFrameEvent.Post event) {
+        canSpawnParticles = false;
     }
 
     public static void renderItemStackEarly(PoseStack poseStack, ItemStack stack, int x, int y) {
@@ -73,9 +72,9 @@ public class ScreenParticleHandler{
         pullFromParticleVault(cacheKey, stack, target, isRenderedAfterItem);
         if (canSpawnParticles) {
             if (isRenderedAfterItem) {
-                emitter.spawnParticlesLate(target, level, Minecraft.getInstance().getPartialTick(), stack, currentItemX, currentItemY);
+                emitter.spawnParticlesLate(target, level, ClientTick.mcPartialTick(), stack, currentItemX, currentItemY);
             } else {
-                emitter.spawnParticlesEarly(target, level, Minecraft.getInstance().getPartialTick(), stack, currentItemX, currentItemY);
+                emitter.spawnParticlesEarly(target, level, ClientTick.mcPartialTick(), stack, currentItemX, currentItemY);
             }
         }
 
@@ -108,14 +107,15 @@ public class ScreenParticleHandler{
         }
     }
 
+    // PORT NOTE: Tesselator.getBuilder()/end() are gone; each render type begins a fresh BufferBuilder and uploads it.
     public static void renderParticles(ScreenParticleHolder screenParticleTarget) {
         screenParticleTarget.particles.forEach((renderType, particles) -> {
-            renderType.begin(TESSELATOR.getBuilder(), Minecraft.getInstance().textureManager);
+            BufferBuilder builder = renderType.begin(TESSELATOR, Minecraft.getInstance().getTextureManager());
             for (ScreenParticle next : particles) {
-                next.render(TESSELATOR.getBuilder());
+                next.render(builder);
             }
 
-            renderType.end(TESSELATOR);
+            renderType.end(builder);
         });
     }
 

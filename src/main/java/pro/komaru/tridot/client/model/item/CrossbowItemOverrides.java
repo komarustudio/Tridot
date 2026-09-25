@@ -42,7 +42,8 @@ public class CrossbowItemOverrides extends CustomItemOverrides {
         if (entity == null) {
             return 0.0F;
         } else {
-            return ConfigurableCrossbow.isCharged(stack) ? 0.0F : (float) (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / (float) ConfigurableCrossbow.getChargeDuration(stack);
+            int charge = stack.getItem() instanceof ConfigurableCrossbow crossbow ? crossbow.getCustomChargeDuration(stack) : CrossbowItem.getChargeDuration(stack, entity);
+            return ConfigurableCrossbow.isCharged(stack) ? 0.0F : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) charge;
         }
     }
 

@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "tridot:dash",
+    "tridot:radius",
+    "tridot:overdrive",
+    "tridot:resonance",
+    "tridot:vigilance",
+    "tridot:vanguard",
+    "tridot:iron_grip",
+    "tridot:deflect",
+    "tridot:push"
+  ]
+}

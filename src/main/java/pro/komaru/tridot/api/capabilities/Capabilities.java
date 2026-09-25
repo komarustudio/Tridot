@@ -1,24 +1,18 @@
 package pro.komaru.tridot.api.capabilities;
 
 import com.mojang.logging.*;
-import net.minecraft.nbt.*;
-import net.minecraft.resources.*;
 import net.minecraft.server.level.*;
-import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
-import net.minecraftforge.common.capabilities.*;
-import net.minecraftforge.common.util.*;
-import net.minecraftforge.event.*;
-import net.minecraftforge.event.entity.player.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.neoforge.event.entity.player.*;
+import net.neoforged.neoforge.registries.*;
 import pro.komaru.tridot.util.struct.capability.CapImpl;
-import pro.komaru.tridot.util.struct.capability.CapProvider;
 import pro.komaru.tridot.util.struct.data.Seq;
 import pro.komaru.tridot.util.struct.data.Var;
 import pro.komaru.tridot.util.struct.func.Prov;
 
-@Mod.EventBusSubscriber()
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
 public class Capabilities {
 
     public static Seq<CapabilityEntry<?>> caps = Seq.with();
@@ -27,12 +21,11 @@ public class Capabilities {
     public static void begin(String modId) {
         tempMod.var = modId;
     }
-    public static <T> CapabilityEntry<T> reg(String modId, String id, Prov<CapProvider> provider, Prov<Capability<T>> instance) {
+    public static <T extends CapImpl> CapabilityEntry<T> reg(String modId, String id, Prov<T> factory) {
         CapabilityEntry<T> entry = new CapabilityEntry<>();
         entry.capId = id;
         entry.modId = modId;
-        entry.prov = provider;
-        entry.instance = instance;
+        entry.factory = factory;
         entry.id = caps.size;
         if(caps.contains(entry))
             LogUtils.getLogger().warn("Existing capability register: {}:{}", tempMod, id);
@@ -43,27 +36,17 @@ public class Capabilities {
         if(modId.equals(tempMod.var)) tempMod.var = null;
     }
 
-    @SubscribeEvent
-    public static void onAttachCapabilitiesPlayer(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof Player)
-            for (CapabilityEntry<?> cap : caps)
-                event.addCapability(new ResourceLocation(cap.modId,cap.capId), cap.prov.get());
+    /** Called from the Tridot entrypoint with the mod bus. */
+    public static void register(IEventBus modBus) {
+        modBus.addListener(Capabilities::onRegister);
     }
 
-
-    @SubscribeEvent
-    public static void onPlayerCloned(PlayerEvent.Clone event) {
-        for (CapabilityEntry<?> cap : caps) {
-            Capability<?> CAP = cap.instance.get();
-            event.getOriginal().reviveCaps();
-            event.getEntity().getCapability(CAP).ifPresent(k -> {
-                event.getOriginal().getCapability(CAP).ifPresent(o -> {
-                    INBTSerializable<CompoundTag> kSer = (INBTSerializable<CompoundTag>) k;
-                    INBTSerializable<CompoundTag> oSer = (INBTSerializable<CompoundTag>) o;
-                    kSer.deserializeNBT(oSer.serializeNBT());
-                });
-            });
-        }
+    private static void onRegister(RegisterEvent event) {
+        event.register(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, helper -> {
+            for (CapabilityEntry<?> cap : caps) {
+                helper.register(cap.location(), cap.buildType());
+            }
+        });
     }
 
     @SubscribeEvent
@@ -81,6 +64,7 @@ public class Capabilities {
         sync(event.getEntity());
     }
 
+    @SuppressWarnings("unchecked")
     public static void sync(Player player) {
         if(player instanceof ServerPlayer s)
             for (CapabilityEntry<?> cap : caps)

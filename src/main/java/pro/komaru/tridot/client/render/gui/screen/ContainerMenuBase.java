@@ -4,7 +4,7 @@ import pro.komaru.tridot.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.items.*;
+import net.neoforged.neoforge.items.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.util.*;
 

@@ -132,17 +132,17 @@ public class ParticleBehavior{
         int light = particle.getLightColor(partialTicks);
 
         if(firstSide){
-            vertexConsumer.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).uv(u1, v1).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).uv(u1, v0).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).uv(u0, v0).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u0, v1).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
+            vertexConsumer.addVertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).setUv(u1, v1).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).setUv(u1, v0).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).setUv(u0, v0).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).setUv(u0, v1).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
         }
 
         if(secondSide){
-            vertexConsumer.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u1, v1).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).uv(u1, v0).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).uv(u0, v0).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
-            vertexConsumer.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).uv(u0, v1).color(particle.rCol, particle.gCol, particle.bCol, particle.alpha).uv2(light).endVertex();
+            vertexConsumer.addVertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).setUv(u1, v1).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).setUv(u1, v0).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).setUv(u0, v0).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
+            vertexConsumer.addVertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).setUv(u0, v1).setColor(particle.rCol, particle.gCol, particle.bCol, particle.alpha).setLight(light);
         }
     }
 

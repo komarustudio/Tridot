@@ -1,89 +1,10 @@
-buildscript{
-    repositories{
-        mavenLocal()
-        mavenCentral()
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven { url = 'https://maven.parchmentmc.org' }
-    }
-
-    dependencies{
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'org.parchmentmc:librarian:1.+'
-    }
-}
-
 plugins{
+    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '[0.7,0.8)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-    id "com.modrinth.minotaur" version "2+"
+    id 'net.neoforged.moddev' version '2.0.147'
 }
-/*def loadEnv(String key) {
-    def path = Paths.get(".env")
-    if (Files.exists(path)) {
-        def env = Files.readAllLines(path).find { it.startsWith("${key}=") }
-        return env?.split("=")?.getAt(1)
-    }
-    return null
-}
-def modFile() {
-    def modFile = "build/libs/${project.name}-${mod_version}.jar"
-    return rootProject.file(modFile)
-}
-def modChangelog() {
-    return rootProject.file("changelog.md").text;
-}
-def modrinthToken = loadEnv("MODRINTH_TOKEN")
-def curseforgeToken = loadEnv("CURSEFORGE_TOKEN")
-def modrinthProjectId = loadEnv("MODRINTH_PROJECT")
-def curseforgeProjectId = loadEnv("CURSEFORGE_PROJECT")
-
-modrinth {
-    token = modrinthToken
-    projectId = modrinthProjectId
-    versionNumber = mod_version
-    uploadFile = modFile()
-    changelog = modChangelog()
-    loaders = ["forge"]
-    gameVersions = [minecraft_version]
-    versionType = mod_type
-}
-task beforeUpload {
-    doLast {
-        println "Введите версию мода: "
-        def vers = new Scanner(System.in).nextLine().trim()
-        println "Введите тип мода (alpha,beta,release): "
-        def type = new Scanner(System.in).nextLine().trim()
-
-        println "Замена версии мода..."
-        modrinth.versionNumber = vers
-        modrinth.versionType = type
-
-        mod_version = vers
-        version = vers
-
-        println "Билд мода..."
-    }
-}
-task prepareSettings {
-    tasks.build.mustRunAfter(beforeUpload)
-    dependsOn(beforeUpload,build)
-    doLast {
-        modrinth.uploadFile = modFile()
-    }
-}
-task modrinthUpload {
-    tasks.modrinth.mustRunAfter(prepareSettings)
-    dependsOn prepareSettings,tasks.modrinth
-    doLast {
-
-    }
-}*/
 
 group = "pro.komaru"
 version = "${version}"
@@ -91,69 +12,74 @@ base{
     archivesName = "Tridot"
 }
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
 repositories{
     mavenLocal()
     mavenCentral()
     maven { url = "https://maven.theillusivec4.top/" }
     maven { url = "https://cursemaven.com" }
     maven { url = "https://maven.blamejared.com" }
-    maven {
+    maven{
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
+        content{
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+sourceSets.main.resources{ srcDir 'src/generated/resources' }
+neoForge{
+    version = project.neo_version
+    parchment{
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
+
+    accessTransformers{
+        publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
+    }
+
+    runs{
+        configureEach{
+            gameDirectory = project.file('run')
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'tridot'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client{
+            client()
+        }
+
+        server{
+            server()
+        }
+
+        gameTestServer{
+            type = 'gameTestServer'
+        }
+
+        data{
+            data()
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', 'tridot', '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+
+    mods{
+        "tridot"{
+            sourceSet sourceSets.main
+        }
     }
 }
 
 dependencies{
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.10.0+1.20.1")
-    compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.7.0")
-    compileOnly fg.deobf("curse.maven:mmmmmmmmmmmm-225738:6608233")
-    compileOnly fg.deobf("curse.maven:selene-499980:6740431")
-}
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-sourceSets.main.resources{ srcDir 'src/generated/resources' }
-minecraft{
-    mappings channel: 'parchment', version: '2023.09.03-1.20.1'
-    copyIdeResources = true
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    runs{
-        configureEach{
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            jvmArg "-Dmixin.env.disableRefMap=true"
-            mods{
-                "tridot"{
-                    source sourceSets.main
-                }
-            }
-        }
-
-        client{
-            property 'forge.enabledGameTestNamespaces', "tridot"
-        }
-
-        server{
-            property 'forge.enabledGameTestNamespaces', "tridot"
-        }
-
-        gameTestServer{
-            property 'forge.enabledGameTestNamespaces', "tridot"
-        }
-
-        data{
-            workingDirectory project.file('run-data')
-            args '--mod', "tridot", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
-}
-
-mixin{
-    add sourceSets.main, "tridot.refmap.json"
-    config "tridot.mixins.json"
-    dumpTargetOnFailure true
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    compileOnly "maven.modrinth:iris:${iris_version}"
 }
 
 task apiJar(type: Jar) {
@@ -181,6 +107,18 @@ artifacts {
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_version            : version
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
 }
 
 publishing {
@@ -203,10 +141,6 @@ publishing {
     }
 }
 
-processResources {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
 jar {
     manifest {
         attributes(["Specification-Title"     : project.name,
@@ -215,12 +149,18 @@ jar {
                     "Implementation-Title"    : project.name,
                     "Implementation-Version"  : project.version,
                     "Implementation-Vendor"   : "IriDark, Auriny, Skoow",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    "MixinConfigs": "tridot.mixins.json"],)
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
 }
 
-jar.finalizedBy('reobfJar')
 tasks.withType(JavaCompile).configureEach{
     options.encoding = 'UTF-8'
+    options.compilerArgs.addAll(['-Xmaxerrs', '10000'])
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

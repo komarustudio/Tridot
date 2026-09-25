@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import pro.komaru.tridot.Tridot;
 
 import java.util.List;
 import java.util.Map;
@@ -149,15 +151,16 @@ public interface BossEntity{
         }
     }
 
+    ResourceLocation NEARBY_PLAYER_BONUS_ID = Tridot.ofTridot("nearby_player_bonus");
     default void applyBonusHealth(Mob mob){
         if(mob.getAttribute(Attributes.MAX_HEALTH) != null && getNearbyPlayers().size() > 1){
-            UUID healthModifierId = UUID.fromString("39ba0d18-24f3-4ea8-ba0d-1824f3fea88b");
+            ResourceLocation healthModifierId = NEARBY_PLAYER_BONUS_ID;
             AttributeModifier existingModifier = mob.getAttribute(Attributes.MAX_HEALTH).getModifier(healthModifierId);
             if(existingModifier != null){
                 mob.getAttribute(Attributes.MAX_HEALTH).removeModifier(existingModifier);
             }
 
-            AttributeModifier healthModifier = new AttributeModifier(healthModifierId, "nearby_player_bonus", getHealthScale(mob), AttributeModifier.Operation.ADDITION);
+            AttributeModifier healthModifier = new AttributeModifier(healthModifierId, getHealthScale(mob), AttributeModifier.Operation.ADD_VALUE);
             mob.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(healthModifier);
             mob.setHealth((float)mob.getAttribute(Attributes.MAX_HEALTH).getValue());
             mob.getPersistentData().putBoolean("NearbyPlayerHealthBonus", true);

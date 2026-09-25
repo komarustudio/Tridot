@@ -52,8 +52,8 @@ public abstract class AbstractBoss extends MultiAttackMob implements Enemy, Boss
     }
 
     @Override
-    public boolean canBreatheUnderwater(){
-        return true;
+    protected int decreaseAirSupply(int pCurrentAir){
+        return pCurrentAir;
     }
 
     @Override
@@ -86,8 +86,9 @@ public abstract class AbstractBoss extends MultiAttackMob implements Enemy, Boss
         return super.hurt(source, amount);
     }
 
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
+    @Override
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         getNearbyPlayers().clear();
         initializeNearbyPlayers(this.level(), this);
         applyBonusHealth(this);

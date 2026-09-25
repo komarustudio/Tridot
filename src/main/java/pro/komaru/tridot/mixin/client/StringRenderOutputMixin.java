@@ -1,5 +1,6 @@
 package pro.komaru.tridot.mixin.client;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.font.GlyphInfo;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
@@ -11,9 +12,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pro.komaru.tridot.client.gfx.text.DotStyle;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Mixin(Font.StringRenderOutput.class)
 public class StringRenderOutputMixin {
@@ -36,7 +34,8 @@ public class StringRenderOutputMixin {
         }
     }
 
-    @ModifyVariable(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Style;getColor()Lnet/minecraft/network/chat/TextColor;"), name = "f3")
+    /** {@code float f3 = this.a;} */
+    @ModifyExpressionValue(method = "accept", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Font$StringRenderOutput;a:F", opcode = org.objectweb.asm.Opcodes.GETFIELD))
     public float changeF3(float value) {
         if(tridot$style != null) {
             for (DotStyle.StyleEffect effect : tridot$style.effects)
@@ -44,7 +43,9 @@ public class StringRenderOutputMixin {
         }
         return value;
     }
-    @ModifyVariable(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Style;isStrikethrough()Z"), name = "f6")
+
+    /** {@code float f6 = glyphinfo.getAdvance(flag);} */
+    @ModifyExpressionValue(method = "accept", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/font/GlyphInfo;getAdvance(Z)F"))
     public float changeF6(float value) {
         if(tridot$style != null) {
             for (DotStyle.StyleEffect effect : tridot$style.effects)

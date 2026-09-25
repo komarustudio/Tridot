@@ -6,12 +6,11 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -61,10 +60,8 @@ public class CutsceneHelper{
     }
 
     @SubscribeEvent
-    public void playerTick(TickEvent.PlayerTickEvent event){
-        if (event.phase != TickEvent.Phase.END) return;
-
-        Player player = event.player;
+    public void playerTick(PlayerTickEvent.Post event){
+        Player player = event.getEntity();
         if (!player.level().isClientSide() && player instanceof ServerPlayer) {
             CutsceneHelper.activeCutscenes.computeIfPresent(player.getUUID(), (uuid, ticks) -> ticks > 1 ? ticks - 1 : null);
         }
@@ -76,7 +73,7 @@ public class CutsceneHelper{
     }
 
     @SubscribeEvent
-    public void onLivingHurt(LivingHurtEvent event){
+    public void onLivingHurt(LivingIncomingDamageEvent event){
         if(event.getEntity() instanceof Player player && CutsceneHelper.isInCutscene(player)){
             event.setCanceled(true);
         }
@@ -84,15 +81,7 @@ public class CutsceneHelper{
 
     @SubscribeEvent
     public void onMobTarget(LivingChangeTargetEvent event){
-        if(event.getNewTarget() instanceof Player player && CutsceneHelper.isInCutscene(player)){
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public void onLivingAttack(LivingAttackEvent event){
-        var entity = event.getEntity();
-        if(entity instanceof Player player && CutsceneHelper.isInCutscene(player)){
+        if(event.getNewAboutToBeSetTarget() instanceof Player player && CutsceneHelper.isInCutscene(player)){
             event.setCanceled(true);
         }
     }

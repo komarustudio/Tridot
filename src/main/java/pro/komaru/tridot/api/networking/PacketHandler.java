@@ -1,72 +1,73 @@
 package pro.komaru.tridot.api.networking;
 
-import com.mojang.datafixers.util.*;
 import net.minecraft.core.*;
-import net.minecraft.resources.*;
+import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.server.level.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.level.*;
-import net.minecraftforge.network.*;
-import net.minecraftforge.network.simple.*;
-import net.minecraftforge.server.*;
+import net.neoforged.neoforge.network.event.*;
+import net.neoforged.neoforge.network.registration.*;
+import net.neoforged.neoforge.server.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.common.networking.AbstractPacketHandler;
 import pro.komaru.tridot.common.networking.packets.*;
+import pro.komaru.tridot.util.struct.data.Seq;
 import pro.komaru.tridot.util.struct.stash.net.SyncStashObjectPacket;
 
+import java.util.function.*;
+
 public class PacketHandler extends AbstractPacketHandler {
-    public static final String PROTOCOL = "10";
-    public static final SimpleChannel HANDLER = NetworkRegistry.newSimpleChannel(Tridot.ofTridot("network"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
+    public static final String PROTOCOL = "11";
+    private static final Seq<Consumer<PayloadRegistrar>> EXTRA = Seq.with();
 
-    public static void init(){
-        int id = 0;
-        HANDLER.registerMessage(id++, DashParticlePacket.class, DashParticlePacket::encode, DashParticlePacket::decode, DashParticlePacket::handle);
-        HANDLER.registerMessage(id++, CooldownSoundPacket.class, CooldownSoundPacket::encode, CooldownSoundPacket::decode, CooldownSoundPacket::handle);
-        HANDLER.registerMessage(id++, DungeonSoundPacket.class, DungeonSoundPacket::encode, DungeonSoundPacket::decode, DungeonSoundPacket::handle);
-        HANDLER.registerMessage(id++, UpdateBossbarPacket.class, UpdateBossbarPacket::encode, UpdateBossbarPacket::decode, UpdateBossbarPacket::handle);
-        HANDLER.registerMessage(id++, SynchronizeCapabilityPacket.class, SynchronizeCapabilityPacket::save, SynchronizeCapabilityPacket::new, SynchronizeCapabilityPacket::handle);
-        HANDLER.registerMessage(id++, SyncStashObjectPacket.class, SyncStashObjectPacket::save, SyncStashObjectPacket::new, SyncStashObjectPacket::handle);
-        HANDLER.registerMessage(id++, CutsceneSkippedPacket.class, CutsceneSkippedPacket::encode, CutsceneSkippedPacket::decode, CutsceneSkippedPacket::handle);
-        HANDLER.registerMessage(id++, ParryParticlePacket.class, ParryParticlePacket::encode, ParryParticlePacket::decode, ParryParticlePacket::handle);
+    public static void addRegistration(Consumer<PayloadRegistrar> registration){
+        EXTRA.add(registration);
     }
 
-    public static SimpleChannel getHandler(){
-        return HANDLER;
+    public static void register(RegisterPayloadHandlersEvent event){
+        PayloadRegistrar registrar = registrar(event, Tridot.ID, PROTOCOL);
+        registrar.playToClient(DashParticlePacket.TYPE, DashParticlePacket.STREAM_CODEC, DashParticlePacket::handle);
+        registrar.playToClient(CooldownSoundPacket.TYPE, CooldownSoundPacket.STREAM_CODEC, CooldownSoundPacket::handle);
+        registrar.playToClient(DungeonSoundPacket.TYPE, DungeonSoundPacket.STREAM_CODEC, DungeonSoundPacket::handle);
+        registrar.playToClient(UpdateBossbarPacket.TYPE, UpdateBossbarPacket.STREAM_CODEC, UpdateBossbarPacket::handle);
+        registrar.playToClient(SynchronizeCapabilityPacket.TYPE, SynchronizeCapabilityPacket.STREAM_CODEC, Packet::handle);
+        registrar.playToClient(SyncStashObjectPacket.TYPE, SyncStashObjectPacket.STREAM_CODEC, Packet::handle);
+        registrar.playToServer(CutsceneSkippedPacket.TYPE, CutsceneSkippedPacket.STREAM_CODEC, CutsceneSkippedPacket::handle);
+        registrar.playToClient(ParryParticlePacket.TYPE, ParryParticlePacket.STREAM_CODEC, ParryParticlePacket::handle);
+        EXTRA.each(c -> c.accept(registrar));
     }
 
-    public static void sendTo(ServerPlayer playerMP, Object toSend){
-        HANDLER.sendTo(toSend, playerMP.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+    public static void sendTo(ServerPlayer playerMP, CustomPacketPayload toSend){
+        AbstractPacketHandler.sendTo(playerMP, toSend);
     }
 
-    public static void sendToAll(Object message){
+    public static void sendToAll(CustomPacketPayload message){
         for(ServerPlayer player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()){
             sendNonLocal(message, player);
         }
     }
 
-    public static void sendNonLocal(Object msg, ServerPlayer player){
-        HANDLER.sendTo(msg, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+    public static void sendNonLocal(CustomPacketPayload msg, ServerPlayer player){
+        AbstractPacketHandler.sendTo(player, msg);
     }
 
-    public static void sendNonLocal(ServerPlayer playerMP, Object toSend){
-        if(playerMP.server.isDedicatedServer() || !playerMP.getGameProfile().getName().equals(playerMP.server.getLocalIp())){
-            sendTo(playerMP, toSend);
-        }
+    public static void sendNonLocal(ServerPlayer playerMP, CustomPacketPayload toSend){
+        AbstractPacketHandler.sendNonLocal(playerMP, toSend);
     }
 
-    public static void sendToTracking(Level world, BlockPos pos, Object msg){
-        HANDLER.send(TRACKING_CHUNK_AND_NEAR.with(() -> Pair.of(world, pos)), msg);
+    public static void sendToTracking(Level world, BlockPos pos, CustomPacketPayload msg){
+        AbstractPacketHandler.sendToTracking(world, pos, msg);
     }
 
-    public static void sendTo(Player entity, Object msg){
-        HANDLER.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer)entity), msg);
+    public static void sendTo(Player entity, CustomPacketPayload msg){
+        AbstractPacketHandler.sendTo(entity, msg);
     }
 
-    public static void sendEntity(Player entity, Object msg){
-        HANDLER.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), msg);
+    public static void sendEntity(Player entity, CustomPacketPayload msg){
+        AbstractPacketHandler.sendEntity(entity, msg);
     }
 
-    public static void sendToServer(Object msg){
-        HANDLER.sendToServer(msg);
+    public static void sendToServer(CustomPacketPayload msg){
+        AbstractPacketHandler.sendToServer(msg);
     }
 }

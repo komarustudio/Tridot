@@ -1,0 +1,23 @@
+{
+  "description": {
+    "translate": "enchantment.tridot.radius"
+  },
+  "supported_items": "#tridot:enchantable/radius_weapon",
+  "weight": 2,
+  "max_level": 2,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 20
+  },
+  "max_cost": {
+    "base": 61,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "exclusive_set": [
+    "minecraft:sweeping_edge"
+  ]
+}

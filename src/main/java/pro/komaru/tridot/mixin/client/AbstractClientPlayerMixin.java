@@ -2,6 +2,7 @@ package pro.komaru.tridot.mixin.client;
 
 import net.minecraft.client.player.*;
 import net.minecraft.world.item.*;
+import net.neoforged.neoforge.client.ClientHooks;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -26,7 +27,7 @@ public abstract class AbstractClientPlayerMixin{
                 }
 
                 f *= 1.0F - f1 * 0.15F;
-                cir.setReturnValue(net.minecraftforge.client.ForgeHooksClient.getFieldOfViewModifier(self, f));
+                cir.setReturnValue(ClientHooks.getFieldOfViewModifier(self, f));
             }
         }
     }

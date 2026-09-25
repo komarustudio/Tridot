@@ -16,7 +16,7 @@ public abstract class AbstractConsumableItem extends Item{
         super(pProperties);
     }
 
-    public int getUseDuration(ItemStack pStack) {
+    public int getUseDuration(ItemStack pStack, LivingEntity pEntity) {
         return useDuration;
     }
 

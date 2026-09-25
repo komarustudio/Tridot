@@ -2,6 +2,7 @@ package pro.komaru.tridot.common.registry.item.types;
 
 import com.google.common.collect.*;
 import net.minecraft.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.tooltip.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
-import net.minecraftforge.registries.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.util.struct.data.*;
@@ -67,7 +67,7 @@ public class EffectConsumableItem extends AbstractConsumableItem implements Tool
             player.addEffect(new MobEffectInstance(mobeffectinstance));
         }
 
-        for(Item item : ForgeRegistries.ITEMS) {
+        for(Item item : BuiltInRegistries.ITEM) {
             if(item instanceof EffectConsumableItem) {
                 player.getCooldowns().addCooldown(item, cooldownTicks);
             }

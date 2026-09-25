@@ -8,7 +8,7 @@ import net.minecraft.server.level.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
 import org.jetbrains.annotations.NotNull;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.api.networking.*;
@@ -39,7 +39,7 @@ public class ScreenshakeHandler{
         if(intensityRotation > 0){
             float yawOffset = randomizeOffset(intensityRotation);
             float pitchOffset = randomizeOffset(intensityRotation);
-            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset);
+            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset, camera.getRoll()); // PORT NOTE: NeoForge adds a roll component to Camera.setRotation
         }
 
         boolean cameraUpdate = false;

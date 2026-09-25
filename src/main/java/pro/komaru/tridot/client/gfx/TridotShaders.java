@@ -2,12 +2,11 @@ package pro.komaru.tridot.client.gfx;
 
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.*;
-import net.minecraft.resources.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.event.lifecycle.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.fml.event.lifecycle.*;
+import net.neoforged.neoforge.client.event.*;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.client.gfx.postprocess.GlowPostProcess;
 import pro.komaru.tridot.client.gfx.postprocess.PostProcessHandler;
@@ -17,7 +16,7 @@ import java.io.*;
 public class TridotShaders{
     public static ShaderInstance ADDITIVE_TEXTURE, ADDITIVE, TRANSLUCENT_TEXTURE, TRANSLUCENT, SCREEN_PARTICLE;
 
-    @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
         @SubscribeEvent
         public static void registerShaders(FMLClientSetupEvent event){

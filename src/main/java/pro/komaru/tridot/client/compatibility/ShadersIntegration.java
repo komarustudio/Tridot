@@ -2,7 +2,7 @@ package pro.komaru.tridot.client.compatibility;
 
 import net.irisshaders.iris.*;
 import net.minecraft.client.*;
-import net.minecraftforge.fml.*;
+import net.neoforged.fml.*;
 
 public class ShadersIntegration{
     public static boolean LOADED;
@@ -14,7 +14,7 @@ public class ShadersIntegration{
     }
 
     public static void init(){
-        LOADED = ModList.get().isLoaded("oculus");
+        LOADED = ModList.get().isLoaded("iris");
     }
 
     public static boolean isLoaded(){

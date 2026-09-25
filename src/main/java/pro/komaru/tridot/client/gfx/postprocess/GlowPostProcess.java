@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.gfx.postprocess;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.resources.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.Tridot;
 
 @OnlyIn(Dist.CLIENT)

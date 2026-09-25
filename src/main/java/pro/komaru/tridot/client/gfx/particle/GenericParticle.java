@@ -2,7 +2,7 @@ package pro.komaru.tridot.client.gfx.particle;
 
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.client.gfx.particle.data.*;
 import net.minecraft.client.*;
 import net.minecraft.client.multiplayer.*;
@@ -212,11 +212,6 @@ public class GenericParticle extends TextureSheetParticle{
     @Override
     public ParticleRenderType getRenderType(){
         return particleRenderType;
-    }
-
-    @Override
-    public boolean shouldCull(){
-        return shouldCull;
     }
 
     @Override

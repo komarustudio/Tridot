@@ -4,7 +4,6 @@ import pro.komaru.tridot.client.gfx.particle.data.*;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.core.particles.*;
-import net.minecraft.network.*;
 import pro.komaru.tridot.client.render.TridotRenderTypes;
 import pro.komaru.tridot.client.gfx.particle.GenericParticle;
 import pro.komaru.tridot.client.gfx.particle.GenericParticleRenderType;
@@ -63,15 +62,5 @@ public class GenericParticleOptions implements ParticleOptions{
     @Override
     public ParticleType<?> getType(){
         return type;
-    }
-
-    @Override
-    public void writeToNetwork(FriendlyByteBuf buffer){
-
-    }
-
-    @Override
-    public String writeToString(){
-        return getClass().getSimpleName();
     }
 }

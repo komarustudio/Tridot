@@ -84,8 +84,7 @@ public class ModCommand{
             if (!stack.isEmpty()) {
                 ItemSkin itemSkin = ItemSkin.itemSkin(stack);
                 if (itemSkin != null) {
-                    CompoundTag nbt = stack.getOrCreateTag();
-                    nbt.remove("skin");
+                    ItemSkin.remove(stack);
                 }
             }
 

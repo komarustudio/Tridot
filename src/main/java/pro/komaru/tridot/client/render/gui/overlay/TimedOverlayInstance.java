@@ -6,9 +6,8 @@ import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.resources.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.client.event.*;
+import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.common.config.*;
 import pro.komaru.tridot.util.*;
 
@@ -21,7 +20,7 @@ public class TimedOverlayInstance implements OverlayInstance{
     public float fadeOut = 20;
     public float opacity = 1;
 
-    public void tick(TickEvent.ClientTickEvent event) {
+    public void tick(ClientTickEvent.Post event) {
         int totalDuration = (int) (fadeIn + showTime + fadeOut);
         if (ClientConfig.ABILITY_OVERLAY.get()) {
             if (showTick < totalDuration) {
@@ -32,13 +31,13 @@ public class TimedOverlayInstance implements OverlayInstance{
         }
     }
 
-    public void onDraw(RenderGuiOverlayEvent.Post event) {
+    public void onDraw(RenderGuiLayerEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         GuiGraphics gui = event.getGuiGraphics();
         if (ClientConfig.ABILITY_OVERLAY.get()) {
             if(location == null) {
                 Log.error(this + " Location is null");
-                location = new ResourceLocation("missingno");
+                location = ResourceLocation.withDefaultNamespace("missingno");
             }
 
             gui.pose().pushPose();
@@ -70,8 +69,8 @@ public class TimedOverlayInstance implements OverlayInstance{
         RenderSystem.applyModelViewMatrix();
     }
 
-    private float getAlpha(RenderGuiOverlayEvent.Post event) {
-        float ticks = showTick + event.getPartialTick();
+    private float getAlpha(RenderGuiLayerEvent.Post event) {
+        float ticks = showTick + ClientTick.mcPartialTick();
         float alpha;
 
         float totalDuration = fadeIn + showTime + fadeOut;

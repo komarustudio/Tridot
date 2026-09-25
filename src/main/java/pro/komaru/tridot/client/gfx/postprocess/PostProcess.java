@@ -8,7 +8,7 @@ import com.mojang.blaze3d.shaders.*;
 import com.mojang.blaze3d.systems.*;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.*;
 import net.minecraft.client.*;
 import net.minecraft.client.renderer.*;
@@ -28,6 +28,7 @@ import static com.mojang.blaze3d.platform.GlConst.GL_DRAW_FRAMEBUFFER;
 public abstract class PostProcess{
     public static final Minecraft minecraft = Minecraft.getInstance();
 
+    // PORT NOTE: Minecraft.getFrameTime()/getDeltaFrameTime() were replaced by the DeltaTracker (see ClientTick.mcPartialTick).
     public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
     Pair.of("cameraPos", u -> u.set(new Vector3f(minecraft.gameRenderer.getMainCamera().getPosition().toVector3f()))),
     Pair.of("lookVector", u -> u.set(minecraft.gameRenderer.getMainCamera().getLookVector())),
@@ -45,7 +46,7 @@ public abstract class PostProcess{
     }),
     Pair.of("nearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
     Pair.of("farPlaneDistance", u -> u.set(minecraft.gameRenderer.getDepthFar())),
-    Pair.of("fov", u -> u.set((float)Math.toRadians(minecraft.gameRenderer.getFov(minecraft.gameRenderer.getMainCamera(), minecraft.getFrameTime(), true)))),
+    Pair.of("fov", u -> u.set((float)Math.toRadians(minecraft.gameRenderer.getFov(minecraft.gameRenderer.getMainCamera(), ClientTick.mcPartialTick(), true)))),
     Pair.of("aspectRatio", u -> u.set((float)minecraft.getWindow().getWidth() / (float)minecraft.getWindow().getHeight()))
     );
 
@@ -129,11 +130,11 @@ public abstract class PostProcess{
         if(isActive){
             if(!initialized) init();
             if(postChain != null){
-                time += minecraft.getDeltaFrameTime() / 20.0;
+                time += minecraft.getTimer().getRealtimeDeltaTicks() / 20.0;
                 beforeProcess(viewModelStack);
                 applyDefaultUniforms();
                 if(!isActive) return;
-                postChain.process(minecraft.getFrameTime());
+                postChain.process(ClientTick.mcPartialTick());
                 GlStateManager._glBindFramebuffer(GL_DRAW_FRAMEBUFFER, minecraft.getMainRenderTarget().frameBufferId);
                 afterProcess();
             }

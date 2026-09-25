@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client.gfx.postprocess;
 
 import com.mojang.blaze3d.vertex.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.*;
 import net.minecraft.client.*;
 import net.minecraft.client.renderer.*;
@@ -37,7 +37,7 @@ public abstract class PostProcessInstanceData{
     public void beforeProcess(PoseStack viewModelStack){
         for(int i = instances.size() - 1; i >= 0; i--){
             PostProcessInstance instance = instances.get(i);
-            instance.update(minecraft.getDeltaFrameTime());
+            instance.update(minecraft.getTimer().getRealtimeDeltaTicks());
             if(instance.isRemoved()){
                 instances.remove(i);
             }

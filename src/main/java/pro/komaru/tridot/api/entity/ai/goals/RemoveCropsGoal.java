@@ -10,8 +10,9 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.status.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.event.*;
 
 import javax.annotation.*;
 
@@ -26,7 +27,7 @@ public class RemoveCropsGoal extends MoveToBlockGoal{
     }
 
     public boolean canUse(){
-        if(!ForgeEventFactory.getMobGriefingEvent(this.removerMob.level(), this.removerMob)){
+        if(!EventHooks.canEntityGrief(this.removerMob.level(), this.removerMob)){
             return false;
         }else if(this.nextStartTick > 0){
             --this.nextStartTick;

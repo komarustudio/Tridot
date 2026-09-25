@@ -1,26 +1,22 @@
 package pro.komaru.tridot.api.level.loot;
 
-import com.google.common.base.*;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.*;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.*;
-import net.minecraft.resources.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.util.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
-import net.minecraftforge.common.loot.*;
-import net.minecraftforge.registries.*;
+import net.neoforged.neoforge.common.loot.*;
 
 import javax.annotation.*;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class AddItemListModifier extends LootModifier{
-    public static final Supplier<Codec<AddItemListModifier>> CODEC = Suppliers.memoize(() ->
-    RecordCodecBuilder.create(inst -> codecStart(inst).and(inst.group(ExtraCodecs.nonEmptyList(ForgeRegistries.ITEMS.getCodec().listOf()).fieldOf("items").forGetter(m -> m.items),
-    Codec.FLOAT.optionalFieldOf("chance", 1.0F).forGetter((m) -> m.chance))).apply(inst, AddItemListModifier::new)));
+    public static final MapCodec<AddItemListModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(inst.group(ExtraCodecs.nonEmptyList(BuiltInRegistries.ITEM.byNameCodec().listOf()).fieldOf("items").forGetter(m -> m.items),
+    Codec.FLOAT.optionalFieldOf("chance", 1.0F).forGetter((m) -> m.chance))).apply(inst, AddItemListModifier::new));
 
     private final List<Item> items;
     private final float chance;
@@ -49,7 +45,7 @@ public class AddItemListModifier extends LootModifier{
         return generatedLoot;
     }
 
-    public Codec<? extends IGlobalLootModifier> codec(){
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec(){
+        return CODEC;
     }
 }

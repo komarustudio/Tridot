@@ -11,8 +11,6 @@ import org.jetbrains.annotations.*;
 import pro.komaru.tridot.util.Tmp;
 import pro.komaru.tridot.util.math.ArcRandom;
 
-import java.util.*;
-
 public abstract class BlockEntityBase extends BlockEntity{
 
     public ArcRandom random = Tmp.rnd;
@@ -27,16 +25,16 @@ public abstract class BlockEntityBase extends BlockEntity{
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet){
-        super.onDataPacket(net, packet);
-        handleUpdateTag(packet.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider lookupProvider){
+        super.onDataPacket(net, packet, lookupProvider);
+        handleUpdateTag(packet.getTag(), lookupProvider);
     }
 
     @NotNull
     @Override
-    public CompoundTag getUpdateTag(){
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries){
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag);
+        saveAdditional(tag, registries);
         return tag;
     }
 

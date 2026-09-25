@@ -1,25 +1,22 @@
 package pro.komaru.tridot.api.level.loot;
 
-import com.google.common.base.*;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.*;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
-import net.minecraftforge.common.loot.*;
-import net.minecraftforge.registries.*;
+import net.neoforged.neoforge.common.loot.*;
 
 import javax.annotation.*;
-import java.util.function.Supplier;
 
 public class AddItemModifier extends LootModifier{
-    public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
-    RecordCodecBuilder.create(inst -> codecStart(inst).and(inst.group(ForgeRegistries.ITEMS.getCodec()
+    public static final MapCodec<AddItemModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(inst.group(BuiltInRegistries.ITEM.byNameCodec()
     .fieldOf("item").forGetter((m) -> m.item),
     Codec.INT.optionalFieldOf("count", 1).forGetter((m) -> m.count),
     Codec.FLOAT.optionalFieldOf("chance", 1.0F).forGetter((m) -> m.chance)
-    )).apply(inst, AddItemModifier::new)));
+    )).apply(inst, AddItemModifier::new));
 
     private final Item item;
     private final int count;
@@ -56,7 +53,7 @@ public class AddItemModifier extends LootModifier{
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec(){
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec(){
+        return CODEC;
     }
 }

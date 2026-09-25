@@ -96,8 +96,8 @@ public interface IGuiDrawer extends RenderStackc {
     };
 
     default ResourceLocation texturePath(String path) {
-        if(path.contains(":")) return new ResourceLocation(path).withPath(s -> "textures/"+s+".png");
-        return new ResourceLocation(namespace(), "textures/"+path+".png");
+        if(path.contains(":")) return ResourceLocation.parse(path).withPath(s -> "textures/"+s+".png");
+        return ResourceLocation.fromNamespaceAndPath(namespace(), "textures/"+path+".png");
     }
     String namespace();
 

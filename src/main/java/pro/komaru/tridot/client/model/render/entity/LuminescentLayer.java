@@ -30,7 +30,7 @@ public class LuminescentLayer<T extends LivingEntity, M extends EntityModel<T>> 
 
     public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, T pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch){
         VertexConsumer vertexconsumer = pBuffer.getBuffer(this.renderType());
-        this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
+        this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, r, g, b)); // PORT NOTE: renderToBuffer takes a packed ARGB int in 1.21
     }
 
     @NotNull

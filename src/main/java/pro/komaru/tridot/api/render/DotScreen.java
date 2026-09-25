@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
 import pro.komaru.tridot.api.*;
+import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.util.Col;
 import pro.komaru.tridot.util.phys.AbsRect;
 import pro.komaru.tridot.util.struct.func.*;
@@ -54,7 +55,7 @@ public abstract class DotScreen extends Screen {
     }
 
     public void blit(String texture,int x,int y,int cutx,int cuty,int cutw,int cuth,int tw, int th) {
-        ResourceLocation location = texture.contains(":") ? new ResourceLocation(texture) : new ResourceLocation(assetsId,texture);
+        ResourceLocation location = texture.contains(":") ? ResourceLocation.parse(texture) : ResourceLocation.fromNamespaceAndPath(assetsId,texture);
         localG.blit(location,
                 x,y,cutx,cuty,cutw,cuth,tw,th);
     }
@@ -103,7 +104,7 @@ public abstract class DotScreen extends Screen {
     }
 
     public float time() {
-        return tick + mc().getPartialTick();
+        return tick + ClientTick.mcPartialTick();
     }
 
     @Override

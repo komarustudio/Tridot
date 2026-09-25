@@ -56,7 +56,7 @@ public abstract class BaseSpawner{
 
                         entity.moveTo(d0, d1, d2, 0, 0);
                         onEntityConfiguration(entity, pPos);
-                        if(pServerLevel.noCollision(getEntityType().getAABB(d0, d1, d2))){
+                        if(pServerLevel.noCollision(getEntityType().getSpawnAABB(d0, d1, d2))){
                             if(skipSpawnReason(pServerLevel)){
                                 this.delay(pServerLevel, pPos);
                                 return;

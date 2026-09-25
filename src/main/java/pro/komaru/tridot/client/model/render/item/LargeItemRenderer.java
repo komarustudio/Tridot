@@ -10,8 +10,8 @@ import net.minecraft.resources.*;
 import net.minecraft.util.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.state.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.neoforge.client.*;
 
 import javax.annotation.*;
 import java.util.*;
@@ -20,20 +20,23 @@ import java.util.*;
 public class LargeItemRenderer{
 
     public static ModelResourceLocation getModelResourceLocation(String modId, String item){
-        return new ModelResourceLocation(new ResourceLocation(modId, item + "_in_hand"), "inventory");
+        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(modId, "item/" + item + "_in_hand"));
     }
 
-    public static void bakeModel(Map<ResourceLocation, BakedModel> map, String modId, String item, CustomItemOverrides itemOverrides){
-        ResourceLocation modelInventory = new ModelResourceLocation(new ResourceLocation(modId, item), "inventory");
-        ResourceLocation modelHand = new ModelResourceLocation(new ResourceLocation(modId, item + "_in_hand"), "inventory");
+    public static void bakeModel(Map<ModelResourceLocation, BakedModel> map, String modId, String item, CustomItemOverrides itemOverrides){
+        ModelResourceLocation modelInventory = ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(modId, item));
+        if(!map.containsKey(modelInventory)){
+            modelInventory = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(modId, "item/" + item));
+        }
 
+        ModelResourceLocation modelHand = getModelResourceLocation(modId, item);
         BakedModel bakedModelDefault = map.get(modelInventory);
         BakedModel bakedModelHand = map.get(modelHand);
         BakedModel modelWrapper = new LargeItemModel(bakedModelDefault, bakedModelHand, itemOverrides);
         map.put(modelInventory, modelWrapper);
     }
 
-    public static void bakeModel(Map<ResourceLocation, BakedModel> map, String modId, String item){
+    public static void bakeModel(Map<ModelResourceLocation, BakedModel> map, String modId, String item){
         bakeModel(map, modId, item, new CustomItemOverrides());
     }
 
@@ -95,7 +98,8 @@ public class LargeItemRenderer{
             if(context != ItemDisplayContext.GUI && context != ItemDisplayContext.GROUND && context != ItemDisplayContext.FIXED){
                 modelToUse = bakedModelHand;
             }
-            return ForgeHooksClient.handleCameraTransforms(poseStack, modelToUse, context, applyLeftHandTransform);
+
+            return ClientHooks.handleCameraTransforms(poseStack, modelToUse, context, applyLeftHandTransform);
         }
     }
 }

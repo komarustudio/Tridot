@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.util.comps.render.gui.IGuiDrawer;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public abstract class DrawerScreen extends Screen implements IGuiDrawer {
         tick++;
     }
     public float time() {
-        return tick + mc().getPartialTick();
+        return tick + ClientTick.mcPartialTick();
     }
 
     @Override

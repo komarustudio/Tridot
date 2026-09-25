@@ -50,7 +50,7 @@ public class EffectListClientComponent implements ClientTooltipComponent{
             }
 
             if(!entry.endsWithin(20)){
-                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1));
+                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1, 20.0F));
             }
 
             int currentWidth = iconSize + padding + font.width(mutablecomponent);
@@ -72,13 +72,13 @@ public class EffectListClientComponent implements ClientTooltipComponent{
 
         for (var entry : effects) {
             MutableComponent mutablecomponent = Component.translatable(entry.getDescriptionId());
-            MobEffect mobeffect = entry.getEffect();
+            MobEffect mobeffect = entry.getEffect().value();
             if(entry.getAmplifier() > 0){
                 mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + entry.getAmplifier()));
             }
 
             if(!entry.endsWithin(20)){
-                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1));
+                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1, 20.0F));
             }
 
             int nameX = x + iconSize + 2 + padding;

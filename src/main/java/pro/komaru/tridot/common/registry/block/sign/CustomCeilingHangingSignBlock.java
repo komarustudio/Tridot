@@ -10,7 +10,7 @@ import javax.annotation.*;
 
 public class CustomCeilingHangingSignBlock extends CeilingHangingSignBlock{
     public CustomCeilingHangingSignBlock(Properties properties, WoodType type){
-        super(properties, type);
+        super(type, properties);
     }
 
     @Nullable

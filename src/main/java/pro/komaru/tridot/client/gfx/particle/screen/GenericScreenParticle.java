@@ -154,6 +154,10 @@ public class GenericScreenParticle extends TextureSheetScreenParticle{
             return;
         }
 
+        if (sprite == null) {
+            return;
+        }
+
         spriteData.renderTick(this, partialTicks);
         if (tracksStack) {
             x = ScreenParticleHandler.currentItemX + stackTrackXOffset + xMoved;

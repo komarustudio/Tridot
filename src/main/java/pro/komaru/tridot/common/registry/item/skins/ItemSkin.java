@@ -2,16 +2,20 @@ package pro.komaru.tridot.common.registry.item.skins;
 
 import net.minecraft.client.model.*;
 import net.minecraft.client.player.*;
+import net.minecraft.client.resources.*;
+import net.minecraft.core.component.*;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.api.distmarker.*;
+import net.minecraft.world.item.component.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.client.gfx.text.DotStyle;
 import pro.komaru.tridot.client.model.TridotModels;
 import pro.komaru.tridot.client.model.armor.ArmorModel;
+import pro.komaru.tridot.common.registry.TridotDataComponents;
 import pro.komaru.tridot.util.Col;
 import pro.komaru.tridot.util.struct.Structs;
 import pro.komaru.tridot.util.struct.data.Seq;
@@ -35,7 +39,18 @@ public class ItemSkin{
     }
 
     public ItemStack apply(ItemStack stack) {
-        stack.getOrCreateTag().putString("skin", skinBuilder.id);
+        stack.set(TridotDataComponents.SKIN, skinBuilder.id);
+        return stack;
+    }
+
+    /** Removes any skin from the stack (replaces {@code tag.remove("skin")}). */
+    public static ItemStack remove(ItemStack stack) {
+        stack.remove(TridotDataComponents.SKIN);
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        if (data != null && data.contains("skin")) {
+            stack.set(DataComponents.CUSTOM_DATA, data.update(tag -> tag.remove("skin")));
+        }
+
         return stack;
     }
 
@@ -49,9 +64,15 @@ public class ItemSkin{
         return skinBuilder.component;
     }
 
+    @Nullable
     public static ItemSkin itemSkin(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
-        return SkinRegistryManager.get(nbt.getString("skin"));
+        String id = stack.get(TridotDataComponents.SKIN);
+        if (id == null) {
+            // Stacks upgraded from 1.20.1 carry the old root tag inside custom_data.
+            CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+            id = data != null ? data.copyTag().getString("skin") : "";
+        }
+        return SkinRegistryManager.get(id);
     }
 
     public Seq<SkinEntry> skinEntries(){
@@ -59,7 +80,7 @@ public class ItemSkin{
     }
 
     public ResourceLocation id() {
-        return new ResourceLocation(skinBuilder.id);
+        return ResourceLocation.parse(skinBuilder.id);
     }
 
     public Col color() {
@@ -100,7 +121,7 @@ public class ItemSkin{
     @OnlyIn(Dist.CLIENT)
     public static boolean defaultModel(Entity entity){
         if(entity instanceof AbstractClientPlayer player){
-            return player.getModelName().equals("default");
+            return player.getSkin().model() == PlayerSkin.Model.WIDE;
         }
 
         return true;

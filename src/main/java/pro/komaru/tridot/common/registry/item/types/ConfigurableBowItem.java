@@ -1,13 +1,12 @@
 package pro.komaru.tridot.common.registry.item.types;
 
-import com.google.common.collect.*;
 import net.minecraft.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.*;
@@ -15,12 +14,11 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
+import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.entity.projectiles.AbstractTridotArrow;
-import pro.komaru.tridot.common.registry.item.*;
 
-import javax.annotation.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -76,8 +74,18 @@ public class ConfigurableBowItem extends BowItem{
         return f;
     }
 
+    public static void applyWeaponEnchantments(Level level, AbstractArrow arrow, ItemStack weapon){
+        if(weapon.isEmpty()) return;
+        arrow.firedFromWeapon = weapon.copy();
+        if(level instanceof ServerLevel serverLevel){
+            int pierce = EnchantmentHelper.getPiercingCount(serverLevel, weapon, arrow.getPickupItemStackOrigin());
+            if(pierce > 0) arrow.setPierceLevel((byte)pierce);
+            EnchantmentHelper.onProjectileSpawned(serverLevel, weapon, arrow, item -> arrow.firedFromWeapon = null);
+        }
+    }
+
     public void doPreSpawn(AbstractArrow abstractarrow, Player player, ItemStack itemstack, float power, boolean infiniteArrows){
-        abstractarrow = customArrow(abstractarrow);
+        abstractarrow = customArrow(abstractarrow, itemstack, player.getUseItem());
         abstractarrow.setBaseDamage(abstractarrow.getBaseDamage() + baseDamage);
         abstractarrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, power * 3.0F, 1.0F);
         if(power == 1.0F){
@@ -100,10 +108,10 @@ public class ConfigurableBowItem extends BowItem{
     @Override
     public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pEntityLiving, int pTimeLeft){
         if(pEntityLiving instanceof Player player){
-            boolean flag = player.getAbilities().instabuild || EnchantmentHelper.getTagEnchantmentLevel(Enchantments.INFINITY_ARROWS, pStack) > 0;
+            boolean flag = player.getAbilities().instabuild || EnchantmentsRegistry.getLevel(pStack, Enchantments.INFINITY) > 0;
             ItemStack itemstack = player.getProjectile(pStack);
-            int i = this.getUseDuration(pStack) - pTimeLeft;
-            i = ForgeEventFactory.onArrowLoose(pStack, pLevel, player, i, !itemstack.isEmpty() || flag);
+            int i = this.getUseDuration(pStack, pEntityLiving) - pTimeLeft;
+            i = EventHooks.onArrowLoose(pStack, pLevel, player, i, !itemstack.isEmpty() || flag);
             if(i < 0) return;
 
             if(!itemstack.isEmpty() || flag){
@@ -116,24 +124,12 @@ public class ConfigurableBowItem extends BowItem{
                     boolean infiniteArrows = player.getAbilities().instabuild || (itemstack.getItem() instanceof ArrowItem && ((ArrowItem)itemstack.getItem()).isInfinite(itemstack, pStack, player));
                     if(!pLevel.isClientSide()){
                         ArrowItem arrowitem = (ArrowItem)(itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
-                        AbstractArrow abstractarrow = arrowitem == Items.ARROW && arrow.get() != EntityType.ARROW ? createArrow(pLevel, player) : arrowitem.createArrow(pLevel, itemstack, player);
+                        AbstractArrow abstractarrow = arrowitem == Items.ARROW && arrow.get() != EntityType.ARROW ? createArrow(pLevel, player) : arrowitem.createArrow(pLevel, itemstack, player, pStack);
                         abstractarrow.setOwner(player);
                         doPreSpawn(abstractarrow, player, itemstack, power, infiniteArrows);
-                        int enchantmentPower = EnchantmentHelper.getTagEnchantmentLevel(Enchantments.POWER_ARROWS, pStack);
-                        if(enchantmentPower > 0){
-                            abstractarrow.setBaseDamage(abstractarrow.getBaseDamage() + (double)enchantmentPower * 0.5D + 0.5D);
-                        }
+                        applyWeaponEnchantments(pLevel, abstractarrow, pStack);
 
-                        int enchantmentPunch = EnchantmentHelper.getTagEnchantmentLevel(Enchantments.PUNCH_ARROWS, pStack);
-                        if(enchantmentPunch > 0){
-                            abstractarrow.setKnockback(enchantmentPunch);
-                        }
-
-                        if(EnchantmentHelper.getTagEnchantmentLevel(Enchantments.FLAMING_ARROWS, pStack) > 0){
-                            abstractarrow.setSecondsOnFire(100);
-                        }
-
-                        pStack.hurtAndBreak(1, player, (p_289501_) -> p_289501_.broadcastBreakEvent(player.getUsedItemHand()));
+                        pStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
                         pLevel.addFreshEntity(abstractarrow);
                     }
 
@@ -153,14 +149,14 @@ public class ConfigurableBowItem extends BowItem{
 
     private double calculateAverageDamage(ItemStack pStack){
         double baseArrowDamage = this.baseDamage + 2;
-        int powerLevel = EnchantmentHelper.getTagEnchantmentLevel(Enchantments.POWER_ARROWS, pStack);
+        int powerLevel = EnchantmentsRegistry.getLevel(pStack, Enchantments.POWER);
         double powerBonus = powerLevel > 0 ? (powerLevel * 0.5D + 0.5D) : 0.0D;
         return (baseArrowDamage + powerBonus) * (2 * 2.0F) - 2;
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced){
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced){
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
         addSkinTooltip(pStack, pTooltipComponents);
         double damage = calculateAverageDamage(pStack);
         if(arrow.get() != EntityType.ARROW){

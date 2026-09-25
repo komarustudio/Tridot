@@ -14,25 +14,39 @@ public class GhostVertexConsumer implements VertexConsumer{
     }
 
     @Override
-    public VertexConsumer vertex(double x, double y, double z) {
-        double offset = Math.sin((y * 10) + time) * 0.02;
-        return wrapped.vertex(x + offset, y, z + offset);
+    public VertexConsumer addVertex(float x, float y, float z) {
+        float offset = (float)(Math.sin((y * 10) + time) * 0.02);
+        wrapped.addVertex(x + offset, y, z + offset);
+        return this;
     }
 
     @Override
-    public VertexConsumer color(int red, int green, int blue, int alpha) {
-        return wrapped.color(100, 200, 255, (int)(255 * this.alpha));
+    public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+        wrapped.setColor(100, 200, 255, (int)(255 * this.alpha));
+        return this;
     }
 
     @Override
-    public VertexConsumer uv(float u, float v) {
-        return wrapped.uv(u, v);
+    public VertexConsumer setUv(float u, float v) {
+        wrapped.setUv(u, v);
+        return this;
     }
 
-    @Override public VertexConsumer overlayCoords(int u, int v) { return wrapped.overlayCoords(u, v); }
-    @Override public VertexConsumer uv2(int u, int v) { return wrapped.uv2(u, v); }
-    @Override public VertexConsumer normal(float x, float y, float z) { return wrapped.normal(x, y, z); }
-    @Override public void endVertex() { wrapped.endVertex(); }
-    @Override public void defaultColor(int r, int g, int b, int a) { wrapped.defaultColor(r, g, b, a); }
-    @Override public void unsetDefaultColor() { wrapped.unsetDefaultColor(); }
+    @Override
+    public VertexConsumer setUv1(int u, int v) {
+        wrapped.setUv1(u, v);
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setUv2(int u, int v) {
+        wrapped.setUv2(u, v);
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setNormal(float x, float y, float z) {
+        wrapped.setNormal(x, y, z);
+        return this;
+    }
 }

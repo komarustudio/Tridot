@@ -2,7 +2,7 @@ package pro.komaru.tridot.client.gfx.particle;
 
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
 public interface ICustomParticleRender{

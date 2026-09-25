@@ -1,11 +1,11 @@
 package pro.komaru.tridot.common.commands;
 
-import net.minecraftforge.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.neoforge.event.*;
 import pro.komaru.tridot.*;
 
-@Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.GAME)
 public class CommandRegister{
 
     @SubscribeEvent

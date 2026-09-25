@@ -4,8 +4,7 @@ import pro.komaru.tridot.util.struct.Structs;
 import pro.komaru.tridot.util.struct.stash.net.SyncStashObjectPacket;
 import pro.komaru.tridot.util.struct.data.Seq;
 import net.minecraft.server.level.*;
-import net.minecraftforge.network.*;
-import net.minecraftforge.network.simple.*;
+import net.neoforged.neoforge.network.*;
 import pro.komaru.tridot.api.Utils;
 
 public class SyncStash {
@@ -50,13 +49,13 @@ public class SyncStash {
         lastChanged.addUnique(id);
     }
 
-    public static void synchronizeLast(SimpleChannel CHANNEL) {
+    public static void synchronizeLast() {
         for (Integer i : lastChanged) {
             SyncStashObject<?> toSync = stash.get(i);
             int id = toSync.getId();
             byte[] bytes = toSync.toBytes();
             for (ServerPlayer player : Utils.players())
-                CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncStashObjectPacket(id,bytes));
+                PacketDistributor.sendToPlayer(player, new SyncStashObjectPacket(id,bytes));
         }
     }
 

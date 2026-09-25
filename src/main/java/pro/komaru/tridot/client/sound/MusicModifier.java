@@ -22,7 +22,7 @@ public class MusicModifier{
     public boolean is(Boolf<Biome> biome, Minecraft minecraft){
         if(minecraft.player == null) return false;
         Holder<Biome> holder = minecraft.player.level().getBiome(minecraft.player.blockPosition());
-        return biome.get(holder.get());
+        return biome.get(holder.value());
     }
 
     public static class DungeonMusic extends MusicModifier {
@@ -35,7 +35,8 @@ public class MusicModifier{
         }
 
         public boolean isPlayerInStructure(Player player, ServerLevel serverLevel) {
-            var structure = serverLevel.structureManager().getStructureWithPieceAt(player.blockPosition(), structureKey);
+            var structure = serverLevel.structureManager().getStructureWithPieceAt(player.blockPosition(), holder -> holder.is(structureKey));
+            if(!structure.isValid()) return false;
             return structure.getBoundingBox().isInside(player.getBlockX(), player.getBlockY(), player.getBlockZ());
         }
     }

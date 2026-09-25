@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "GPL-2.0"
+
+[[mods]]
+modId = "tridot"
+version = "${mod_version}"
+displayName = "Tridot"
+authors = "IriDark, Auriny, Skoow"
+description = '''API mod for Komaru org'''
+
+[[mixins]]
+config = "tridot.mixins.json"
+
+[[accessTransformers]]
+file = "META-INF/accesstransformer.cfg"
+
+[[dependencies.tridot]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tridot]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tridot]]
+modId = "curios"
+type = "optional"
+versionRange = "[9,)"
+ordering = "AFTER"
+side = "BOTH"

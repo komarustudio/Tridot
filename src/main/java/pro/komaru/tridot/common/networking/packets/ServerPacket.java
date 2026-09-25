@@ -1,20 +1,17 @@
 package pro.komaru.tridot.common.networking.packets;
 
 import net.minecraft.network.*;
-import net.minecraftforge.network.*;
+import net.minecraft.network.protocol.common.custom.*;
+import net.neoforged.neoforge.network.handling.*;
 
-import java.util.*;
-import java.util.function.*;
-
-public abstract class ServerPacket{
+public abstract class ServerPacket implements CustomPacketPayload{
     public void encode(FriendlyByteBuf buf){
     }
 
-    public final void handle(Supplier<NetworkEvent.Context> context){
-        context.get().enqueueWork(() -> execute(context));
-        context.get().setPacketHandled(true);
+    public final void handle(IPayloadContext context){
+        context.enqueueWork(() -> execute(context));
     }
 
-    public void execute(Supplier<NetworkEvent.Context> context){
+    public void execute(IPayloadContext context){
     }
 }

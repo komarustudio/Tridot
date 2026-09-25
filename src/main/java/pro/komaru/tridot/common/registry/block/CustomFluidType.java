@@ -6,8 +6,8 @@ import net.minecraft.client.*;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.resources.*;
-import net.minecraftforge.client.extensions.common.*;
-import net.minecraftforge.fluids.*;
+import net.neoforged.neoforge.client.extensions.common.*;
+import net.neoforged.neoforge.fluids.*;
 import org.jetbrains.annotations.*;
 import org.joml.*;
 

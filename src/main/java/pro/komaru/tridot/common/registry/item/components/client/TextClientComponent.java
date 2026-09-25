@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.locale.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import org.joml.*;
 
 import java.lang.Math;

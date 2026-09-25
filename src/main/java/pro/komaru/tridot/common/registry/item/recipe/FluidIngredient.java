@@ -8,8 +8,8 @@ import net.minecraft.resources.*;
 import net.minecraft.tags.*;
 import net.minecraft.util.*;
 import net.minecraft.world.level.material.*;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.registries.*;
+import net.neoforged.neoforge.fluids.*;
+
 
 import java.util.*;
 import java.util.stream.*;
@@ -80,7 +80,7 @@ public abstract class FluidIngredient{
         Collection<FluidStack> fluids = getAllFluids();
         buffer.writeInt(fluids.size());
         for(FluidStack stack : fluids){
-            buffer.writeResourceLocation(ForgeRegistries.FLUIDS.getResourceKey(stack.getFluid()).get().location());
+            buffer.writeResourceLocation(BuiltInRegistries.FLUID.getKey(stack.getFluid()));
             buffer.writeVarInt(stack.getAmount());
         }
     }
@@ -209,7 +209,7 @@ public abstract class FluidIngredient{
         int count = buffer.readInt();
         FluidIngredient[] ingredients = new FluidIngredient[count];
         for(int i = 0; i < count; i++){
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(buffer.readResourceLocation());
+            Fluid fluid = BuiltInRegistries.FLUID.get(buffer.readResourceLocation());
             if(fluid == null){
                 fluid = Fluids.EMPTY;
             }
@@ -288,7 +288,7 @@ public abstract class FluidIngredient{
         @Override
         public JsonElement serialize(){
             JsonObject object = new JsonObject();
-            object.addProperty("name", Objects.requireNonNull(ForgeRegistries.FLUIDS.getResourceKey(fluid).get().location()).toString());
+            object.addProperty("name", Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(fluid)).toString());
             object.addProperty("amount", amount);
             return object;
         }
@@ -298,7 +298,7 @@ public abstract class FluidIngredient{
             // count
             buffer.writeInt(1);
             // single fluid
-            buffer.writeResourceLocation(ForgeRegistries.FLUIDS.getResourceKey(fluid).get().location());
+            buffer.writeResourceLocation(BuiltInRegistries.FLUID.getKey(fluid));
             buffer.writeVarInt(amount);
         }
 
@@ -309,7 +309,7 @@ public abstract class FluidIngredient{
          */
         private static FluidMatch deserialize(JsonObject json){
             String fluidName = GsonHelper.getAsString(json, "name");
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidName));
+            Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidName));
             if(fluid == null || fluid == Fluids.EMPTY){
                 throw new JsonSyntaxException("Unknown fluid '" + fluidName + "'");
             }

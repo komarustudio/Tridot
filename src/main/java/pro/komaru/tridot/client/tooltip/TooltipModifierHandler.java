@@ -1,5 +1,6 @@
 package pro.komaru.tridot.client.tooltip;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.TooltipFlag;
@@ -14,10 +15,10 @@ public class TooltipModifierHandler{
         modifiers.add(modifier);
     }
 
-    public static void add(UUID id) {
+    public static void add(ResourceLocation id) {
         register(new AttributeTooltipModifier(){
             public boolean isToolBase(AttributeModifier modifier, Player player, TooltipFlag flag){
-                return modifier.getId().equals(id);
+                return modifier.id().equals(id);
             }
         });
     }

@@ -2,10 +2,13 @@ package pro.komaru.tridot.common.networking.packets;
 
 import net.minecraft.network.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.codec.*;
+import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.resources.*;
 import net.minecraft.sounds.*;
-import net.minecraftforge.network.NetworkEvent.*;
+import net.neoforged.neoforge.network.handling.*;
 import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.networking.Packet;
 import pro.komaru.tridot.api.render.bossbars.*;
 import pro.komaru.tridot.client.*;
 import pro.komaru.tridot.util.*;
@@ -13,7 +16,10 @@ import pro.komaru.tridot.util.*;
 import java.util.*;
 import java.util.function.*;
 
-public record UpdateBossbarPacket(UUID id, Operation operation){
+public record UpdateBossbarPacket(UUID id, Operation operation) implements CustomPacketPayload{
+    public static final Type<UpdateBossbarPacket> TYPE = Packet.type(Tridot.ID, "update_bossbar");
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpdateBossbarPacket> STREAM_CODEC = StreamCodec.of((buf, p) -> p.encode(buf), UpdateBossbarPacket::decode);
+
     static final Operation REMOVE_OPERATION = new Operation(){
         public OperationType getType(){
             return OperationType.REMOVE;
@@ -23,11 +29,11 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             p_178661_.remove(p_178660_);
         }
 
-        public void encode(FriendlyByteBuf p_178663_){
+        public void encode(RegistryFriendlyByteBuf p_178663_){
         }
     };
 
-    public static UpdateBossbarPacket decode(FriendlyByteBuf pBuffer){
+    public static UpdateBossbarPacket decode(RegistryFriendlyByteBuf pBuffer){
         UUID id = pBuffer.readUUID();
         OperationType operationType = pBuffer.readEnum(OperationType.class);
         return new UpdateBossbarPacket(id, operationType.reader.apply(pBuffer));
@@ -57,19 +63,23 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
         return new UpdateBossbarPacket(pEvent.getId(), new UpdatePropertiesOperation(pEvent.getType(), pEvent.getTexture(), pEvent.getBossMusic(), pEvent.shouldDarkenScreen(), pEvent.shouldPlayBossMusic(), pEvent.shouldCreateWorldFog(), pEvent.isRainbow(), pEvent.isAboutToDie()));
     }
 
-    public void encode(FriendlyByteBuf pBuffer){
+    public void encode(RegistryFriendlyByteBuf pBuffer){
         pBuffer.writeUUID(this.id);
         pBuffer.writeEnum(this.operation.getType());
         this.operation.encode(pBuffer);
     }
 
-    public static void handle(UpdateBossbarPacket pMsg, Supplier<Context> context){
-        context.get().setPacketHandled(true);
+    public static void handle(UpdateBossbarPacket pMsg, IPayloadContext context){
         BossBarsOverlay.INSTANCE.update(pMsg);
     }
 
     public void dispatch(Handler pHandler){
         this.operation.dispatch(this.id, pHandler);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type(){
+        return TYPE;
     }
 
     enum OperationType{
@@ -80,9 +90,9 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
         UPDATE_STYLE(UpdateStyleOperation::new),
         UPDATE_PROPERTIES(UpdatePropertiesOperation::new);
 
-        final Function<FriendlyByteBuf, Operation> reader;
+        final Function<RegistryFriendlyByteBuf, Operation> reader;
 
-        OperationType(Function<FriendlyByteBuf, Operation> pReader){
+        OperationType(Function<RegistryFriendlyByteBuf, Operation> pReader){
             this.reader = pReader;
         }
     }
@@ -112,7 +122,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
 
         void dispatch(UUID pId, Handler pHandler);
 
-        void encode(FriendlyByteBuf pBuffer);
+        void encode(RegistryFriendlyByteBuf pBuffer);
     }
 
     static class AddOperation implements Operation{
@@ -128,11 +138,11 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
         public ResourceLocation clientBossbarType;
         public ResourceLocation texture;
 
-        public AddOperation(FriendlyByteBuf pBuffer){
+        public AddOperation(RegistryFriendlyByteBuf pBuffer){
             this(
             pBuffer.readResourceLocation(),
             pBuffer.readResourceLocation(),
-            pBuffer.readComponent(),
+            ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer),
             pBuffer.readFloat(),
             pBuffer.readFloat(),
             new Col(pBuffer.readFloat(), pBuffer.readFloat(), pBuffer.readFloat()),
@@ -176,7 +186,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             this.rainbow = pEvent.isRainbow();
         }
 
-        public static AddOperation decode(FriendlyByteBuf pBuffer){
+        public static AddOperation decode(RegistryFriendlyByteBuf pBuffer){
             return new AddOperation(pBuffer);
         }
 
@@ -188,10 +198,10 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             pHandler.add(pId, this.clientBossbarType, this.texture, this.name, this.health, this.maxHealth, new Col(r, g, b), this.bossMusic, this.darkenScreen, this.playBossMusic, this.createWorldFog, this.rainbow);
         }
 
-        public void encode(FriendlyByteBuf pBuffer){
+        public void encode(RegistryFriendlyByteBuf pBuffer){
             pBuffer.writeResourceLocation(this.clientBossbarType);
             pBuffer.writeResourceLocation(this.texture);
-            pBuffer.writeComponent(this.name);
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.name);
             pBuffer.writeFloat(this.health);
             pBuffer.writeFloat(this.maxHealth);
             pBuffer.writeFloat(this.r);
@@ -206,8 +216,8 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
     }
 
     record UpdateNameOperation(Component name) implements Operation{
-        private UpdateNameOperation(FriendlyByteBuf pBuffer){
-            this(pBuffer.readComponent());
+        private UpdateNameOperation(RegistryFriendlyByteBuf pBuffer){
+            this(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(pBuffer));
         }
 
         public OperationType getType(){
@@ -218,8 +228,8 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             pHandler.updateName(pId, this.name);
         }
 
-        public void encode(FriendlyByteBuf pBuffer){
-            pBuffer.writeComponent(this.name);
+        public void encode(RegistryFriendlyByteBuf pBuffer){
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(pBuffer, this.name);
         }
     }
 
@@ -232,7 +242,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             this.maxHealth = maxHealth;
         }
 
-        private UpdateProgressOperation(FriendlyByteBuf pBuffer){
+        private UpdateProgressOperation(RegistryFriendlyByteBuf pBuffer){
             this.health = pBuffer.readFloat();
             this.maxHealth = pBuffer.readFloat();
         }
@@ -245,14 +255,14 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             pHandler.updateProgress(pId, this.health, this.maxHealth);
         }
 
-        public void encode(FriendlyByteBuf pBuffer){
+        public void encode(RegistryFriendlyByteBuf pBuffer){
             pBuffer.writeFloat(this.health);
             pBuffer.writeFloat(this.maxHealth);
         }
     }
 
     record UpdatePropertiesOperation(ResourceLocation type, ResourceLocation texture, SoundEvent event, boolean darkenScreen, boolean playMusic, boolean createWorldFog, boolean isRainbow, boolean aboutToDie) implements Operation{
-        private UpdatePropertiesOperation(FriendlyByteBuf pBuffer){
+        private UpdatePropertiesOperation(RegistryFriendlyByteBuf pBuffer){
             this(
             pBuffer.readResourceLocation(),
             pBuffer.readResourceLocation(),
@@ -272,7 +282,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             pHandler.updateProperties(pId, this.type, this.texture, this.event, this.darkenScreen, this.playMusic, this.createWorldFog, this.isRainbow, this.aboutToDie);
         }
 
-        public void encode(FriendlyByteBuf pBuffer){
+        public void encode(RegistryFriendlyByteBuf pBuffer){
             pBuffer.writeResourceLocation(this.type);
             pBuffer.writeResourceLocation(this.texture);
             pBuffer.writeResourceLocation(this.event.getLocation());
@@ -293,7 +303,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             this.b = col.b;
         }
 
-        private UpdateStyleOperation(FriendlyByteBuf pBuffer){
+        private UpdateStyleOperation(RegistryFriendlyByteBuf pBuffer){
             r = pBuffer.readFloat();
             g = pBuffer.readFloat();
             b = pBuffer.readFloat();
@@ -307,7 +317,7 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
             pHandler.updateStyle(pId, new Col(r, g, b));
         }
 
-        public void encode(FriendlyByteBuf pBuffer){
+        public void encode(RegistryFriendlyByteBuf pBuffer){
             pBuffer.writeFloat(this.r);
             pBuffer.writeFloat(this.g);
             pBuffer.writeFloat(this.b);

@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client;
 
 import net.minecraft.client.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.client.event.*;
 import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.common.ServerTickHandler;
 
@@ -14,21 +14,24 @@ public class ClientTick {
         return (float)ticksInGame + partialTicks;
     }
 
-    public static void renderTick(TickEvent.RenderTickEvent event){
-        partialTicks = event.renderTickTime;
+    public static float mcPartialTick(){
+        Minecraft mc = Minecraft.getInstance();
+        return mc.getTimer().getGameTimeDeltaPartialTick(!mc.isPaused());
     }
 
-    public static void clientTickEnd(TickEvent.ClientTickEvent event){
-        if(event.phase == TickEvent.Phase.END){
-            if(!Minecraft.getInstance().isPaused()){
-                ticksInGame++;
-                partialTicks = 0;
-            }
+    public static void renderTick(RenderFrameEvent.Post event){
+        partialTicks = event.getPartialTick().getGameTimeDeltaPartialTick(!Minecraft.getInstance().isPaused());
+    }
 
-            if(!Minecraft.getInstance().hasSingleplayerServer()){
-                ServerTickHandler.tick++;
-                Utils.Schedule.handleSyncScheduledTasks(ServerTickHandler.tick);
-            }
+    public static void clientTickEnd(ClientTickEvent.Post event){
+        if(!Minecraft.getInstance().isPaused()){
+            ticksInGame++;
+            partialTicks = 0;
+        }
+
+        if(!Minecraft.getInstance().hasSingleplayerServer()){
+            ServerTickHandler.tick++;
+            Utils.Schedule.handleSyncScheduledTasks(ServerTickHandler.tick);
         }
     }
 

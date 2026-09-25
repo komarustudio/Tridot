@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.world.entity.npc.VillagerTrades.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
-import net.minecraftforge.common.*;
+import net.neoforged.neoforge.common.*;
 
 import java.util.*;
 

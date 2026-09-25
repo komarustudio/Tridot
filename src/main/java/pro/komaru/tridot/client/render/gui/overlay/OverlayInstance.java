@@ -1,13 +1,11 @@
 package pro.komaru.tridot.client.render.gui.overlay;
 
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.client.event.*;
 
 public interface OverlayInstance{
 
-    default void tick(TickEvent.ClientTickEvent event){
+    default void tick(ClientTickEvent.Post event){
     }
 
-    void onDraw(RenderGuiOverlayEvent.Post event);
+    void onDraw(RenderGuiLayerEvent.Post event);
 }

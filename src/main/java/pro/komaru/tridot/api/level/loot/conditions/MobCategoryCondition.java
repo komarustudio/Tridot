@@ -1,13 +1,17 @@
 package pro.komaru.tridot.api.level.loot.conditions;
 
-import com.google.gson.*;
-import net.minecraft.util.*;
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.parameters.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
 
 public class MobCategoryCondition implements LootItemCondition{
+    public static final MapCodec<MobCategoryCondition> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+        MobCategory.CODEC.fieldOf("mob_category").forGetter(c -> c.category)
+    ).apply(inst, MobCategoryCondition::new));
+
     private final MobCategory category;
 
     public MobCategoryCondition(MobCategory category){
@@ -25,18 +29,5 @@ public class MobCategoryCondition implements LootItemCondition{
     @Override
     public LootItemConditionType getType(){
         return LootConditionsRegistry.MOB_CATEGORY_CONDITION.get();
-    }
-
-    public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<MobCategoryCondition>{
-        @Override
-        public void serialize(JsonObject json, MobCategoryCondition condition, JsonSerializationContext context){
-            json.addProperty("mob_category", condition.category.getName());
-        }
-
-        @Override
-        public MobCategoryCondition deserialize(JsonObject json, JsonDeserializationContext context){
-            String categoryStr = GsonHelper.getAsString(json, "mob_category");
-            return new MobCategoryCondition(MobCategory.byName(categoryStr));
-        }
     }
 }

@@ -2,13 +2,14 @@ package pro.komaru.tridot.common.registry.block;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
+import net.minecraft.core.registries.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.neoforge.registries.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.common.registry.block.fire.FireBlockHandler;
 import pro.komaru.tridot.common.registry.block.fire.FireBlockModifier;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.registries.*;
 import pro.komaru.tridot.util.Log;
 
 import java.lang.reflect.*;
@@ -16,7 +17,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class TridotBlocks{
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Tridot.ID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Tridot.ID);
 
     public static void register(IEventBus eventBus){
         BLOCKS.register(eventBus);
@@ -25,9 +26,8 @@ public class TridotBlocks{
     public static FireBlock fireblock;
 
     public static Block[] getBlocks(Class<?>... blockClasses){
-        IForgeRegistry<Block> blocks = ForgeRegistries.BLOCKS;
         ArrayList<Block> matchingBlocks = new ArrayList<>();
-        for(Block block : blocks){
+        for(Block block : BuiltInRegistries.BLOCK){
             if(Arrays.stream(blockClasses).anyMatch(b -> b.isInstance(block))){
                 matchingBlocks.add(block);
             }
@@ -36,9 +36,8 @@ public class TridotBlocks{
     }
 
     public static Block[] getBlocksExact(Class<?> clazz){
-        IForgeRegistry<Block> blocks = ForgeRegistries.BLOCKS;
         ArrayList<Block> matchingBlocks = new ArrayList<>();
-        for(Block block : blocks){
+        for(Block block : BuiltInRegistries.BLOCK){
             if(clazz.equals(block.getClass())){
                 matchingBlocks.add(block);
             }

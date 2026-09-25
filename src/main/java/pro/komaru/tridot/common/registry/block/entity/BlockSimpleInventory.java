@@ -10,7 +10,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.*;
-import net.minecraftforge.items.*;
 
 public abstract class BlockSimpleInventory extends BlockEntityBase{
 
@@ -37,17 +36,17 @@ public abstract class BlockSimpleInventory extends BlockEntityBase{
     }
 
     @Override
-    public void load(CompoundTag tag){
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries){
+        super.loadAdditional(tag, registries);
         NonNullList<ItemStack> tmp = NonNullList.withSize(inventorySize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, tmp);
+        ContainerHelper.loadAllItems(tag, tmp, registries);
         copyToInv(tmp, itemHandler);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag){
-        super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, copyFromInv(itemHandler));
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries){
+        super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, copyFromInv(itemHandler), registries);
     }
 
     public final int inventorySize(){
@@ -65,7 +64,7 @@ public abstract class BlockSimpleInventory extends BlockEntityBase{
             addPlayerItem(level, player, addStack);
         }else if(stack.isEmpty()){
             player.setItemInHand(hand, addStack.copy());
-        }else if(ItemHandlerHelper.canItemStacksStack(stack, addStack) && (stack.getCount() + addStack.getCount() <= addStack.getMaxStackSize())){
+        }else if(ItemStack.isSameItemSameComponents(stack, addStack) && (stack.getCount() + addStack.getCount() <= addStack.getMaxStackSize())){
             stack.setCount(stack.getCount() + addStack.getCount());
             player.setItemInHand(hand, stack);
         }else{

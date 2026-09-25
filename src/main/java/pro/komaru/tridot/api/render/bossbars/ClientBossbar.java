@@ -5,9 +5,8 @@ import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.client.*;
-import pro.komaru.tridot.util.math.*;
 
 import java.util.*;
 

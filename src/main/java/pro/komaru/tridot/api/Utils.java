@@ -27,6 +27,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.*;
@@ -52,15 +53,16 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fml.loading.*;
-import net.minecraftforge.items.*;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.core.registries.*;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.fml.loading.*;
+import net.neoforged.neoforge.items.*;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.joml.*;
 import pro.komaru.tridot.client.render.TridotRenderTypes;
 import pro.komaru.tridot.client.render.RenderBuilder;
@@ -494,24 +496,22 @@ public class Utils {
          * Performs a spin attack with checking a collision with targets
          */
         public static void circularHit(Level level, Player player) {
-            List<Entity> list = level.getEntities(player, player.getBoundingBox().inflate(1));
-            float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)) + EnchantmentHelper.getSweepingDamageRatio(player);
-            if (!list.isEmpty()) {
-                for (Entity entity : list) {
-                    if (entity instanceof LivingEntity target) {
-                        target.hurt(level.damageSources().playerAttack(player), (damage + EnchantmentHelper.getDamageBonus(player.getUseItem(), target.getMobType())) * 1.35f);
-                    }
-                }
-            }
+            circularHit(level, player, 1);
         }
 
         public static void circularHit(Level level, Player player, double inflateValue) {
             List<Entity> list = level.getEntities(player, player.getBoundingBox().inflate(inflateValue));
-            float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)) + EnchantmentHelper.getSweepingDamageRatio(player);
+            float damage = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE)) + (float) player.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO);
             if (!list.isEmpty()) {
                 for (Entity entity : list) {
                     if (entity instanceof LivingEntity target) {
-                        target.hurt(level.damageSources().playerAttack(player), (damage + EnchantmentHelper.getDamageBonus(player.getUseItem(), target.getMobType())) * 1.35f);
+                        DamageSource source = level.damageSources().playerAttack(player);
+                        float total = damage;
+                        if (level instanceof ServerLevel serverLevel) {
+                            total = EnchantmentHelper.modifyDamage(serverLevel, player.getUseItem(), target, source, damage);
+                        }
+
+                        target.hurt(source, total * 1.35f);
                     }
                 }
             }
@@ -723,9 +723,9 @@ public class Utils {
                     if (!enemy.equals(player)) {
                         enemy.hurt(level.damageSources().explosion(player, player), damage);
                         enemy.knockback(knockback, player.getX() + clipPos.x - entity.getX(), player.getZ() + clipPos.z - entity.getZ());
-                        if (EnchantmentHelper.getTagEnchantmentLevel(Enchantments.FIRE_ASPECT, itemstack) > 0) {
-                            int i = EnchantmentHelper.getFireAspect(player);
-                            enemy.setSecondsOnFire(i * 4);
+                        int fireAspect = EnchantmentsRegistry.getLevel(itemstack, Enchantments.FIRE_ASPECT);
+                        if (fireAspect > 0) {
+                            enemy.igniteForSeconds(fireAspect * 4);
                         }
                     }
                 }
@@ -733,7 +733,7 @@ public class Utils {
 
             if (level instanceof ServerLevel srv) {
                 srv.sendParticles(ParticleTypes.EXPLOSION_EMITTER, pos.x + clipPos.x, pos.y + clipPos.y, player.getZ() + clipPos.z, 1, 0, 0, 0, radius);
-                srv.playSound(null, player.blockPosition().offset((int) clipPos.x, (int) (clipPos.y + player.getEyeHeight()), (int) clipPos.z), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 10f, 1f);
+                srv.playSound(null, player.blockPosition().offset((int) clipPos.x, (int) (clipPos.y + player.getEyeHeight()), (int) clipPos.z), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 10f, 1f);
                 srv.sendParticles(ParticleTypes.LARGE_SMOKE, pos.x + clipPos.x + ((rand.nextDouble() - 0.5D) * radius), pos.y + clipPos.y + ((rand.nextDouble() - 0.5D) * radius), pos.z + clipPos.z + ((rand.nextDouble() - 0.5D) * radius), 8, 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.2f);
                 srv.sendParticles(ParticleTypes.FLAME, pos.x + clipPos.x + ((rand.nextDouble() - 0.5D) * radius), pos.y + clipPos.y + ((rand.nextDouble() - 0.5D) * radius), pos.z + clipPos.z + ((rand.nextDouble() - 0.5D) * radius), 6, 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.05d * ((rand.nextDouble() - 0.5D) * radius), 0.2f);
             }
@@ -742,8 +742,7 @@ public class Utils {
     /**Items utils**/
     public static class Items {
         public static Item getItem(String modId, String id){
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(modId, id));
-            return item != null ? item : net.minecraft.world.item.Items.DIRT;
+            return BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(modId, id)).orElse(net.minecraft.world.item.Items.DIRT);
         }
 
         public static boolean getAttackStrengthScale(Player player, float powerPercent) {
@@ -769,7 +768,7 @@ public class Utils {
          * @see  Hit#circularHit
          */
         public static float enchantmentRadius(ItemStack stack) {
-            int i = stack.getEnchantmentLevel(EnchantmentsRegistry.RADIUS.get());
+            int i = EnchantmentsRegistry.getLevel(stack, EnchantmentsRegistry.RADIUS);
             return i > 0 ? (float) i / 2 : 0.0F;
         }
 
@@ -823,7 +822,7 @@ public class Utils {
             for (int i = 0; i < player.getInventory().getContainerSize(); ++i) {
                 ItemStack ammo = player.getInventory().getItem(i);
                 if (predicate.get(ammo)) {
-                    return net.minecraftforge.common.ForgeHooks.getProjectile(player, shootable, ammo);
+                    return net.neoforged.neoforge.common.CommonHooks.getProjectile(player, shootable, ammo);
                 }
             }
 
@@ -885,13 +884,13 @@ public class Utils {
         public static void effectLines(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration){
             for (MobEffectInstance mobeffectinstance : effects) {
                 MutableComponent mutablecomponent = Component.translatable(mobeffectinstance.getDescriptionId());
-                MobEffect mobeffect = mobeffectinstance.getEffect();
+                MobEffect mobeffect = mobeffectinstance.getEffect().value();
                 if (mobeffectinstance.getAmplifier() > 0) {
                     mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + mobeffectinstance.getAmplifier()));
                 }
 
                 if (!mobeffectinstance.endsWithin(20)) {
-                    mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(mobeffectinstance, duration));
+                    mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(mobeffectinstance, duration, 20.0F));
                 }
 
                 tooltipList.add(Component.literal(" ♦ ").withStyle(mobeffect.getCategory().getTooltipFormatting()).append(mutablecomponent.withStyle(mobeffect.getCategory().getTooltipFormatting())));
@@ -899,7 +898,11 @@ public class Utils {
         }
 
         public static LootTable getTable(ServerLevel pServer, ResourceLocation pLoot){
-            return pServer.getServer().getLootData().getLootTable(pLoot);
+            return getTable(pServer, ResourceKey.create(Registries.LOOT_TABLE, pLoot));
+        }
+
+        public static LootTable getTable(ServerLevel pServer, ResourceKey<LootTable> pLoot){
+            return pServer.getServer().reloadableRegistries().getLootTable(pLoot);
         }
 
         /**
@@ -983,8 +986,8 @@ public class Utils {
 
         public static FluidStack deserializeFluidStack(JsonObject json){
             String fluidName = GsonHelper.getAsString(json, "fluid");
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidName));
-            if(fluid == null || fluid == Fluids.EMPTY){
+            Fluid fluid = BuiltInRegistries.FLUID.getOptional(ResourceLocation.parse(fluidName)).orElse(Fluids.EMPTY);
+            if(fluid == Fluids.EMPTY){
                 throw new JsonSyntaxException("Unknown fluid " + fluidName);
             }
             int amount = GsonHelper.getAsInt(json, "amount");
@@ -993,10 +996,8 @@ public class Utils {
 
         public static MobEffectInstance deserializeMobEffect(JsonObject json){
             String effectName = GsonHelper.getAsString(json, "effect");
-            MobEffect mobEffect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(effectName));
-            if(mobEffect == null){
-                throw new JsonSyntaxException("Unknown effect " + effectName);
-            }
+            Holder<MobEffect> mobEffect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(effectName))
+                    .orElseThrow(() -> new JsonSyntaxException("Unknown effect " + effectName));
             int duration = GsonHelper.getAsInt(json, "duration");
             int amplifier = GsonHelper.getAsInt(json, "amplifier");
             return new MobEffectInstance(mobEffect, duration, amplifier);
@@ -1004,7 +1005,7 @@ public class Utils {
 
         public static MobEffectInstance mobEffectFromNetwork(FriendlyByteBuf buffer){
             if(buffer.readBoolean()){
-                MobEffect mobEffect = buffer.readRegistryId();
+                Holder<MobEffect> mobEffect = buffer.readById(BuiltInRegistries.MOB_EFFECT.asHolderIdMap()::byId);
                 int duration = buffer.readInt();
                 int amplifier = buffer.readInt();
                 return new MobEffectInstance(mobEffect, duration, amplifier);
@@ -1017,33 +1018,44 @@ public class Utils {
                 buffer.writeBoolean(false);
             }else{
                 buffer.writeBoolean(true);
-                buffer.writeRegistryId(ForgeRegistries.MOB_EFFECTS, effect.getEffect());
+                buffer.writeById(BuiltInRegistries.MOB_EFFECT.asHolderIdMap()::getId, effect.getEffect());
                 buffer.writeInt(effect.getDuration());
                 buffer.writeInt(effect.getAmplifier());
             }
 
         }
 
-        public static Enchantment deserializeEnchantment(JsonObject json){
+        public static ResourceKey<Enchantment> deserializeEnchantment(JsonObject json){
             String enchantmentName = GsonHelper.getAsString(json, "enchantment");
-            Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantmentName));
-            if(enchantment == null){
+            ResourceLocation location = ResourceLocation.tryParse(enchantmentName);
+            if(location == null){
                 throw new JsonSyntaxException("Unknown enchantment " + enchantmentName);
             }
-            return enchantment;
+            return ResourceKey.create(Registries.ENCHANTMENT, location);
         }
 
-        public static Enchantment enchantmentFromNetwork(FriendlyByteBuf buffer){
-            return !buffer.readBoolean() ? null : buffer.readRegistryId();
+        public static Holder<Enchantment> deserializeEnchantment(JsonObject json, HolderLookup.Provider registries){
+            ResourceKey<Enchantment> key = deserializeEnchantment(json);
+            return registries.lookupOrThrow(Registries.ENCHANTMENT).get(key)
+                    .orElseThrow(() -> new JsonSyntaxException("Unknown enchantment " + key.location()));
         }
 
-        public static void enchantmentToNetwork(Enchantment enchantment, FriendlyByteBuf buffer){
+        @Nullable
+        public static ResourceKey<Enchantment> enchantmentFromNetwork(FriendlyByteBuf buffer){
+            return !buffer.readBoolean() ? null : ResourceKey.create(Registries.ENCHANTMENT, buffer.readResourceLocation());
+        }
+
+        public static void enchantmentToNetwork(@Nullable ResourceKey<Enchantment> enchantment, FriendlyByteBuf buffer){
             if(enchantment == null){
                 buffer.writeBoolean(false);
             }else{
                 buffer.writeBoolean(true);
-                buffer.writeRegistryId(ForgeRegistries.ENCHANTMENTS, enchantment);
+                buffer.writeResourceLocation(enchantment.location());
             }
+        }
+
+        public static void enchantmentToNetwork(@Nullable Holder<Enchantment> enchantment, FriendlyByteBuf buffer){
+            enchantmentToNetwork(enchantment == null ? null : enchantment.unwrapKey().orElse(null), buffer);
         }
     }
     /**Vector and other mc physics utilities*/
@@ -1116,7 +1128,7 @@ public class Utils {
 
         /**
          * Checks whether an attacker can hit a target.
-         * Internally fires a {@link LivingAttackEvent} to let other mods cancel the attack, such as Cadmus, WG, etc.
+         * Internally fires a {@link LivingIncomingDamageEvent} to let other mods cancel the attack, such as Cadmus, WG, etc.
          *
          * @param target   the entity being attacked
          * @param attacker the entity performing the attack
@@ -1133,8 +1145,8 @@ public class Utils {
          */
         public static boolean canHitTarget(LivingEntity target, LivingEntity attacker, float amount) {
             DamageSource source = createDamageSource(attacker);
-            LivingAttackEvent event = new LivingAttackEvent(target, source, amount);
-            return !MinecraftForge.EVENT_BUS.post(event);
+            LivingIncomingDamageEvent event = new LivingIncomingDamageEvent(target, new DamageContainer(source, amount));
+            return !NeoForge.EVENT_BUS.post(event).isCanceled();
         }
 
         /**
@@ -1315,15 +1327,16 @@ public class Utils {
             BakedModel bakedmodel = Minecraft.getInstance().getItemRenderer().getModel(stack, minecraft.level, minecraft.player, 0);
             CustomItemRenderer customItemRenderer = getCustomItemRenderer();
 
-            PoseStack poseStack = RenderSystem.getModelViewStack();
-            poseStack.pushPose();
+            // PORT NOTE: RenderSystem.getModelViewStack() is a JOML Matrix4fStack in 1.21.
+            Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+            poseStack.pushMatrix();
             poseStack.translate(x, y, 100.0F + blitOffset);
-            poseStack.translate((double)xSize / 2, (double)ySize / 2, 0.0D);
+            poseStack.translate(xSize / 2f, ySize / 2f, 0.0F);
             poseStack.scale(1.0F, -1.0F, 1.0F);
             poseStack.scale(xSize, ySize, zSize);
-            poseStack.mulPose(Axis.XP.rotationDegrees(xRot));
-            poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(zRot));
+            poseStack.rotate(Axis.XP.rotationDegrees(xRot));
+            poseStack.rotate(Axis.YP.rotationDegrees(yRot));
+            poseStack.rotate(Axis.ZP.rotationDegrees(zRot));
             RenderSystem.applyModelViewMatrix();
             PoseStack posestack1 = new PoseStack();
             MultiBufferSource.BufferSource multibuffersource$buffersource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -1336,7 +1349,7 @@ public class Utils {
             multibuffersource$buffersource.endBatch();
             RenderSystem.enableDepthTest();
             if(flag) Lighting.setupFor3DItems();
-            poseStack.popPose();
+            poseStack.popMatrix();
             RenderSystem.applyModelViewMatrix();
         }
 
@@ -1352,7 +1365,7 @@ public class Utils {
 
             poseStack.pushPose();
             poseStack.translate(x + 8, y + 8, 100 + blitOffset);
-            poseStack.mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+            poseStack.mulPose((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
             poseStack.scale(16.0F, 16.0F, 16.0F);
             poseStack.translate(0.0D, Math.sin(Math.toRadians(ticksUp)) * 0.03125F, 0.0D);
             if(bakedmodel.usesBlockLight()){
@@ -1391,7 +1404,7 @@ public class Utils {
         }
 
         public static TextureAtlasSprite getBlockSprite(String modId, String sprite) {
-            return getBlockSprite(new ResourceLocation(modId, sprite));
+            return getBlockSprite(ResourceLocation.fromNamespaceAndPath(modId, sprite));
         }
 
         public static TextureAtlasSprite getParticleSprite(ResourceLocation resourceLocation) {
@@ -1399,7 +1412,7 @@ public class Utils {
         }
 
         public static TextureAtlasSprite getParticleSprite(String modId, String sprite) {
-            return getParticleSprite(new ResourceLocation(modId, sprite));
+            return getParticleSprite(ResourceLocation.fromNamespaceAndPath(modId, sprite));
         }
 
         public static TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
@@ -1407,7 +1420,7 @@ public class Utils {
         }
 
         public static TextureAtlasSprite getSprite(String modId, String sprite) {
-            return getSprite(new ResourceLocation(modId, sprite));
+            return getSprite(ResourceLocation.fromNamespaceAndPath(modId, sprite));
         }
 
         public static void renderFluid(PoseStack stack, FluidStack fluidStack, float size, float texSize, boolean flowing, int light){

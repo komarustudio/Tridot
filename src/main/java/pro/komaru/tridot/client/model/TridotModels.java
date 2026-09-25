@@ -7,10 +7,10 @@ import pro.komaru.tridot.client.model.item.*;
 import net.minecraft.client.model.geom.*;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.neoforge.client.event.*;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ public class TridotModels{
     public static CustomBookModel BOOK = null;
     public static EmptyArmorModel EMPTY_ARMOR = null;
 
-    @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
         @SubscribeEvent
         public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event){
@@ -41,45 +41,59 @@ public class TridotModels{
     }
 
     public static ModelLayerLocation addLayer(String modId, String layer){
-        return new ModelLayerLocation(new ResourceLocation(modId, layer), "main");
+        return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(modId, layer), "main");
     }
 
     public static ModelResourceLocation addCustomModel(String modId, String model){
-        return new ModelResourceLocation(modId, model, "");
+        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(modId, model));
     }
 
-    public static void addCustomRenderItemModel(Map<ResourceLocation, BakedModel> map, ResourceLocation item){
-        BakedModel model = map.get(new ModelResourceLocation(item, "inventory"));
+    public static ModelResourceLocation inventory(ResourceLocation item){
+        return ModelResourceLocation.inventory(item);
+    }
+
+    public static ModelResourceLocation inventory(ResourceLocation item, String suffix){
+        return ModelResourceLocation.inventory(item.withSuffix(suffix));
+    }
+
+    public static ModelResourceLocation sideLoaded(ResourceLocation item){
+        return ModelResourceLocation.standalone(item.withPrefix("item/"));
+    }
+
+    public static ModelResourceLocation sideLoaded(ResourceLocation item, String suffix){
+        return sideLoaded(item.withSuffix(suffix));
+    }
+
+    public static void addCustomRenderItemModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation item){
+        BakedModel model = map.get(inventory(item));
         CustomModel customModel = new CustomRenderModel(model, new CustomItemOverrides());
-        map.replace(new ModelResourceLocation(item, "inventory"), customModel);
+        map.replace(inventory(item), customModel);
     }
 
-    public static void addCrossbowItemModel(Map<ResourceLocation, BakedModel> map, ResourceLocation item, CrossbowItemOverrides itemOverrides) {
-        BakedModel model = map.get(new ModelResourceLocation(item, "inventory"));
+    public static void addCrossbowItemModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation item, CrossbowItemOverrides itemOverrides) {
+        BakedModel model = map.get(inventory(item));
         CustomModel customModel = new CustomModel(model, itemOverrides);
 
         for (int i = 0; i < 3; i++) {
-            BakedModel pullModel = map.get(new ModelResourceLocation(new ResourceLocation(item + "_pulling_" + i), "inventory"));
+            BakedModel pullModel = map.get(sideLoaded(item, "_pulling_" + i));
             itemOverrides.pullingModels.add(pullModel);
         }
-        itemOverrides.arrowModel = map.get(new ModelResourceLocation(new ResourceLocation(item + "_arrow"), "inventory"));
-        itemOverrides.fireworkModel = map.get(new ModelResourceLocation(new ResourceLocation(item + "_firework"), "inventory"));
+        itemOverrides.arrowModel = map.get(sideLoaded(item, "_arrow"));
+        itemOverrides.fireworkModel = map.get(sideLoaded(item, "_firework"));
 
-        map.replace(new ModelResourceLocation(item, "inventory"), customModel);
+        map.replace(inventory(item), customModel);
     }
 
-    public static void addCrossbowItemModel(Map<ResourceLocation, BakedModel> map, ResourceLocation item) {
+    public static void addCrossbowItemModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation item) {
         addCrossbowItemModel(map, item, new CrossbowItemOverrides());
     }
-
     public static ArrayList<ModelResourceLocation> getCrossbowModels(String modId, String item) {
         ArrayList<ModelResourceLocation> models = new ArrayList<>();
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_0"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_1"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_2"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_arrow"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_firework"), "inventory"));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_0")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_1")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_2")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_arrow")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_firework")));
         return models;
     }
 
@@ -89,28 +103,27 @@ public class TridotModels{
         }
     }
 
-    public static void addBowItemModel(Map<ResourceLocation, BakedModel> map, ResourceLocation item, BowItemOverrides itemOverrides){
-        BakedModel model = map.get(new ModelResourceLocation(item, "inventory"));
+    public static void addBowItemModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation item, BowItemOverrides itemOverrides){
+        BakedModel model = map.get(inventory(item));
         CustomModel customModel = new CustomModel(model, itemOverrides);
 
         for(int i = 0; i < 3; i++){
-            BakedModel pullModel = map.get(new ModelResourceLocation(new ResourceLocation(item + "_pulling_" + i), "inventory"));
+            BakedModel pullModel = map.get(sideLoaded(item, "_pulling_" + i));
             itemOverrides.models.add(pullModel);
         }
 
-        map.replace(new ModelResourceLocation(item, "inventory"), customModel);
+        map.replace(inventory(item), customModel);
     }
 
-    public static void addBowItemModel(Map<ResourceLocation, BakedModel> map, ResourceLocation item){
+    public static void addBowItemModel(Map<ModelResourceLocation, BakedModel> map, ResourceLocation item){
         addBowItemModel(map, item, new BowSkinItemOverrides());
     }
 
     public static ArrayList<ModelResourceLocation> getBowModels(String modId, String item){
         ArrayList<ModelResourceLocation> models = new ArrayList<>();
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_0"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_1"), "inventory"));
-        models.add(new ModelResourceLocation(new ResourceLocation(modId, item + "_pulling_2"), "inventory"));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_0")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_1")));
+        models.add(sideLoaded(ResourceLocation.fromNamespaceAndPath(modId, item + "_pulling_2")));
         return models;
     }
 

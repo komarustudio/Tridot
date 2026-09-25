@@ -5,14 +5,14 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.*;
-import net.minecraftforge.registries.*;
+import net.minecraft.core.registries.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.common.registry.block.entity.TridotTrappedChestBlockEntity;
 
 public class TridotTrappedChestRender extends ChestRenderer<TridotTrappedChestBlockEntity> {
 
-    public static final ResourceLocation CHEST_SHEET = new ResourceLocation("textures/atlas/chest.png");
+    public static final ResourceLocation CHEST_SHEET = ResourceLocation.withDefaultNamespace("textures/atlas/chest.png");
 
     public TridotTrappedChestRender(BlockEntityRendererProvider.Context pContext) {
         super(pContext);
@@ -26,9 +26,9 @@ public class TridotTrappedChestRender extends ChestRenderer<TridotTrappedChestBl
     public @NotNull Material getMaterial(@NotNull TridotTrappedChestBlockEntity tile, @NotNull ChestType type) {
         Block block = tile.getBlockState().getBlock();
         if (type.name().equals("SINGLE")) {
-            return chestMaterial(ForgeRegistries.BLOCKS.getKey(block).getPath());
+            return chestMaterial(BuiltInRegistries.BLOCK.getKey(block).getPath());
         } else {
-            return chestMaterial(ForgeRegistries.BLOCKS.getKey(block).getPath() + "_" + type.name().toLowerCase());
+            return chestMaterial(BuiltInRegistries.BLOCK.getKey(block).getPath() + "_" + type.name().toLowerCase());
         }
     }
 }

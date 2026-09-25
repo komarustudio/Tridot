@@ -14,7 +14,7 @@ import pro.komaru.tridot.api.interfaces.*;
 public class LivingEntityRendererMixin<T extends LivingEntity>{
 
     @Inject(at = @At("HEAD"), method = "setupRotations")
-    protected void setupRotations(T pEntityLiving, PoseStack pPoseStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks, CallbackInfo ci){
+    protected void setupRotations(T pEntityLiving, PoseStack pPoseStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks, float pScale, CallbackInfo ci){
         if(pEntityLiving.isUsingItem() && pEntityLiving.getUseItem().getItem() instanceof SpinAttackItem){
             if(pEntityLiving.getUsedItemHand() != InteractionHand.MAIN_HAND){
                 pPoseStack.mulPose(Axis.YP.rotationDegrees(((float)pEntityLiving.getTicksUsingItem() + pPartialTicks) * -42f));

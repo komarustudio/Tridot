@@ -9,14 +9,14 @@ import org.spongepowered.asm.mixin.injection.*;
 public abstract class BlocksMixin{
     @ModifyArg(method = "<clinit>",
     at = @At(value = "INVOKE",
-    target = "Lnet/minecraft/world/level/block/FlowerBlock;<init>(Lnet/minecraft/world/effect/MobEffect;ILnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V",
+    target = "Lnet/minecraft/world/level/block/FlowerBlock;<init>(Lnet/minecraft/core/Holder;FLnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V",
     ordinal = 0),
     slice = @Slice(from = @At(value = "CONSTANT", args = "stringValue=torchflower")))
     private static BlockBehaviour.Properties tridot$modifyTorchflower(BlockBehaviour.Properties properties){
         return properties.lightLevel(blockState -> 12);
     }
 
-    @ModifyArg(method = "flowerPot(Lnet/minecraft/world/level/block/Block;[Lnet/minecraft/world/flag/FeatureFlag;)Lnet/minecraft/world/level/block/FlowerPotBlock;",
+    @ModifyArg(method = "flowerPot(Lnet/minecraft/world/level/block/Block;)Lnet/minecraft/world/level/block/Block;",
     at = @At(value = "INVOKE",
     target = "Lnet/minecraft/world/level/block/FlowerPotBlock;<init>(Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V",
     ordinal = 0))

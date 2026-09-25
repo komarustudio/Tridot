@@ -3,7 +3,7 @@ package pro.komaru.tridot.common.registry.item.recipe;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.fluids.capability.*;
+import net.neoforged.neoforge.fluids.capability.*;
 
 public class FluidHandlerContext implements Container{
 

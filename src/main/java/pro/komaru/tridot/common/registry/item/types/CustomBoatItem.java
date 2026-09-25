@@ -8,16 +8,15 @@ import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.registries.*;
 
 import java.util.*;
 import java.util.function.*;
 
 public class CustomBoatItem extends Item{
     private static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
-    private final RegistryObject<EntityType<CustomBoatEntity>> boat;
+    private final Supplier<? extends EntityType<? extends CustomBoatEntity>> boat;
 
-    public CustomBoatItem(Properties properties, RegistryObject<EntityType<CustomBoatEntity>> boat){
+    public CustomBoatItem(Properties properties, Supplier<? extends EntityType<? extends CustomBoatEntity>> boat){
         super(properties);
         this.boat = boat;
     }

@@ -5,17 +5,14 @@ import com.mojang.datafixers.util.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.*;
-import net.minecraft.client.resources.language.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.tooltip.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.gui.overlay.*;
-import net.minecraftforge.event.*;
-import net.minecraftforge.eventbus.api.*;
-import org.spongepowered.asm.mixin.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.*;
 import pro.komaru.tridot.client.gfx.postprocess.*;
 import pro.komaru.tridot.client.model.render.item.bow.*;
 import pro.komaru.tridot.client.render.gui.particle.*;
@@ -37,7 +34,7 @@ public class ClientEvents {
         if (player.isUsingItem()) {
             ItemStack useItem = player.getUseItem();
             if (useItem.getItem() instanceof ConfiguredShield) {
-                int vanguardLevel = useItem.getEnchantmentLevel(EnchantmentsRegistry.VANGUARD.get());
+                int vanguardLevel = EnchantmentsRegistry.getLevel(useItem, EnchantmentsRegistry.VANGUARD);
                 if (vanguardLevel == 0) return;
 
                 event.getInput().leftImpulse *= 3.5F;
@@ -51,8 +48,8 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public void onRenderCrosshair(RenderGuiOverlayEvent.Post event) {
-        if (event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type()) return;
+    public void onRenderCrosshair(RenderGuiLayerEvent.Post event) {
+        if (!event.getName().equals(VanillaGuiLayers.CROSSHAIR)) return;
 
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
@@ -64,15 +61,15 @@ public class ClientEvents {
                 int ticksUsing = player.getTicksUsingItem();
                 if (ticksUsing <= shield.getParryWindow(useItem)) {
                     GuiGraphics graphics = event.getGuiGraphics();
-                    int screenWidth = event.getWindow().getGuiScaledWidth();
-                    int screenHeight = event.getWindow().getGuiScaledHeight();
-                
+                    int screenWidth = graphics.guiWidth();
+                    int screenHeight = graphics.guiHeight();
+
                     int centerX = screenWidth / 2;
                     int centerY = screenHeight / 2;
-                
+
                     int barWidth = 15;
                     int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.getParryWindow(useItem))));
-                
+
                     graphics.pose().pushPose();
 
 //                    Col col = ticksUsing > 5 ? Col.green : Col.red;
@@ -81,11 +78,11 @@ public class ClientEvents {
                     RenderSystem.setShaderColor(1,1,1,1);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                
+
                     graphics.renderFakeItem(useItem, centerX - barWidth, centerY + 8);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX + barWidth / 2, centerY + 27, 0x80000000);
                     graphics.fill(centerX - barWidth / 2, centerY + 25, centerX - barWidth / 2 + currentWidth, centerY + 27, col.argb8888());
-                    
+
                     graphics.pose().popPose();
                 }
             }
@@ -93,8 +90,8 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public void handleArmorLevelOverlay(RenderGuiOverlayEvent.Pre e){
-        if (e.getOverlay() == VanillaGuiOverlay.ARMOR_LEVEL.type() && CommonConfig.PERCENT_ARMOR.get()) {
+    public void handleArmorLevelOverlay(RenderGuiLayerEvent.Pre e){
+        if (e.getName().equals(VanillaGuiLayers.ARMOR_LEVEL) && CommonConfig.PERCENT_ARMOR.get()) {
             e.setCanceled(true);
         }
     }
@@ -128,28 +125,18 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public void clientTick(TickEvent.ClientTickEvent event){
+    public void clientTick(ClientTickEvent.Post event){
         Minecraft minecraft = Minecraft.getInstance();
         ClientTick.clientTickEnd(event);
-        if(event.phase == TickEvent.Phase.END){
-            if(minecraft.isPaused()) return;
-            Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-            ScreenshakeHandler.clientTick(camera);
-            PostProcessHandler.tick();
-            ScreenParticleHandler.tickParticles();
-        }
+        if(minecraft.isPaused()) return;
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        ScreenshakeHandler.clientTick(camera);
+        PostProcessHandler.tick();
+        ScreenParticleHandler.tickParticles();
     }
 
-    /*@SubscribeEvent
-    public void render(RenderGuiEvent event) {
-        BaseDrawer draw = new BaseDrawer(event.getGuiGraphics(), event.getGuiGraphics().pose(), "tridot");
-
-        draw.color(Col.red);
-        draw.rect("particle/skull",100f,100f, 2f, 2f, ClientTick.getTotal());
-    }*/
-
     @SubscribeEvent
-    public void renderTick(TickEvent.RenderTickEvent event){
+    public void renderTick(RenderFrameEvent.Post event){
         ClientTick.renderTick(event);
         ScreenParticleHandler.renderTick(event);
     }

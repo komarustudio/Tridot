@@ -1,29 +1,23 @@
 package pro.komaru.tridot.common.registry.entity.projectiles;
 
 import com.google.common.collect.*;
+import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.item.AttributeRegistry;
 import it.unimi.dsi.fastutil.ints.*;
-import net.minecraft.advancements.*;
 import net.minecraft.core.particles.*;
 import net.minecraft.nbt.*;
-import net.minecraft.network.protocol.*;
-import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.*;
 import net.minecraft.server.level.*;
 import net.minecraft.sounds.*;
-import net.minecraft.util.*;
 import net.minecraft.world.damagesource.*;
 import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.*;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.network.*;
 import org.jetbrains.annotations.*;
 
 import javax.annotation.Nullable;
@@ -43,13 +37,14 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
 
     public AbstractSupplierProjectile(EntityType<? extends AbstractArrow> pEntityType, Level worldIn, LivingEntity thrower, ItemStack thrownStackIn){
         super(pEntityType, worldIn, thrower, thrownStackIn, 0);
-        this.entityData.set(LOYALTY_LEVEL, (byte)EnchantmentHelper.getLoyalty(thrownStackIn));
+        this.entityData.set(LOYALTY_LEVEL, (byte)EnchantmentsRegistry.getLevel(thrownStackIn, Enchantments.LOYALTY));
     }
 
-    public void defineSynchedData(){
-        super.defineSynchedData();
-        this.entityData.define(LOYALTY_LEVEL, (byte)0);
-        this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder){
+        super.defineSynchedData(builder);
+        builder.define(LOYALTY_LEVEL, (byte)0);
+        builder.define(DATA_ITEM_STACK, ItemStack.EMPTY);
     }
 
     public void addEffect(MobEffectInstance pEffectInstance){
@@ -61,7 +56,7 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         if(!this.effects.isEmpty()){
             ListTag listtag = new ListTag();
             for(MobEffectInstance mobeffectinstance : this.effects){
-                listtag.add(mobeffectinstance.save(new CompoundTag()));
+                listtag.add(mobeffectinstance.save());
             }
 
             compound.put("CustomPotionEffects", listtag);
@@ -70,19 +65,19 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         compound.putBoolean("DealtDamage", this.returnToPlayer);
         ItemStack itemstack = this.getItemRaw();
         if(!itemstack.isEmpty()){
-            compound.put("Item", itemstack.save(new CompoundTag()));
+            compound.put("Item", itemstack.save(this.registryAccess()));
         }
     }
 
     public void readAdditionalSaveData(CompoundTag pCompound){
         super.readAdditionalSaveData(pCompound);
-        for(MobEffectInstance mobeffectinstance : PotionUtils.getCustomEffects(pCompound)){
+        for(MobEffectInstance mobeffectinstance : loadCustomEffects(pCompound)){
             this.addEffect(mobeffectinstance);
         }
 
         this.returnToPlayer = pCompound.getBoolean("DealtDamage");
-        this.entityData.set(LOYALTY_LEVEL, (byte)EnchantmentHelper.getLoyalty(this.getItem()));
-        ItemStack itemstack = ItemStack.of(pCompound.getCompound("Item"));
+        this.entityData.set(LOYALTY_LEVEL, (byte)EnchantmentsRegistry.getLevel(this.getItem(), Enchantments.LOYALTY));
+        ItemStack itemstack = ItemStack.parse(this.registryAccess(), pCompound.getCompound("Item")).orElse(ItemStack.EMPTY);
         this.setItem(itemstack);
     }
 
@@ -115,6 +110,11 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
 
     public ItemStack getPickupItem(){
         return this.getItem().copy();
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem(){
+        return new ItemStack(this.getDefaultItem());
     }
 
     public SoundEvent getReturnSound(){
@@ -224,24 +224,25 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         if(shooter instanceof LivingEntity thrower && !this.returnToPlayer){
             boolean flag = entity.getType() == EntityType.ENDERMAN;
             if(this.isOnFire() && !flag){
-                entity.setSecondsOnFire(5);
+                entity.igniteForSeconds(5);
             }
 
             if(isVelocityBased()){
                 processVelocityDamage(thrower, entity, damagesource);
             }else{
-                int e = (int)EnchantmentHelper.getDamageBonus(this.getItem(), MobType.UNDEFINED);
+                float enchantBonus = this.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.modifyDamage(serverLevel, this.getItem(), entity, damagesource, 0.0F) : 0.0F;
+                int e = (int)enchantBonus;
                 float f = 0;
                 if(thrower instanceof Player plr){
-                    f += (float)(plr.getAttributes().getValue(AttributeRegistry.PROJECTILE_DAMAGE.get()) + Math.max(0, e - 2));
+                    f += (float)(plr.getAttributes().getValue(AttributeRegistry.PROJECTILE_DAMAGE) + Math.max(0, e - 2));
                 }else{
                     //prevents crashing, grants ability to be thrown be mobs, keep in mind that base damage needs to be set
                     //YourProjectile.setBaseDamage()
                     processVelocityDamage(thrower, entity, damagesource);
                 }
 
-                if(entity instanceof LivingEntity livingentity){
-                    f += EnchantmentHelper.getDamageBonus(this.getItem(), livingentity.getMobType());
+                if(entity instanceof LivingEntity){
+                    f += enchantBonus;
                 }
 
                 hurt(thrower, entity, damagesource, f);
@@ -254,7 +255,7 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
      */
     public void hurt(LivingEntity thrower, Entity entity, DamageSource source, float damage){
         super.hurt(thrower, entity, source, damage);
-        if(EnchantmentHelper.getTagEnchantmentLevel(Enchantments.PIERCING, this.getItem()) == 0){
+        if(EnchantmentsRegistry.getLevel(this.getItem(), Enchantments.PIERCING) == 0){
             this.returnToPlayer = true;
         }
     }
@@ -275,7 +276,8 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
     }
 
     public void setItem(ItemStack pStack){
-        if(!pStack.is(this.getDefaultItem()) || pStack.hasTag()){
+        // PORT NOTE: hasTag() -> "has any non-default components".
+        if(!pStack.is(this.getDefaultItem()) || !pStack.getComponentsPatch().isEmpty()){
             this.getEntityData().set(DATA_ITEM_STACK, pStack.copyWithCount(1));
         }
     }

@@ -3,8 +3,8 @@ package pro.komaru.tridot.client.cinema;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import pro.komaru.tridot.util.struct.data.Seq;
 
 @OnlyIn(Dist.CLIENT)

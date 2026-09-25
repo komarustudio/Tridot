@@ -75,7 +75,7 @@ public abstract class AttackInstance{
     }
 
     public double getPerceivedTargetDistanceSquareForAttack(LivingEntity target) {
-        return Math.max(mob.distanceToSqr(target.getMeleeAttackReferencePosition()), mob.distanceToSqr(target.position()));
+        return mob.distanceToSqr(target.position());
     }
 
     public boolean isWithinAttackRange(LivingEntity pEntity, double range) {

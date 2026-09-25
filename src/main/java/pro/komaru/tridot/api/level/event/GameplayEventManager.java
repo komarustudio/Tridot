@@ -1,8 +1,8 @@
 package pro.komaru.tridot.api.level.event;
 
+import net.minecraft.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.*;
-import net.minecraft.server.*;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.saveddata.*;
 import net.minecraft.world.level.storage.*;
@@ -10,10 +10,11 @@ import pro.komaru.tridot.util.struct.data.*;
 
 public class GameplayEventManager extends SavedData{
     public static final Seq<ResourceLocation> activeEvents = Seq.with();
+    public static final SavedData.Factory<GameplayEventManager> FACTORY = new SavedData.Factory<>(GameplayEventManager::new, GameplayEventManager::load, null);
     private transient int tickCounter = 0;
 
     @Override
-    public CompoundTag save(CompoundTag nbt) {
+    public CompoundTag save(CompoundTag nbt, HolderLookup.Provider registries) {
         ListTag list = new ListTag();
         for (ResourceLocation id : activeEvents) {
             list.add(StringTag.valueOf(id.toString()));
@@ -23,11 +24,11 @@ public class GameplayEventManager extends SavedData{
         return nbt;
     }
 
-    public static GameplayEventManager load(CompoundTag nbt) {
+    public static GameplayEventManager load(CompoundTag nbt, HolderLookup.Provider registries) {
         GameplayEventManager manager = new GameplayEventManager();
         ListTag list = nbt.getList("ActiveEvents", 8);
         for (int i = 0; i < list.size(); i++) {
-            activeEvents.add(new ResourceLocation(list.getString(i)));
+            activeEvents.add(ResourceLocation.parse(list.getString(i)));
         }
 
         return manager;
@@ -35,7 +36,7 @@ public class GameplayEventManager extends SavedData{
 
     public static GameplayEventManager get(ServerLevel server) {
         DimensionDataStorage storage = server.getDataStorage();
-        return storage.computeIfAbsent(GameplayEventManager::load, GameplayEventManager::new, "gameplay_events");
+        return storage.computeIfAbsent(FACTORY, "gameplay_events");
     }
 
     public boolean isEventActive(ResourceLocation eventId) {

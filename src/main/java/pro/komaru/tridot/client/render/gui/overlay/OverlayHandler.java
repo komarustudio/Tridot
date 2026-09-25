@@ -1,9 +1,7 @@
 package pro.komaru.tridot.client.render.gui.overlay;
 
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.gui.overlay.*;
-import net.minecraftforge.event.*;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.*;
 import pro.komaru.tridot.util.struct.data.*;
 
 public class OverlayHandler{
@@ -15,15 +13,15 @@ public class OverlayHandler{
         instanceSeq.remove(instance);
     }
 
-    public static void renderInstances(RenderGuiOverlayEvent.Post event) {
-        if (event.getOverlay() != VanillaGuiOverlay.HOTBAR.type()) {
+    public static void renderInstances(RenderGuiLayerEvent.Post event) {
+        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) {
             return;
         }
 
         instanceSeq.forEach((inst) -> inst.onDraw(event));
     }
 
-    public static void tickInstances(TickEvent.ClientTickEvent event) {
+    public static void tickInstances(ClientTickEvent.Post event) {
         instanceSeq.forEach((inst) -> inst.tick(event));
     }
 }

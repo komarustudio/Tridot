@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.gfx.particle;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.client.render.TridotRenderTypes.*;
 
 import java.util.*;

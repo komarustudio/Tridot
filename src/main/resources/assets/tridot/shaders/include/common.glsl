@@ -73,7 +73,7 @@ vec4 applyFog(vec4 color, float vertexDistance, float FogStart, float FogEnd, ve
 }
 
 float fogDistance(mat4 ModelViewMat, vec3 Position, int FogShape) {
-    return fog_distance(ModelViewMat, Position, FogShape);
+    return fog_distance(Position, FogShape);
 }
 
 vec4 mixLight(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {

@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client.render.gui.screen;
 
 import net.minecraft.world.item.*;
-import net.minecraftforge.items.*;
+import net.neoforged.neoforge.items.*;
 
 import javax.annotation.*;
 

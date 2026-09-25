@@ -3,26 +3,27 @@ package pro.komaru.tridot.common.registry.item.armor;
 import net.minecraft.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.screens.*;
+import net.minecraft.core.*;
+import net.minecraft.core.registries.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.registries.*;
+import net.neoforged.api.distmarker.*;
 
 import java.util.*;
 
 public class SuitArmorItem extends SkinableArmorItem{
 
-    public SuitArmorItem(ArmorMaterial material, Type type, Properties properties){
+    public SuitArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties){
         super(material, type, properties);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(ItemStack stack, Level world, List<Component> list, TooltipFlag flags){
-        super.appendHoverText(stack, world, list, flags);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag flags){
+        super.appendHoverText(stack, context, list, flags);
         var player = Minecraft.getInstance().player;
         if(player != null){
             if(Screen.hasShiftDown()){
@@ -39,11 +40,15 @@ public class SuitArmorItem extends SkinableArmorItem{
         }
     }
 
-    public static Map<EquipmentSlot, ItemStack> getFullArmorSet(ArmorMaterial material){
+    public static boolean sameMaterial(Holder<ArmorMaterial> a, Holder<ArmorMaterial> b){
+        return a == b || a.unwrapKey().isPresent() && b.unwrapKey().isPresent() && a.unwrapKey().equals(b.unwrapKey()) || a.value() == b.value();
+    }
+
+    public static Map<EquipmentSlot, ItemStack> getFullArmorSet(Holder<ArmorMaterial> material){
         Map<EquipmentSlot, ItemStack> armorSet = new EnumMap<>(EquipmentSlot.class);
-        for(var item : ForgeRegistries.ITEMS){
+        for(var item : BuiltInRegistries.ITEM){
             if(item instanceof ArmorItem armorItem){
-                if(armorItem.getMaterial() == material){
+                if(sameMaterial(armorItem.getMaterial(), material)){
                     EquipmentSlot slot = armorItem.getEquipmentSlot();
                     armorSet.put(slot, new ItemStack(armorItem));
                 }
@@ -66,13 +71,25 @@ public class SuitArmorItem extends SkinableArmorItem{
         return !helmet.isEmpty() && !chestplate.isEmpty() && !leggings.isEmpty() && !boots.isEmpty();
     }
 
-    public static boolean hasCorrectArmorOn(ArmorMaterial material, Player player){
+    public static boolean hasCorrectArmorOn(Holder<ArmorMaterial> material, Player player){
         ItemStack bootsStack = player.getInventory().getArmor(0);
         ItemStack leggingsStack = player.getInventory().getArmor(1);
         ItemStack chestplateStack = player.getInventory().getArmor(2);
         ItemStack helmetStack = player.getInventory().getArmor(3);
         if(bootsStack.getItem() instanceof ArmorItem boots && leggingsStack.getItem() instanceof ArmorItem leggings && chestplateStack.getItem() instanceof ArmorItem chestplate && helmetStack.getItem() instanceof ArmorItem helmet){
-            return helmet.getMaterial() == material && chestplate.getMaterial() == material && leggings.getMaterial() == material && boots.getMaterial() == material;
+            return sameMaterial(helmet.getMaterial(), material) && sameMaterial(chestplate.getMaterial(), material) && sameMaterial(leggings.getMaterial(), material) && sameMaterial(boots.getMaterial(), material);
+        }
+
+        return false;
+    }
+
+    public static boolean hasCorrectArmorOn(ResourceKey<ArmorMaterial> material, Player player){
+        ItemStack bootsStack = player.getInventory().getArmor(0);
+        ItemStack leggingsStack = player.getInventory().getArmor(1);
+        ItemStack chestplateStack = player.getInventory().getArmor(2);
+        ItemStack helmetStack = player.getInventory().getArmor(3);
+        if(bootsStack.getItem() instanceof ArmorItem boots && leggingsStack.getItem() instanceof ArmorItem leggings && chestplateStack.getItem() instanceof ArmorItem chestplate && helmetStack.getItem() instanceof ArmorItem helmet){
+            return helmet.getMaterial().is(material) && chestplate.getMaterial().is(material) && leggings.getMaterial().is(material) && boots.getMaterial().is(material);
         }
 
         return false;

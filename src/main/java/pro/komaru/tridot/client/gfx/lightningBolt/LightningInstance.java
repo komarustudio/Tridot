@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.gfx.lightningBolt;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.util.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.util.*;
 import pro.komaru.tridot.util.math.*;
 import pro.komaru.tridot.util.phys.*;

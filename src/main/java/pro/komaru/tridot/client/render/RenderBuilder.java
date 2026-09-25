@@ -1,6 +1,5 @@
 package pro.komaru.tridot.client.render;
 
-import com.google.common.collect.*;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.*;
 import net.minecraft.client.*;
@@ -16,7 +15,6 @@ import pro.komaru.tridot.client.gfx.trail.TrailRenderPoint;
 import pro.komaru.tridot.util.*;
 
 import javax.annotation.*;
-import java.awt.*;
 import java.lang.Math;
 import java.util.List;
 import java.util.Random;
@@ -47,18 +45,18 @@ public class RenderBuilder{
     private static final float ROOT_3 = (float)(Math.sqrt(3.0D) / 2.0D);
 
     static{
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_POSITION, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> {
+        CONSUMER_INFO_MAP.put(VertexFormatElement.POSITION, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> {
             if(last == null){
-                consumer.vertex(x, y, z);
+                consumer.addVertex(x, y, z);
             }else{
-                consumer.vertex(last, x, y, z);
+                consumer.addVertex(last, x, y, z);
             }
         });
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_COLOR, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.color(r, g, b, a));
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_UV0, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.uv(u, v));
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_UV2, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.uv2(l));
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_NORMAL, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.normal(0, 0, 0));
-        CONSUMER_INFO_MAP.put(DefaultVertexFormat.ELEMENT_PADDING, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.overlayCoords(OverlayTexture.NO_OVERLAY));
+        CONSUMER_INFO_MAP.put(VertexFormatElement.COLOR, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.setColor(r, g, b, a));
+        CONSUMER_INFO_MAP.put(VertexFormatElement.UV0, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.setUv(u, v));
+        CONSUMER_INFO_MAP.put(VertexFormatElement.UV1, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.setOverlay(OverlayTexture.NO_OVERLAY));
+        CONSUMER_INFO_MAP.put(VertexFormatElement.UV2, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.setLight(l));
+        CONSUMER_INFO_MAP.put(VertexFormatElement.NORMAL, (consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> consumer.setNormal(0, 0, 0));
     }
 
     public static RenderBuilder create(){
@@ -80,12 +78,12 @@ public class RenderBuilder{
     }
 
     public RenderBuilder setFormat(VertexFormat format){
-        ImmutableList<VertexFormatElement> elements = format.getElements();
+        List<VertexFormatElement> elements = format.getElements();
         return setFormatRaw(format).setVertexSupplier((consumer, last, builder, x, y, z, r, g, b, a, u, v, l) -> {
             for(VertexFormatElement element : elements){
-                CONSUMER_INFO_MAP.get(element).placeVertex(consumer, last, this, x, y, z, r, g, b, a, u, v, l);
+                VertexConsumerActor actor = CONSUMER_INFO_MAP.get(element);
+                if(actor != null) actor.placeVertex(consumer, last, this, x, y, z, r, g, b, a, u, v, l);
             }
-            consumer.endVertex();
         });
     }
 

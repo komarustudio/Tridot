@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client.gfx.postprocess;
 
 import com.mojang.blaze3d.preprocessor.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.*;
 import net.minecraft.client.*;
 import net.minecraft.resources.*;
@@ -21,8 +21,8 @@ public class TridotGlslPreprocessor extends GlslPreprocessor{
     @Nullable
     @Override
     public String applyImport(boolean useFullPath, String directory){
-        ResourceLocation resourcelocation = new ResourceLocation(directory);
-        ResourceLocation resourcelocation1 = new ResourceLocation(resourcelocation.getNamespace(), "shaders/include/" + resourcelocation.getPath());
+        ResourceLocation resourcelocation = ResourceLocation.parse(directory);
+        ResourceLocation resourcelocation1 = ResourceLocation.fromNamespaceAndPath(resourcelocation.getNamespace(), "shaders/include/" + resourcelocation.getPath());
         try{
             Resource resource1 = Minecraft.getInstance().getResourceManager().getResource(resourcelocation1).get();
             return IOUtils.toString(resource1.open(), StandardCharsets.UTF_8);

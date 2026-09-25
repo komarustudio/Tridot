@@ -7,13 +7,14 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.*;
-import net.minecraftforge.fml.common.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.neoforge.client.event.*;
 import org.joml.*;
 import org.lwjgl.opengl.*;
+import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.client.compatibility.*;
 import pro.komaru.tridot.client.gfx.particle.GenericParticle;
 import pro.komaru.tridot.client.gfx.particle.ICustomParticleRender;
@@ -21,7 +22,7 @@ import pro.komaru.tridot.client.gfx.particle.behavior.ICustomBehaviorParticleRen
 
 import java.util.*;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class LevelRenderHandler{
     public static Matrix4f MATRIX4F = null;
     static MultiBufferSource.BufferSource DELAYED_RENDER = null;
@@ -33,7 +34,7 @@ public class LevelRenderHandler{
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLevelRender(RenderLevelStageEvent event){
         PoseStack stack = event.getPoseStack();
-        float partialTicks = event.getPartialTick();
+        float partialTicks = ClientTick.mcPartialTick();
         MultiBufferSource bufferSource = LevelRenderHandler.getDelayedRender();
 
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES){
@@ -79,20 +80,21 @@ public class LevelRenderHandler{
     public static void shadersDelayedRender(RenderLevelStageEvent event){
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL){
             RenderSystem.setShaderFogStart(FOG_START);
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().setIdentity();
-            if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
+            Matrix4fStack modelView = RenderSystem.getModelViewStack();
+            modelView.pushMatrix();
+            modelView.identity();
+            if(MATRIX4F != null) modelView.mul(MATRIX4F);
             RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewStack().popPose();
+            modelView.popMatrix();
             RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().setIdentity();
-            if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
+            modelView.pushMatrix();
+            modelView.identity();
+            if(MATRIX4F != null) modelView.mul(MATRIX4F);
             RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewStack().popPose();
+            modelView.popMatrix();
             RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
             FogRenderer.setupNoFog();
@@ -128,11 +130,11 @@ public class LevelRenderHandler{
 
     public static MultiBufferSource.BufferSource getDelayedRender(){
         if(DELAYED_RENDER == null){
-            Map<RenderType, BufferBuilder> buffers = new HashMap<>();
+            SequencedMap<RenderType, ByteBufferBuilder> buffers = new LinkedHashMap<>();
             for(RenderType type : TridotRenderTypes.renderTypes){
-                buffers.put(type, new BufferBuilder(ModList.get().isLoaded("embeddium") || ModList.get().isLoaded("rubidium") ? 2097152 : type.bufferSize()));
+                buffers.put(type, new ByteBufferBuilder(ModList.get().isLoaded("embeddium") || ModList.get().isLoaded("rubidium") || ModList.get().isLoaded("sodium") ? 2097152 : type.bufferSize()));
             }
-            DELAYED_RENDER = MultiBufferSource.immediateWithBuffers(buffers, new BufferBuilder(256));
+            DELAYED_RENDER = MultiBufferSource.immediateWithBuffers(buffers, new ByteBufferBuilder(256));
         }
         return DELAYED_RENDER;
     }

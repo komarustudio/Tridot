@@ -1,6 +1,6 @@
 package pro.komaru.tridot.client.gfx.particle;
 
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.client.gfx.particle.data.*;
 import net.minecraft.client.*;
 import net.minecraft.client.particle.*;
@@ -9,7 +9,7 @@ import net.minecraft.core.particles.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.*;
-import net.minecraftforge.registries.*;
+
 import org.joml.Math;
 import pro.komaru.tridot.client.gfx.particle.behavior.ParticleBehavior;
 import pro.komaru.tridot.client.gfx.particle.options.GenericParticleOptions;
@@ -362,8 +362,8 @@ public class ParticleBuilder extends AbstractParticleBuilder<ParticleBuilder>{
         return new ParticleBuilder(new GenericParticleOptions(type));
     }
 
-    public static ParticleBuilder create(RegistryObject<?> type){
-        return new ParticleBuilder(new GenericParticleOptions((ParticleType<?>)type.get()));
+    public static ParticleBuilder create(Supplier<? extends ParticleType<?>> type){
+        return new ParticleBuilder(new GenericParticleOptions(type.get()));
     }
 
     public static ParticleBuilder create(GenericParticleOptions options){

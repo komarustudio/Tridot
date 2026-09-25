@@ -2,20 +2,21 @@
   "required": true,
   "minVersion": "0.8",
   "package": "pro.komaru.tridot.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "refmap": "tridot.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "common.BlockItemMixin",
     "common.BlocksMixin",
     "common.CreeperMixin",
     "common.CrossbowMixin",
-    "common.ForgeHooksMixin",
     "common.ItemEntityMixin",
+    "common.LootDataTypeMixin",
     "common.ServerItemCooldownsMixin",
+    "common.StyleSerializerMixin",
     "common.TntBlockMixin"
   ],
   "client": [
     "client.AbstractClientPlayerMixin",
+    "client.AttributeUtilMixin",
     "client.BossHealthOverlayAccessor",
     "client.CameraMixin",
     "client.EffectProgramMixin",
@@ -31,8 +32,7 @@
     "client.LivingEntityRendererMixin",
     "client.SplashManagerMixin",
     "client.StringRenderOutputMixin",
-    "client.TooltipRenderUtilMixin",
-    "client.curios.CurioTooltipMixin"
+    "client.TooltipRenderUtilMixin"
   ],
   "injectors": {
     "defaultRequire": 1

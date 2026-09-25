@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -14,10 +15,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import pro.komaru.tridot.common.registry.item.*;
 
@@ -106,13 +107,18 @@ public abstract class AbstractProjectile extends AbstractTridotArrow{
                 processVelocityDamage(thrower, entity, damagesource);
             }else{
                 if(thrower instanceof Player plr){
-                    float f = (float)(plr.getAttributes().getValue(AttributeRegistry.PROJECTILE_DAMAGE.get()));
+                    float f = (float)(plr.getAttributes().getValue(AttributeRegistry.PROJECTILE_DAMAGE));
                     hurt(thrower, entity, damagesource, f);
                 }else{
                     processVelocityDamage(thrower, entity, damagesource);
                 }
             }
         }
+    }
+
+    /** True when the arrow was fired from a crossbow (replaces the removed AbstractArrow#shotFromCrossbow). */
+    public boolean shotFromCrossbow(){
+        return this.firedFromWeapon != null && this.firedFromWeapon.is(Items.CROSSBOW);
     }
 
     /**
@@ -122,7 +128,7 @@ public abstract class AbstractProjectile extends AbstractTridotArrow{
         boolean flag = entity.getType() == EntityType.ENDERMAN;
         int k = entity.getRemainingFireTicks();
         if (this.isOnFire() && !flag) {
-            entity.setSecondsOnFire(5);
+            entity.igniteForSeconds(5);
         }
 
         if(entity.hurt(source, damage)){
@@ -131,13 +137,15 @@ public abstract class AbstractProjectile extends AbstractTridotArrow{
             }
 
             if(entity instanceof LivingEntity livingentity){
-                EnchantmentHelper.doPostHurtEffects(livingentity, thrower);
-                EnchantmentHelper.doPostDamageEffects(thrower, livingentity);
-                if(this.knockback > 0){
-                    double d0 = Math.max(0.0D, 1.0D - livingentity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-                    Vec3 vec3 = this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D).normalize().scale((double)this.knockback * 0.6D * d0);
-                    if(vec3.lengthSqr() > 0.0D){
-                        livingentity.push(vec3.x, 0.1D, vec3.z);
+                if(this.level() instanceof ServerLevel serverLevel){
+                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, livingentity, source, this.getWeaponItem());
+                    double knockback = this.getWeaponItem() != null ? EnchantmentHelper.modifyKnockback(serverLevel, this.getWeaponItem(), livingentity, source, 0.0F) : 0.0D;
+                    if(knockback > 0){
+                        double d0 = Math.max(0.0D, 1.0D - livingentity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+                        Vec3 vec3 = this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D).normalize().scale(knockback * 0.6D * d0);
+                        if(vec3.lengthSqr() > 0.0D){
+                            livingentity.push(vec3.x, 0.1D, vec3.z);
+                        }
                     }
                 }
 

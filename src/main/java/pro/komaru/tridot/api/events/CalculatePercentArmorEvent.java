@@ -1,15 +1,14 @@
 package pro.komaru.tridot.api.events;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
 /**
  * Fired before the final Percent Armor damage reduction is applied.
  * Allows other mods to modify the damage multiplier or cancel the reduction entirely.
  */
-@Cancelable
-public class CalculatePercentArmorEvent extends Event {
+public class CalculatePercentArmorEvent extends Event implements ICancellableEvent {
     private final LivingEntity entity;
     private final float incomingDamage;
     private float multiplier;

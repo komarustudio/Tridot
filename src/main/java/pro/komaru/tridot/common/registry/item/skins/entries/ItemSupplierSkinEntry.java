@@ -2,7 +2,7 @@ package pro.komaru.tridot.common.registry.item.skins.entries;
 
 import net.minecraft.resources.*;
 import net.minecraft.world.item.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.common.registry.item.skins.*;
 
 import java.util.function.*;

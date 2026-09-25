@@ -2,8 +2,8 @@ package pro.komaru.tridot.client.render.gui.particle;
 
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
-import net.minecraftforge.fml.event.lifecycle.*;
-import net.minecraftforge.registries.*;
+import net.neoforged.fml.event.lifecycle.*;
+import net.minecraft.core.registries.*;
 
 import java.util.*;
 
@@ -11,7 +11,7 @@ public class ParticleEmitterHandler {
     public static final Map<Item, List<IGUIParticleItem>> EMITTERS = new HashMap<>();
 
     public static void registerEmitters(FMLClientSetupEvent event) {
-        for(Item item : ForgeRegistries.ITEMS.getValues()) {
+        for(Item item : BuiltInRegistries.ITEM) {
             if(item instanceof IGUIParticleItem supplier) {
                 registerEmitters(item, supplier);
             }

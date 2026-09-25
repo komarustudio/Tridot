@@ -1,11 +1,14 @@
 package pro.komaru.tridot.common.networking.packets;
 
 import net.minecraft.network.*;
+import net.minecraft.network.codec.*;
+import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.network.NetworkEvent.*;
+import net.neoforged.neoforge.network.handling.*;
 import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.networking.Packet;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.gfx.particle.*;
 import pro.komaru.tridot.client.gfx.particle.data.*;
@@ -17,9 +20,11 @@ import pro.komaru.tridot.util.math.ArcRandom;
 
 import java.awt.*;
 import java.util.*;
-import java.util.function.*;
 
-public class DashParticlePacket {
+public class DashParticlePacket implements CustomPacketPayload{
+    public static final Type<DashParticlePacket> TYPE = Packet.type(Tridot.ID, "dash_particle");
+    public static final StreamCodec<RegistryFriendlyByteBuf, DashParticlePacket> STREAM_CODEC = StreamCodec.of((buf, p) -> p.encode(buf), DashParticlePacket::decode);
+
     private final UUID id;
     private final float velX, velY, velZ;
     private final int count, colorR, colorG, colorB;
@@ -50,9 +55,9 @@ public class DashParticlePacket {
         return new DashParticlePacket(buf.readUUID(), buf.readInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readInt(), buf.readInt());
     }
 
-    public static void handle(DashParticlePacket msg, Supplier<Context> ctx) {
-        if (ctx.get().getDirection().getReceptionSide().isClient()) {
-            ctx.get().enqueueWork(() -> {
+    public static void handle(DashParticlePacket msg, IPayloadContext ctx) {
+        if (ctx.flow().isClientbound()) {
+            ctx.enqueueWork(() -> {
                 Level level = Tridot.PROXY.getLevel();
                 Player player = level.getPlayerByUUID(msg.id);
                 if (player != null) {
@@ -82,8 +87,6 @@ public class DashParticlePacket {
                 } else {
                     Log.error("Player with UUID {}, not found", msg.id);
                 }
-
-                ctx.get().setPacketHandled(true);
             });
         }
     }
@@ -98,5 +101,10 @@ public class DashParticlePacket {
         buf.writeInt(colorR);
         buf.writeInt(colorG);
         buf.writeInt(colorB);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type(){
+        return TYPE;
     }
 }

@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.gfx.particle;
 import net.minecraft.client.multiplayer.*;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.texture.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class TextureSheetScreenParticle extends QuadScreenParticle {

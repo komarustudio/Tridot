@@ -5,10 +5,10 @@ import com.mojang.blaze3d.systems.*;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.event.lifecycle.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.fml.common.*;
+import net.neoforged.fml.event.lifecycle.*;
 import org.lwjgl.opengl.*;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.client.gfx.*;
@@ -112,7 +112,7 @@ public class TridotRenderTypes{
     .setWriteMaskState(COLOR_WRITE).setLightmapState(LIGHTMAP).setTransparencyState(NORMAL_TRANSPARENCY)
     .setShaderState(TRANSLUCENT_SHADER).createCompositeState(true));
 
-    @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
         @SubscribeEvent
         public static void registerRenderTypes(FMLClientSetupEvent event){
@@ -168,18 +168,18 @@ public class TridotRenderTypes{
     public interface ScreenParticleRenderType{
         ScreenParticleRenderType ADDITIVE = new ScreenParticleRenderType() {
             @Override
-            public void begin(BufferBuilder builder, TextureManager manager) {
+            public BufferBuilder begin(Tesselator tesselator, TextureManager manager) {
                 RenderSystem.depthMask(false);
                 RenderSystem.enableBlend();
                 RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
                 RenderSystem.setShader(TridotShaders::getScreenParticle);
                 RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             }
 
             @Override
-            public void end(Tesselator tesselator) {
-                tesselator.end();
+            public void end(BufferBuilder builder) {
+                draw(builder);
                 RenderSystem.depthMask(true);
                 RenderSystem.disableBlend();
                 RenderSystem.defaultBlendFunc();
@@ -187,18 +187,18 @@ public class TridotRenderTypes{
         };
         ScreenParticleRenderType TRANSPARENT = new ScreenParticleRenderType() {
             @Override
-            public void begin(BufferBuilder builder, TextureManager manager) {
+            public BufferBuilder begin(Tesselator tesselator, TextureManager manager) {
                 RenderSystem.depthMask(false);
                 RenderSystem.enableBlend();
                 RenderSystem.setShader(TridotShaders::getScreenParticle);
                 RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
                 RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             }
 
             @Override
-            public void end(Tesselator tesselator) {
-                tesselator.end();
+            public void end(BufferBuilder builder) {
+                draw(builder);
                 RenderSystem.depthMask(true);
                 RenderSystem.disableBlend();
                 RenderSystem.defaultBlendFunc();
@@ -207,7 +207,7 @@ public class TridotRenderTypes{
 
         ScreenParticleRenderType LUMITRANSPARENT = new ScreenParticleRenderType() {
             @Override
-            public void begin(BufferBuilder builder, TextureManager manager) {
+            public BufferBuilder begin(Tesselator tesselator, TextureManager manager) {
                 RenderSystem.depthMask(false);
                 RenderSystem.enableBlend();
                 Supplier<ShaderInstance> instance = TridotShaders::getScreenParticle;
@@ -215,12 +215,12 @@ public class TridotRenderTypes{
                 instance.get().safeGetUniform("LumiTransparency").set(1f);
                 RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
                 RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             }
 
             @Override
-            public void end(Tesselator tesselator) {
-                tesselator.end();
+            public void end(BufferBuilder builder) {
+                draw(builder);
                 RenderSystem.depthMask(true);
                 RenderSystem.disableBlend();
                 RenderSystem.defaultBlendFunc();
@@ -229,8 +229,14 @@ public class TridotRenderTypes{
             }
         };
 
-        void begin(BufferBuilder pBuilder, TextureManager pTextureManager);
+        BufferBuilder begin(Tesselator pTesselator, TextureManager pTextureManager);
 
-        void end(Tesselator pTesselator);
+        void end(BufferBuilder pBuilder);
+
+        /** Uploads whatever was written into the builder (no-op when empty). */
+        static void draw(BufferBuilder builder){
+            MeshData mesh = builder.build();
+            if(mesh != null) BufferUploader.drawWithShader(mesh);
+        }
     }
 }

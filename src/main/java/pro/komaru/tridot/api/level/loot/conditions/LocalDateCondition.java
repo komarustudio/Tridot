@@ -1,7 +1,7 @@
 package pro.komaru.tridot.api.level.loot.conditions;
 
-import com.google.gson.*;
-import net.minecraft.util.*;
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
 import org.jetbrains.annotations.*;
@@ -10,6 +10,11 @@ import javax.annotation.Nullable;
 import java.time.*;
 
 public class LocalDateCondition implements LootItemCondition{
+    public static final MapCodec<LocalDateCondition> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+        IntRange.CODEC.fieldOf("day_of_month").forGetter(c -> c.dayOfMonth),
+        IntRange.CODEC.fieldOf("month").forGetter(c -> c.month)
+    ).apply(inst, LocalDateCondition::new));
+
     public final IntRange dayOfMonth;
     public final IntRange month;
 
@@ -25,8 +30,8 @@ public class LocalDateCondition implements LootItemCondition{
 
     public boolean test(LootContext lootContext){
         LocalDate localdate = LocalDate.now();
-        int month = localdate.getDayOfMonth();
-        int day = localdate.getMonth().getValue();
+        int day = localdate.getDayOfMonth();
+        int month = localdate.getMonth().getValue();
         return this.dayOfMonth.test(lootContext, day) && this.month.test(lootContext, month);
     }
 
@@ -46,21 +51,6 @@ public class LocalDateCondition implements LootItemCondition{
 
         public LocalDateCondition build(){
             return new LocalDateCondition(this.day, this.month);
-        }
-    }
-
-    public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LocalDateCondition>{
-        @Override
-        public void serialize(JsonObject json, LocalDateCondition condition, JsonSerializationContext context){
-            json.add("day_of_month", context.serialize(condition.dayOfMonth));
-            json.add("month", context.serialize(condition.month));
-        }
-
-        @Override
-        public LocalDateCondition deserialize(JsonObject json, JsonDeserializationContext context){
-            IntRange dayOfMonth = GsonHelper.getAsObject(json, "day_of_month", context, IntRange.class);
-            IntRange month = GsonHelper.getAsObject(json, "month", context, IntRange.class);
-            return new LocalDateCondition(month, dayOfMonth);
         }
     }
 }

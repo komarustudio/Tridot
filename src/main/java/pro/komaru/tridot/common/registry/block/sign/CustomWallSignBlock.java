@@ -10,7 +10,7 @@ import javax.annotation.*;
 
 public class CustomWallSignBlock extends WallSignBlock{
     public CustomWallSignBlock(Properties properties, WoodType type){
-        super(properties, type);
+        super(type, properties);
     }
 
     @Nullable

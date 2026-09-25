@@ -11,6 +11,8 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.tags.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
+import net.neoforged.neoforge.client.*;
+import net.neoforged.neoforge.client.extensions.common.*;
 
 public class CustomItemRenderer extends ItemRenderer{
 
@@ -30,7 +32,7 @@ public class CustomItemRenderer extends ItemRenderer{
                 }
             }
 
-            bakedModel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(poseStack, bakedModel, displayContext, leftHand);
+            bakedModel = ClientHooks.handleCameraTransforms(poseStack, bakedModel, displayContext, leftHand);
             poseStack.translate(-0.5F, -0.5F, -0.5F);
             if(!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || flag)){
                 boolean flag1;
@@ -52,11 +54,7 @@ public class CustomItemRenderer extends ItemRenderer{
                                 MatrixUtil.mulComponentWise(posestack$pose.pose(), 0.75F);
                             }
 
-                            if(flag1){
-                                vertexconsumer = getCompassFoilBufferDirect(buffer, rendertype, posestack$pose);
-                            }else{
-                                vertexconsumer = getCompassFoilBuffer(buffer, rendertype, posestack$pose);
-                            }
+                            vertexconsumer = getCompassFoilBuffer(buffer, rendertype, posestack$pose);
 
                             poseStack.popPose();
                         }else if(flag1){
@@ -69,7 +67,7 @@ public class CustomItemRenderer extends ItemRenderer{
                     }
                 }
             }else{
-                net.minecraftforge.client.extensions.common.IClientItemExtensions.of(itemStack).getCustomRenderer().renderByItem(itemStack, displayContext, poseStack, buffer, combinedLight, combinedOverlay);
+                IClientItemExtensions.of(itemStack).getCustomRenderer().renderByItem(itemStack, displayContext, poseStack, buffer, combinedLight, combinedOverlay);
             }
 
             poseStack.popPose();

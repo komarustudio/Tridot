@@ -10,7 +10,7 @@ import javax.annotation.*;
 
 public class CustomStandingSignBlock extends StandingSignBlock{
     public CustomStandingSignBlock(Properties properties, WoodType type){
-        super(properties, type);
+        super(type, properties);
     }
 
     @Nullable

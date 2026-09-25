@@ -1,60 +1,52 @@
 package pro.komaru.tridot.common.registry.item.armor;
 
-import com.google.common.collect.*;
+import com.google.common.base.Suppliers;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.common.config.CommonConfig;
 import net.minecraft.*;
-import net.minecraft.client.*;
+import net.minecraft.core.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
-import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.ItemStack.*;
-import net.minecraft.world.item.enchantment.*;
-import net.minecraft.world.level.*;
-import net.minecraftforge.api.distmarker.*;
+import net.minecraft.world.item.component.*;
+import net.neoforged.api.distmarker.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.builders.*;
 
 import java.text.*;
 import java.util.*;
+import java.util.function.Supplier;
 
 
 public class PercentageArmorItem extends ArmorItem{
-    public ArmorMaterial material;
-    public UUID uuid;
+    public Holder<ArmorMaterial> material;
+    public ResourceLocation id;
     private final float defense;
     private final float toughness;
     protected final float knockbackResistance;
-    public static final EnumMap<ArmorItem.Type, UUID> ARMOR_MODIFIER_UUID_PER_TYPE = Util.make(new EnumMap<>(ArmorItem.Type.class), (p_266744_) -> {
-        p_266744_.put(ArmorItem.Type.BOOTS, UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"));
-        p_266744_.put(ArmorItem.Type.LEGGINGS, UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"));
-        p_266744_.put(ArmorItem.Type.CHESTPLATE, UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"));
-        p_266744_.put(ArmorItem.Type.HELMET, UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150"));
+    public static final EnumMap<ArmorItem.Type, ResourceLocation> ARMOR_MODIFIER_ID_PER_TYPE = Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+        for(ArmorItem.Type type : ArmorItem.Type.values()) map.put(type, ResourceLocation.withDefaultNamespace("armor." + type.getName()));
     });
 
     public final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), (p_41704_) -> p_41704_.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
-    public Multimap<Attribute, AttributeModifier> defaultModifiers;
+    public ItemAttributeModifiers defaultModifiers;
+    private final Supplier<ItemAttributeModifiers> percentModifiers = Suppliers.memoize(() -> buildModifiers(true));
+    private final Supplier<ItemAttributeModifiers> vanillaModifiers = Suppliers.memoize(() -> buildModifiers(false));
 
-    public PercentageArmorItem(ArmorMaterial pMaterial, Type pType, Properties pProperties){
+    public PercentageArmorItem(Holder<ArmorMaterial> pMaterial, Type pType, Properties pProperties){
         super(pMaterial, pType, pProperties);
         this.material = pMaterial;
-        this.toughness = pMaterial.getToughness();
-        if(pMaterial instanceof TridotArmorMat mat) {
+        this.toughness = pMaterial.value().toughness();
+        TridotArmorMat mat = AbstractArmorRegistry.tridotMaterial(pMaterial);
+        if(mat != null) {
             this.defense = mat.getPercentDefenseForType(pType);
-        } else this.defense = pMaterial.getDefenseForType(pType);
+        } else this.defense = pMaterial.value().getDefense(pType);
 
-        this.knockbackResistance = pMaterial.getKnockbackResistance();
-        this.uuid = ARMOR_MODIFIER_UUID_PER_TYPE.get(pType);
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        if (this.knockbackResistance > 0) {
-            builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uuid, "Armor knockback resistance", this.knockbackResistance, AttributeModifier.Operation.ADDITION));
-        }
-
-        builder.put(AttributeRegistry.PERCENT_ARMOR.get(), new AttributeModifier(uuid, "PercentArmor", this.defense, AttributeModifier.Operation.ADDITION));
-        builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uuid, "Armor toughness", this.toughness, AttributeModifier.Operation.ADDITION));
-        this.defaultModifiers = builder.build();
+        this.knockbackResistance = pMaterial.value().knockbackResistance();
+        this.id = ARMOR_MODIFIER_ID_PER_TYPE.get(pType);
+        this.defaultModifiers = percentModifiers.get();
     }
 
     public int getDefense() {
@@ -65,22 +57,24 @@ public class PercentageArmorItem extends ArmorItem{
         return toughness;
     }
 
-    public float getTotalDefense(ArmorMaterial material) {
-        if(material instanceof TridotArmorMat tridotArmorMat) {
+    public float getTotalDefense(Holder<ArmorMaterial> material) {
+        TridotArmorMat tridotArmorMat = AbstractArmorRegistry.tridotMaterial(material);
+        if(tridotArmorMat != null) {
             return tridotArmorMat.getPercentDefenseForType(Type.HELMET) + tridotArmorMat.getPercentDefenseForType(Type.CHESTPLATE) + tridotArmorMat.getPercentDefenseForType(Type.LEGGINGS) + tridotArmorMat.getPercentDefenseForType(Type.BOOTS);
         }
 
-        return material.getDefenseForType(Type.HELMET) + material.getDefenseForType(Type.CHESTPLATE) + material.getDefenseForType(Type.LEGGINGS) + material.getDefenseForType(Type.BOOTS);
+        ArmorMaterial value = material.value();
+        return value.getDefense(Type.HELMET) + value.getDefense(Type.CHESTPLATE) + value.getDefense(Type.LEGGINGS) + value.getDefense(Type.BOOTS);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced){
+    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced){
         if(CommonConfig.PERCENT_ARMOR.get() != null && CommonConfig.PERCENT_ARMOR.get()){
             pTooltipComponents.add(Component.translatable("tooltip.tridot.total_armor", getTotalDefense(((PercentageArmorItem)pStack.getItem()).getMaterial()) + "%").withStyle(ChatFormatting.GRAY));
         }
 
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pIsAdvanced);
     }
 
     public float attrDist(AbstractArmorBuilder<?> builder, EquipmentSlot pEquipmentSlot, float percent) {
@@ -99,35 +93,38 @@ public class PercentageArmorItem extends ArmorItem{
         };
     }
 
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot pEquipmentSlot){
-        if(pEquipmentSlot == this.type.getSlot()){
-            ImmutableMultimap.Builder<Attribute, AttributeModifier> m = ImmutableMultimap.builder();
-            m.putAll(getModifiedMultimap());
-            if(this.getMaterial() instanceof TridotArmorMat armorRegistry){
-                armorRegistry.builder().attributeMap.forEach((attrSupplier, data) -> {
-                    AttributeModifier modifier1 = new AttributeModifier(uuid, "Attribute Modifier", attrDist(armorRegistry.builder(), pEquipmentSlot, data.value()), data.operation());
-                    m.put(attrSupplier.get(), modifier1);
-                });
-            }
-
-            return m.build();
-        }
-
-        return super.getDefaultAttributeModifiers(pEquipmentSlot);
+    @Override
+    public ItemAttributeModifiers getDefaultAttributeModifiers(){
+        return CommonConfig.PERCENT_ARMOR.get() ? percentModifiers.get() : vanillaModifiers.get();
     }
 
-    private @NotNull Multimap<Attribute, AttributeModifier> getModifiedMultimap(){
-        Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
-        if(!CommonConfig.PERCENT_ARMOR.get()){
-            map.put(Attributes.ARMOR, new AttributeModifier(uuid, "Armor modifier", this.defense, AttributeModifier.Operation.ADDITION));
-            map.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uuid, "Armor toughness", this.toughness, AttributeModifier.Operation.ADDITION));
-            if(this.knockbackResistance > 0){
-                map.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uuid, "Armor knockback resistance", this.knockbackResistance, AttributeModifier.Operation.ADDITION));
+    private ItemAttributeModifiers buildModifiers(boolean percent){
+        EquipmentSlot slot = this.type.getSlot();
+        EquipmentSlotGroup group = EquipmentSlotGroup.bySlot(slot);
+        ItemAttributeModifiers.Builder m = ItemAttributeModifiers.builder();
+        if(percent){
+            if (this.knockbackResistance > 0) {
+                m.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(id, this.knockbackResistance, AttributeModifier.Operation.ADD_VALUE), group);
             }
-        } else {
-            map = this.defaultModifiers;
+
+            m.add(AttributeRegistry.PERCENT_ARMOR, new AttributeModifier(id, this.defense, AttributeModifier.Operation.ADD_VALUE), group);
+            m.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id, this.toughness, AttributeModifier.Operation.ADD_VALUE), group);
+        }else{
+            m.add(Attributes.ARMOR, new AttributeModifier(id, this.defense, AttributeModifier.Operation.ADD_VALUE), group);
+            m.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id, this.toughness, AttributeModifier.Operation.ADD_VALUE), group);
+            if(this.knockbackResistance > 0){
+                m.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(id, this.knockbackResistance, AttributeModifier.Operation.ADD_VALUE), group);
+            }
         }
 
-        return map;
+        TridotArmorMat armorRegistry = AbstractArmorRegistry.tridotMaterial(this.getMaterial());
+        if(armorRegistry != null){
+            armorRegistry.builder().attributeMap.forEach((attribute, data) -> {
+                AttributeModifier modifier1 = new AttributeModifier(id, attrDist(armorRegistry.builder(), slot, data.value()), data.operation());
+                m.add(attribute, modifier1, group);
+            });
+        }
+
+        return m.build();
     }
 }

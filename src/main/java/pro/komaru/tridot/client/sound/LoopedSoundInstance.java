@@ -3,7 +3,7 @@ package pro.komaru.tridot.client.sound;
 import net.minecraft.client.player.*;
 import net.minecraft.client.resources.sounds.*;
 import net.minecraft.sounds.*;
-import net.minecraftforge.api.distmarker.*;
+import net.neoforged.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
 public class LoopedSoundInstance extends AbstractTickableSoundInstance{

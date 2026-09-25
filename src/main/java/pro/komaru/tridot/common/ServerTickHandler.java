@@ -1,26 +1,22 @@
 package pro.komaru.tridot.common;
 
-import net.minecraftforge.event.*;
-import net.minecraftforge.event.server.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.javafmlmod.*;
+import net.neoforged.bus.api.*;
+import net.neoforged.neoforge.event.server.*;
+import net.neoforged.neoforge.event.tick.*;
 import pro.komaru.tridot.api.Utils;
 
 public class ServerTickHandler{
 
     public static int tick;
 
-    public static void preInit(){
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener(EventPriority.NORMAL, false, TickEvent.ServerTickEvent.class, ServerTickHandler::serverTick);
-        eventBus.addListener(EventPriority.NORMAL, false, ServerStartingEvent.class, ServerTickHandler::serverStarting);
+    public static void preInit(IEventBus gameBus){
+        gameBus.addListener(EventPriority.NORMAL, false, ServerTickEvent.Post.class, ServerTickHandler::serverTick);
+        gameBus.addListener(EventPriority.NORMAL, false, ServerStartingEvent.class, ServerTickHandler::serverStarting);
     }
 
-    private static void serverTick(final TickEvent.ServerTickEvent serverTickEvent){
-        if(serverTickEvent.phase == TickEvent.Phase.END){
-            tick++;
-            Utils.Schedule.handleSyncScheduledTasks(tick);
-        }
+    private static void serverTick(final ServerTickEvent.Post serverTickEvent){
+        tick++;
+        Utils.Schedule.handleSyncScheduledTasks(tick);
     }
 
     private static void serverStarting(final ServerStartingEvent serverStartingEvent){

@@ -6,7 +6,6 @@ import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.api.*;
 import pro.komaru.tridot.util.*;
@@ -20,19 +19,19 @@ public class HitEffectItem extends SwordItem{
     public ArcRandom arcRandom = Tmp.rnd;
 
     public HitEffectItem(Tier tier, float attackDamageIn, float attackSpeedIn, Item.Properties builderIn, float pChance, MobEffectInstance... pEffects){
-        super(tier, (int)attackDamageIn, attackSpeedIn, builderIn);
+        super(tier, builderIn.attributes(SwordItem.createAttributes(tier, (int)attackDamageIn, attackSpeedIn)));
         this.chance = pChance;
         this.effects = ImmutableList.copyOf(pEffects);
     }
 
     public HitEffectItem(Tier tier, float attackDamageIn, float attackSpeedIn, Item.Properties builderIn, MobEffectInstance... pEffects){
-        super(tier, (int)attackDamageIn, attackSpeedIn, builderIn);
+        super(tier, builderIn.attributes(SwordItem.createAttributes(tier, (int)attackDamageIn, attackSpeedIn)));
         this.effects = ImmutableList.copyOf(pEffects);
     }
 
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker){
         if(!(attacker instanceof Player player)) return true;
-        stack.hurtAndBreak(2, attacker, (entity) -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+        stack.hurtAndBreak(2, attacker, EquipmentSlot.MAINHAND);
         if(Utils.Items.getAttackStrengthScale(player, 0.9f)){
             Utils.Entities.applyWithChance(target, effects, chance, arcRandom);
         }
@@ -41,8 +40,8 @@ public class HitEffectItem extends SwordItem{
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flags){
-        super.appendHoverText(stack, world, tooltip, flags);
+    public void appendHoverText(@NotNull ItemStack stack, TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flags){
+        super.appendHoverText(stack, context, tooltip, flags);
         Utils.Items.effectTooltip(effects, tooltip, 1, chance);
     }
 }

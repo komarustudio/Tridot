@@ -72,8 +72,8 @@ public class FollowOwnerGoal extends Goal{
          */
         public void start() {
             this.timeToRecalcPath = 0;
-            this.oldWaterCost = this.minion.getPathfindingMalus(BlockPathTypes.WATER);
-            this.minion.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+            this.oldWaterCost = this.minion.getPathfindingMalus(PathType.WATER);
+            this.minion.setPathfindingMalus(PathType.WATER, 0.0F);
         }
 
         /**
@@ -82,7 +82,7 @@ public class FollowOwnerGoal extends Goal{
         public void stop() {
             this.owner = null;
             this.navigation.stop();
-            this.minion.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
+            this.minion.setPathfindingMalus(PathType.WATER, this.oldWaterCost);
         }
 
         /**
@@ -126,8 +126,8 @@ public class FollowOwnerGoal extends Goal{
         }
 
         private boolean canTeleportTo(BlockPos pPos) {
-            BlockPathTypes blockpathtypes = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, pPos.mutable());
-            if (blockpathtypes != BlockPathTypes.WALKABLE) {
+            PathType blockpathtypes = WalkNodeEvaluator.getPathTypeStatic(this.minion, pPos.mutable()); // PORT NOTE: BlockPathTypes -> PathType; the static evaluator now takes the mob
+            if (blockpathtypes != PathType.WALKABLE) {
                 return false;
             } else {
                 BlockState blockstate = this.level.getBlockState(pPos.below());

@@ -1,7 +1,7 @@
 package pro.komaru.tridot.client.render.gui.screen;
 
 import net.minecraft.world.entity.player.*;
-import net.minecraftforge.items.*;
+import net.neoforged.neoforge.items.*;
 
 public class InputSlot extends SlotItemHandler{
 

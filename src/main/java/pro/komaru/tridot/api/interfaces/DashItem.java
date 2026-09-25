@@ -7,7 +7,7 @@ import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 
 public interface DashItem{
     default double getEnchantmentBonus(ItemStack stack) {
-        return stack.getEnchantmentLevel(EnchantmentsRegistry.DASH.get()) * 0.1;
+        return EnchantmentsRegistry.getLevel(stack, EnchantmentsRegistry.DASH) * 0.1;
     }
 
     default void performDash(Player player, ItemStack stack) {

@@ -53,7 +53,7 @@ public interface DotSynced {
             }
         });
     }
-    default void defineData() {
-        entries().each(e -> e.define.get(synchedData()));
+    default void defineData(SynchedEntityData.Builder builder) {
+        entries().each(e -> e.define.get(builder));
     }
 }

@@ -1,6 +1,7 @@
 package pro.komaru.tridot.api.entity.trades;
 
 import net.minecraft.core.*;
+import net.minecraft.core.component.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.*;
 import net.minecraft.tags.*;
@@ -10,7 +11,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.trading.*;
 import net.minecraft.world.level.levelgen.structure.*;
 import net.minecraft.world.level.saveddata.maps.*;
-import net.minecraftforge.common.*;
+import net.neoforged.neoforge.common.*;
 
 import javax.annotation.*;
 
@@ -18,11 +19,11 @@ public class TreasureMapItemListing extends BasicItemListing{
     private final int emeraldCost;
     private final TagKey<Structure> destination;
     private final String displayName;
-    private final MapDecoration.Type destinationType;
+    private final Holder<MapDecorationType> destinationType;
     private final int maxUses;
     private final int villagerXp;
 
-    public TreasureMapItemListing(int pEmeraldCost, TagKey<Structure> pDestination, String pDisplayName, MapDecoration.Type pDestinationType, int pMaxUses, int pVillagerXp) {
+    public TreasureMapItemListing(int pEmeraldCost, TagKey<Structure> pDestination, String pDisplayName, Holder<MapDecorationType> pDestinationType, int pMaxUses, int pVillagerXp) {
         super(pEmeraldCost, new ItemStack(Items.COMPASS), pMaxUses, pVillagerXp, 0);
         this.emeraldCost = pEmeraldCost;
         this.destination = pDestination;
@@ -32,7 +33,7 @@ public class TreasureMapItemListing extends BasicItemListing{
         this.villagerXp = pVillagerXp;
     }
 
-    public TreasureMapItemListing(Trade trade, int pEmeraldCost, TagKey<Structure> pDestination, String pDisplayName, MapDecoration.Type pDestinationType) {
+    public TreasureMapItemListing(Trade trade, int pEmeraldCost, TagKey<Structure> pDestination, String pDisplayName, Holder<MapDecorationType> pDestinationType) {
         super(pEmeraldCost, new ItemStack(Items.COMPASS), trade.maxTrades, trade.experience, trade.multiplier);
         this.emeraldCost = pEmeraldCost;
         this.destination = pDestination;
@@ -52,8 +53,8 @@ public class TreasureMapItemListing extends BasicItemListing{
                 ItemStack itemstack = MapItem.create(serverlevel, blockpos.getX(), blockpos.getZ(), (byte)2, true, true);
                 MapItem.renderBiomePreviewMap(serverlevel, itemstack);
                 MapItemSavedData.addTargetDecoration(itemstack, blockpos, "+", this.destinationType);
-                itemstack.setHoverName(Component.translatable(this.displayName));
-                return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemstack, this.maxUses, this.villagerXp, 0.2F);
+                itemstack.set(DataComponents.CUSTOM_NAME, Component.translatable(this.displayName));
+                return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), java.util.Optional.of(new ItemCost(Items.COMPASS)), itemstack, this.maxUses, this.villagerXp, 0.2F);
             } else {
                 return null;
             }

@@ -1,8 +1,8 @@
 package pro.komaru.tridot.mixin.client;
 
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.*;
 import net.minecraft.client.renderer.*;
+import org.joml.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -12,11 +12,8 @@ import pro.komaru.tridot.client.render.*;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin{
 
-    @Shadow
-    public abstract void renderLevel(float pPartialTicks, long pFinishTimeNano, PoseStack pPoseStack);
-
     @Inject(at = @At(value = "RETURN"), method = "renderItemInHand")
-    private void tridot$renderItemInHand(PoseStack pPoseStack, Camera pActiveRenderInfo, float pPartialTicks, CallbackInfo ci){
+    private void tridot$renderItemInHand(Camera camera, float partialTick, Matrix4f projectionMatrix, CallbackInfo ci){
         for(RenderBuilder builder : TridotRenderTypes.customItemRenderBuilderFirst){
             builder.endBatch();
         }
@@ -30,12 +27,12 @@ public abstract class GameRendererMixin{
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;bindWrite(Z)V"), method = "render")
-    public void tridot$renderScreenPostProcess(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci){
-        PostProcessHandler.onScreenRender((GameRenderer)(Object)this, partialTicks, nanoTime, renderLevel);
+    public void tridot$renderScreenPostProcess(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci){
+        PostProcessHandler.onScreenRender((GameRenderer)(Object)this, deltaTracker.getGameTimeDeltaPartialTick(false), 0L, renderLevel);
     }
 
     @Inject(at = @At(value = "RETURN"), method = "render")
-    public void tridot$renderWindowPostProcess(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci){
-        PostProcessHandler.onWindowRender((GameRenderer)(Object)this, partialTicks, nanoTime, renderLevel);
+    public void tridot$renderWindowPostProcess(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci){
+        PostProcessHandler.onWindowRender((GameRenderer)(Object)this, deltaTracker.getGameTimeDeltaPartialTick(false), 0L, renderLevel);
     }
 }

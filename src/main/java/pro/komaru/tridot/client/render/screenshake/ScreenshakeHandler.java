@@ -1,28 +1,20 @@
 package pro.komaru.tridot.client.render.screenshake;
 
 
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.*;
-import net.minecraft.server.level.*;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.*;
+import net.minecraft.util.*;
+import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
-import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
-import org.jetbrains.annotations.NotNull;
-import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.api.networking.*;
-import pro.komaru.tridot.client.ClientTick;
-import pro.komaru.tridot.common.config.ClientConfig;
-import pro.komaru.tridot.common.networking.packets.*;
-import pro.komaru.tridot.util.Tmp;
-import pro.komaru.tridot.util.math.ArcRandom;
-import pro.komaru.tridot.util.math.Mathf;
-import pro.komaru.tridot.util.math.raycast.RayCast;
-import pro.komaru.tridot.util.math.raycast.RayCastContext;
-import pro.komaru.tridot.util.math.raycast.RayHitResult;
+import net.neoforged.neoforge.client.event.*;
+import org.jetbrains.annotations.*;
+import pro.komaru.tridot.*;
+import pro.komaru.tridot.client.*;
+import pro.komaru.tridot.common.config.*;
+import pro.komaru.tridot.util.*;
+import pro.komaru.tridot.util.math.*;
+import pro.komaru.tridot.util.math.raycast.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class ScreenshakeHandler{
     public static final ArrayList<ScreenshakeInstance> INSTANCES = new ArrayList<>();
@@ -39,7 +31,7 @@ public class ScreenshakeHandler{
         if(intensityRotation > 0){
             float yawOffset = randomizeOffset(intensityRotation);
             float pitchOffset = randomizeOffset(intensityRotation);
-            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset, camera.getRoll()); // PORT NOTE: NeoForge adds a roll component to Camera.setRotation
+            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset, camera.getRoll());
         }
 
         boolean cameraUpdate = false;

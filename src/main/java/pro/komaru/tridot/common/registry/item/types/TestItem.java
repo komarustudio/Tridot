@@ -1,14 +1,13 @@
 package pro.komaru.tridot.common.registry.item.types;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import org.jetbrains.annotations.*;
-import pro.komaru.tridot.api.render.text.DotStyleEffects;
-import pro.komaru.tridot.api.render.text.DotText;
+import pro.komaru.tridot.api.render.text.*;
 import pro.komaru.tridot.client.gfx.*;
 import pro.komaru.tridot.client.gfx.particle.*;
 import pro.komaru.tridot.client.gfx.particle.data.*;
@@ -29,8 +28,9 @@ public class TestItem extends Item{
         Col particleColor = Col.pink;
         Col particleColorTo = Col.blue;
 
-        ScreenshakeHandler.add(new ScreenshakeInstance(10).intensity(1).fov(true).vec(true).interp(Interp.bounceIn));
-        ParticleBuilder.create(TridotParticles.HEART.get())
+        if (worldIn.isClientSide){
+            ScreenshakeHandler.add(new ScreenshakeInstance(10).intensity(1).fov(true).vec(true).interp(Interp.bounceIn));
+            ParticleBuilder.create(TridotParticles.HEART.get())
             .setRenderType(TridotRenderTypes.ADDITIVE_PARTICLE)
 
             .setScaleData(GenericParticleData.create(1 + Tmp.rnd.randomValueUpTo(0.15f), Tmp.rnd.randomValueUpTo(0.2f)).build())
@@ -39,6 +39,7 @@ public class TestItem extends Item{
             .setVelocity((Tmp.rnd.nextDouble() / 5), 0.05f, (Tmp.rnd.nextDouble() / 5))
             .randomOffset(5)
             .repeat(worldIn, pos.x, pos.y, pos.z, 5);
+        }
 
         if(!worldIn.isClientSide) {
             var a = Component.Serializer.toJson(DotText.create("Test Item")

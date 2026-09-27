@@ -1,22 +1,21 @@
 package pro.komaru.tridot.common.networking.packets;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.api.networking.Packet;
-import pro.komaru.tridot.client.gfx.TridotParticles;
-import pro.komaru.tridot.client.gfx.particle.ParticleBuilder;
-import pro.komaru.tridot.client.gfx.particle.behavior.SparkParticleBehavior;
-import pro.komaru.tridot.client.gfx.particle.data.ColorParticleData;
-import pro.komaru.tridot.client.gfx.particle.data.GenericParticleData;
-import pro.komaru.tridot.client.render.gui.overlay.OverlayHandler;
-import pro.komaru.tridot.client.render.gui.overlay.TimedOverlayInstance;
-import pro.komaru.tridot.util.Col;
-import pro.komaru.tridot.util.math.Interp;
+import net.minecraft.network.*;
+import net.minecraft.network.codec.*;
+import net.minecraft.network.protocol.common.custom.*;
+import net.minecraft.world.level.*;
+import net.neoforged.neoforge.network.handling.*;
+import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.networking.*;
+import pro.komaru.tridot.client.gfx.*;
+import pro.komaru.tridot.client.gfx.particle.*;
+import pro.komaru.tridot.client.gfx.particle.behavior.*;
+import pro.komaru.tridot.client.gfx.particle.data.*;
+import pro.komaru.tridot.client.render.gui.overlay.*;
+import pro.komaru.tridot.client.render.screenshake.*;
+import pro.komaru.tridot.util.*;
+import pro.komaru.tridot.util.comps.phys.*;
+import pro.komaru.tridot.util.math.*;
 
 public class ParryParticlePacket implements CustomPacketPayload{
     public static final Type<ParryParticlePacket> TYPE = Packet.type(Tridot.ID, "parry_particle");
@@ -47,7 +46,7 @@ public class ParryParticlePacket implements CustomPacketPayload{
                 .randomVelocity(0.125, 0.25, 0.125)
                 .setHasPhysics(false)
                 .repeat(level, msg.posX, msg.posY, msg.posZ, 12);
-
+                ScreenshakeHandler.add(new PositionedScreenshakeInstance(20, Pos3.init((float) msg.posX, (float) msg.posY, (float) msg.posZ), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
                 OverlayHandler.addInstance(new TimedOverlayInstance().setTexture(Tridot.ofTridot("textures/gui/overlay/flash.png")).setShowTime(10).setOpacity(0.25f).setFadeIn(0));
             });
         }

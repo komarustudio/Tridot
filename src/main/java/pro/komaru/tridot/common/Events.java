@@ -1,21 +1,16 @@
 package pro.komaru.tridot.common;
 
-import net.minecraft.*;
-import net.minecraft.client.*;
-import net.minecraft.client.gui.screens.*;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.*;
 import net.minecraft.nbt.*;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.*;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.*;
 import net.minecraft.server.level.*;
 import net.minecraft.tags.*;
 import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.state.*;
 import net.neoforged.bus.api.*;
 import net.neoforged.fml.loading.*;
 import net.neoforged.neoforge.common.*;
@@ -24,21 +19,18 @@ import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.tick.*;
 import pro.komaru.tridot.*;
-import pro.komaru.tridot.api.events.CalculatePercentArmorEvent;
-import pro.komaru.tridot.client.sound.MusicHandler;
-import pro.komaru.tridot.client.sound.MusicModifier;
-import pro.komaru.tridot.common.config.CommonConfig;
-import pro.komaru.tridot.common.registry.TagsRegistry;
+import pro.komaru.tridot.api.events.*;
+import pro.komaru.tridot.api.networking.*;
+import pro.komaru.tridot.client.sound.*;
+import pro.komaru.tridot.common.config.*;
+import pro.komaru.tridot.common.networking.packets.*;
+import pro.komaru.tridot.common.registry.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.armor.*;
 import pro.komaru.tridot.common.registry.item.types.*;
-import pro.komaru.tridot.api.networking.PacketHandler;
-import pro.komaru.tridot.common.networking.packets.DungeonSoundPacket;
-import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.util.*;
 
 import java.util.*;
-import java.util.stream.*;
 
 public class Events{
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -199,38 +191,6 @@ public class Events{
             ItemStack weapon = player.getMainHandItem();
             if(!weapon.isEmpty() && weapon.is(TagsRegistry.CAN_DISABLE_SHIELD) && mob instanceof Player attacked){
                 attacked.disableShield();
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onTooltip(ItemTooltipEvent e){
-        ItemStack itemStack = e.getItemStack();
-        Utils.Items.addSkinTooltip(itemStack, e.getToolTip());
-        if(Utils.isDevelopment){
-            Stream<ResourceLocation> itemTagStream = itemStack.getTags().map(TagKey::location);
-            if(Minecraft.getInstance().options.advancedItemTooltips){
-                if(Screen.hasControlDown()){
-                    if(!itemStack.getTags().toList().isEmpty()){
-                        e.getToolTip().add(Component.empty());
-                        e.getToolTip().add(Component.literal("ItemTags: " + itemTagStream.toList()).withStyle(ChatFormatting.DARK_GRAY));
-                    }
-
-                    if(itemStack.getItem() instanceof BlockItem blockItem){
-                        BlockState blockState = blockItem.getBlock().defaultBlockState();
-                        Stream<ResourceLocation> blockTagStream = blockState.getTags().map(TagKey::location);
-                        if(!blockState.getTags().map(TagKey::location).toList().isEmpty()){
-                            if(itemStack.getTags().toList().isEmpty()){
-                                e.getToolTip().add(Component.empty());
-                            }
-
-                            e.getToolTip().add(Component.literal("BlockTags: " + blockTagStream.toList()).withStyle(ChatFormatting.DARK_GRAY));
-                        }
-                    }
-                }else if(!itemStack.getTags().toList().isEmpty() || itemStack.getItem() instanceof BlockItem blockItem && !blockItem.getBlock().defaultBlockState().getTags().toList().isEmpty()){
-                    e.getToolTip().add(Component.empty());
-                    e.getToolTip().add(Component.literal("Press [Control] to get tags info").withStyle(ChatFormatting.GRAY));
-                }
             }
         }
     }

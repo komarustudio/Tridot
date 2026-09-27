@@ -14,11 +14,10 @@ import net.neoforged.fml.common.*;
 import net.neoforged.neoforge.client.event.*;
 import org.joml.*;
 import org.lwjgl.opengl.*;
-import pro.komaru.tridot.client.ClientTick;
+import pro.komaru.tridot.client.*;
 import pro.komaru.tridot.client.compatibility.*;
-import pro.komaru.tridot.client.gfx.particle.GenericParticle;
-import pro.komaru.tridot.client.gfx.particle.ICustomParticleRender;
-import pro.komaru.tridot.client.gfx.particle.behavior.ICustomBehaviorParticleRender;
+import pro.komaru.tridot.client.gfx.particle.*;
+import pro.komaru.tridot.client.gfx.particle.behavior.*;
 
 import java.util.*;
 
@@ -36,23 +35,22 @@ public class LevelRenderHandler{
         PoseStack stack = event.getPoseStack();
         float partialTicks = ClientTick.mcPartialTick();
         MultiBufferSource bufferSource = LevelRenderHandler.getDelayedRender();
-
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES){
             Vec3 pos = event.getCamera().getPosition();
-
             stack.pushPose();
             stack.translate(-pos.x, -pos.y, -pos.z);
             for(ICustomParticleRender particle : particleList){
                 particle.render(stack, bufferSource, partialTicks);
             }
+
             for(GenericParticle particle : behaviorParticleList.keySet()){
                 behaviorParticleList.get(particle).render(particle, stack, bufferSource, partialTicks);
             }
+
             stack.popPose();
             particleList.clear();
             behaviorParticleList.clear();
-
-            if(!ShadersIntegration.shouldApply()) MATRIX4F = new Matrix4f(RenderSystem.getModelViewMatrix());
+            MATRIX4F = new Matrix4f(event.getModelViewMatrix());
             FOG_START = RenderSystem.getShaderFogStart();
         }
 
@@ -82,21 +80,14 @@ public class LevelRenderHandler{
             RenderSystem.setShaderFogStart(FOG_START);
             Matrix4fStack modelView = RenderSystem.getModelViewStack();
             modelView.pushMatrix();
-            modelView.identity();
-            if(MATRIX4F != null) modelView.mul(MATRIX4F);
+            modelView.set(Objects.requireNonNullElseGet(MATRIX4F, event::getModelViewMatrix));
             RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            modelView.popMatrix();
-            RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
-            modelView.pushMatrix();
-            modelView.identity();
-            if(MATRIX4F != null) modelView.mul(MATRIX4F);
-            RenderSystem.applyModelViewMatrix();
             for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
+            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
             modelView.popMatrix();
             RenderSystem.applyModelViewMatrix();
-            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
             FogRenderer.setupNoFog();
         }
     }

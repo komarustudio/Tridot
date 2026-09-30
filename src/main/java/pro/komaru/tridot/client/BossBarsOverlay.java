@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
 import net.minecraft.sounds.*;
@@ -58,6 +59,13 @@ public class BossBarsOverlay implements IGuiOverlay {
                 ClientBossbar bossbar = events.get(uuid);
                 bossbar.setAboutToDie(aboutToDie);
                 this.updateProperties(bossbar, type, texture, event, darkenSky, shouldPlayBossMusic, createFog, isRainbow);
+            }
+
+            public void updateCustomData(UUID uuid, FriendlyByteBuf buf) {
+                ClientBossbar bossbar = events.get(uuid);
+                if (bossbar != null) {
+                    bossbar.readCustomData(buf);
+                }
             }
 
             public void updateName(ClientBossbar bossbar, Component component) {

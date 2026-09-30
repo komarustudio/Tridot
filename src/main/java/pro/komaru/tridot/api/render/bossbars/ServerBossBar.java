@@ -1,6 +1,7 @@
 package pro.komaru.tridot.api.render.bossbars;
 
 import com.google.common.collect.*;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.*;
@@ -144,7 +145,15 @@ public class ServerBossBar extends TridotBossBar{
         }
     }
 
-    private void broadcast(Function<ServerBossBar, UpdateBossbarPacket> pPacketGetter) {
+    public void writeCustomData(FriendlyByteBuf buf) {
+
+    }
+
+    public void syncCustomData() {
+        this.broadcast(UpdateBossbarPacket::createCustomDataPacket);
+    }
+
+    public void broadcast(Function<ServerBossBar, UpdateBossbarPacket> pPacketGetter) {
         if (this.visible) {
             UpdateBossbarPacket event = pPacketGetter.apply(this);
             for(ServerPlayer player : this.players) {

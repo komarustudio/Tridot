@@ -1,5 +1,6 @@
 package pro.komaru.tridot.api.render.bossbars;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
 import net.minecraft.sounds.*;
@@ -150,5 +151,9 @@ public abstract class TridotBossBar{
 
     public boolean isRainbow(){
         return rainbow;
+    }
+
+    public void readCustomData(FriendlyByteBuf buf) {
+
     }
 }

@@ -1,5 +1,6 @@
 package pro.komaru.tridot.common.networking.packets;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.network.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
@@ -72,13 +73,18 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
         this.operation.dispatch(this.id, pHandler);
     }
 
+    public static UpdateBossbarPacket createCustomDataPacket(ServerBossBar pEvent){
+        return new UpdateBossbarPacket(pEvent.getId(), new CustomDataOperation(pEvent));
+    }
+
     enum OperationType{
         ADD(AddOperation::new),
         REMOVE((p_178719_) -> UpdateBossbarPacket.REMOVE_OPERATION),
         UPDATE_PROGRESS(UpdateProgressOperation::new),
         UPDATE_NAME(UpdateNameOperation::new),
         UPDATE_STYLE(UpdateStyleOperation::new),
-        UPDATE_PROPERTIES(UpdatePropertiesOperation::new);
+        UPDATE_PROPERTIES(UpdatePropertiesOperation::new),
+        UPDATE_CUSTOM_DATA(CustomDataOperation::new);
 
         final Function<FriendlyByteBuf, Operation> reader;
 
@@ -105,6 +111,9 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
 
         default void updateProperties(UUID uuid, ResourceLocation type, ResourceLocation texture, SoundEvent event, boolean darkenSky, boolean shouldPlayBossMusic, boolean createFog, boolean isRainbow, boolean aboutToDie){
         }
+
+        default void updateCustomData(UUID uuid, FriendlyByteBuf buf) {
+        }
     }
 
     interface Operation{
@@ -113,6 +122,48 @@ public record UpdateBossbarPacket(UUID id, Operation operation){
         void dispatch(UUID pId, Handler pHandler);
 
         void encode(FriendlyByteBuf pBuffer);
+    }
+
+    static class CustomDataOperation implements Operation {
+        private final Consumer<FriendlyByteBuf> writer;
+        private FriendlyByteBuf receivedPayload;
+
+        public CustomDataOperation(ServerBossBar event) {
+            this.writer = event::writeCustomData;
+        }
+
+        public CustomDataOperation(FriendlyByteBuf pBuffer) {
+            this.writer = null;
+            int length = pBuffer.readVarInt();
+            this.receivedPayload = new FriendlyByteBuf(pBuffer.readBytes(length));
+        }
+
+        @Override
+        public OperationType getType() {
+            return OperationType.UPDATE_CUSTOM_DATA;
+        }
+
+        @Override
+        public void dispatch(UUID pId, Handler pHandler) {
+            if (this.receivedPayload != null) {
+                pHandler.updateCustomData(pId, this.receivedPayload);
+                this.receivedPayload.release();
+            }
+        }
+
+        @Override
+        public void encode(FriendlyByteBuf pBuffer) {
+            FriendlyByteBuf tempBuf = new FriendlyByteBuf(Unpooled.buffer());
+            try {
+                if (this.writer != null) {
+                    this.writer.accept(tempBuf);
+                }
+                pBuffer.writeVarInt(tempBuf.readableBytes());
+                pBuffer.writeBytes(tempBuf);
+            } finally {
+                tempBuf.release();
+            }
+        }
     }
 
     static class AddOperation implements Operation{

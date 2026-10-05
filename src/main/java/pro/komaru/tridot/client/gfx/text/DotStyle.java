@@ -75,6 +75,7 @@ public class DotStyle extends Style {
         } else if (!(pOther instanceof DotStyle)) {
             return false;
         }
+
         DotStyle dot = (DotStyle) pOther;
         if(!dot.effects.equals(this.effects)) return false;
         return super.equals(pOther);
@@ -83,70 +84,86 @@ public class DotStyle extends Style {
     public DotStyle color(Color color) {
         return this.color(new Col(color.getRGB()));
     }
+
     public DotStyle color(Col color) {
         return color(color.toTextColor());
     }
+
     public DotStyle color(TextColor color) {
         this.color = color;
         return this;
     }
+
     public DotStyle bold(boolean value) {
         this.bold = value;
         return this;
     }
+
     public DotStyle italic(boolean value) {
         this.italic = value;
         return this;
     }
+
     public DotStyle underlined(boolean value) {
         this.underlined = value;
         return this;
     }
+
     public DotStyle strikethrough(boolean value) {
         this.strikethrough = value;
         return this;
     }
+
     public DotStyle obfuscated(boolean value) {
         this.obfuscated = value;
         return this;
     }
+
     public DotStyle insertion(String value) {
         this.insertion = value;
         return this;
     }
+
     public DotStyle click(ClickEvent event) {
         this.clickEvent = event;
         return this;
     }
+
     public DotStyle hover(HoverEvent event) {
         this.hoverEvent = event;
         return this;
     }
+
     public DotStyle font(ResourceLocation font) {
         this.font = font;
         return this;
     }
+
     public DotStyle effects() {
         this.effects.clear();
         return this;
     }
+
     public DotStyle effects(StyleEffect...effects) {
         this.effects.addAll(effects);
         return this;
     }
+
     public DotStyle effects(ResourceLocation ...effects) {
         Seq<StyleEffect> fx = Seq.with();
-        for (ResourceLocation effect : effects)
-            fx.add(DotStyleEffects.EFFECTS.get(effect.toString()).get());
+        for (ResourceLocation effect : effects) fx.add(DotStyleEffects.EFFECTS.get(effect.toString()).get());
         return effects(fx.toArray());
     }
+
     public DotStyle effect(StyleEffect effect) {
         effects.add(effect);
         return this;
     }
+
     public DotStyle effect(ResourceLocation location) {
         return effect(DotStyleEffects.EFFECTS.get(location.toString()).get());
     }
+
     public DotStyle effect(String modId, String id) {
         return effect(new ResourceLocation(modId,id));
     }
@@ -162,22 +179,27 @@ public class DotStyle extends Style {
         public float advance(float advance) {
             return advance;
         }
+
         public float alpha(float alpha) {
             return alpha;
         }
 
-        public void beforeGlyph(Font.StringRenderOutput self, DotStyle style, int index) {
+        public void beforeGlyph(int index, Font.StringRenderOutput self, DotStyle style, int codePoint) {
 
         }
-        public void beforeGlyphEffects(Font.StringRenderOutput self, DotStyle style, int index, FontSet fontset, GlyphInfo glyphinfo, BakedGlyph bakedglyph, TextColor textcolor, float f, float f1, float f2, float f3, float f6, float f7) {
+
+        public void beforeGlyphEffects(int index, Font.StringRenderOutput self, DotStyle style, int codePoint) {
 
         }
-        public void afterGlyph(Font.StringRenderOutput self, DotStyle style, int index, FontSet fontset, GlyphInfo glyphinfo, BakedGlyph bakedglyph, TextColor textcolor, float f, float f1, float f2, float f3, float f6, float f7) {
+
+        public void afterGlyph(int index, Font.StringRenderOutput self, DotStyle style, int codePoint) {
             
         }
 
         public abstract ResourceLocation id();
+
         public abstract void write(CompoundTag tag);
+
         public abstract void read(CompoundTag tag);
     }
 

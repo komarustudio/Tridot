@@ -33,6 +33,10 @@ public class TextBuilder {
         renderProps = new TextRenderProps();
     }
 
+    public static void reset() {
+        tmp[0] = tmp[1] = 0;
+    }
+
     public TextBuilder renderStyle(UnaryOperator<TextRenderProps> renderStyle) {
         renderProps = renderStyle.apply(renderProps);
         return this;
@@ -42,10 +46,12 @@ public class TextBuilder {
         this.text.append(text);
         return this;
     }
+
     public TextBuilder add(Component component) {
         text.append(component);
         return this;
     }
+
     public TextBuilder add(TextBuilder builder) {
         text.append(builder.get());
         return this;
@@ -54,21 +60,25 @@ public class TextBuilder {
     public TextBuilder color(TextColor col) {
         return style(style -> style.color(col));
     }
+
     public TextBuilder color(int col) {
         return style(style -> style.color(TextColor.fromRgb(col)));
     }
+
     public TextBuilder color(String hex) {
         return style(style -> style.color(Col.fromHex(hex)));
     }
+
     public TextBuilder color(Color col) {
         return style(style -> style.color(col));
     }
+
     public TextBuilder color(Col col) {
         return style(style -> style.color(col));
     }
 
     public TextBuilder style(UnaryOperator<DotStyle> style) {
-        if(!(text.getStyle() instanceof DotStyle)) text.setStyle(DotStyle.of().from(text.getStyle()));
+        if (!(text.getStyle() instanceof DotStyle)) text.setStyle(DotStyle.of().from(text.getStyle()));
         text.setStyle(style.apply((DotStyle) text.getStyle()));
         return this;
     }
@@ -77,6 +87,7 @@ public class TextBuilder {
         text = (MutableComponent) comp;
         return this;
     }
+
     public TextBuilder text(String comp) {
         text = Component.literal(comp);
         return this;
@@ -90,45 +101,46 @@ public class TextBuilder {
     public TextBuilder effects() {
         return style(DotStyle::effects);
     }
+
     public TextBuilder effects(DotStyle.StyleEffect... effs) {
         return style(s -> s.effects(effs));
     }
+
     public TextBuilder effects(ResourceLocation... effs) {
         return style(s -> s.effects(effs));
     }
 
     public TextBuilder render(GuiGraphics g, float x, float y, UnaryOperator<TextRenderProps> props) {
         renderStyle(props);
-        return render(g,x,y);
+        return render(g, x, y);
     }
 
     public TextBuilder render(GuiGraphics g, float x, float y) {
         GuiDraw d = new GuiDraw(g);
-
-        x += tmp[0];
-        y += tmp[1];
-
-        float w = width(true);
-        float h = height(true);
-
         List<FormattedCharSequence> split = split(true);
+        float h = split.size() * 9 * renderProps.scaleY;
+        float w = 0;
+        for (FormattedCharSequence seq : split) {
+            w = Math.max(w, Utils.mc().font.width(seq));
+        }
+        w *= renderProps.scaleX;
 
-        if(renderProps.xCentered) x -= w/2f;
-        if(renderProps.yCentered) y -= h/2f;
+        if (renderProps.xCentered) x -= w / 2f;
+        if (renderProps.yCentered) y -= h / 2f;
 
         d.push();
-        d.move(x,y);
+        d.move(x, y);
         d.scale(renderProps.scaleX, renderProps.scaleY);
 
-        if(renderProps.clipRect != null && renderProps.clipRect != AbsRect.ZERO) {
-            if(renderProps.persistentClip) {
+        if (renderProps.clipRect != null && renderProps.clipRect != AbsRect.ZERO) {
+            if (renderProps.persistentClip) {
                 d.move(-tmp[0], -tmp[1]);
             }
 
             PoseStack pose = g.pose();
             AbsRect r = renderProps.clipRect.pose(pose);
 
-            if(renderProps.persistentClip) {
+            if (renderProps.persistentClip) {
                 d.move(tmp[0], tmp[1]);
             }
 
@@ -141,11 +153,11 @@ public class TextBuilder {
         int i = 0;
         for (FormattedCharSequence charseq : split) {
             float locw = Utils.mc().font.width(charseq);
-            g.drawString(Utils.mc().font,charseq,renderProps.xCentered ? w/2f/renderProps.scaleX-locw/2f : 0f,i * 9, Tmp.c1.set(1f,1f,1f,renderProps.alpha).argb8888(), renderProps.shadow);
+            g.drawString(Utils.mc().font, charseq, renderProps.xCentered ? w / 2f / renderProps.scaleX - locw / 2f : 0f, i * 9, Tmp.c1.set(1f, 1f, 1f, renderProps.alpha).argb8888(), renderProps.shadow);
             i++;
         }
 
-        if(renderProps.clipRect != null && renderProps.clipRect != AbsRect.ZERO) {
+        if (renderProps.clipRect != null && renderProps.clipRect != AbsRect.ZERO) {
             d.scissorsOff();
         }
 
@@ -155,17 +167,14 @@ public class TextBuilder {
     }
 
     public TextBuilder next(boolean horizontal, boolean vertical) {
-        if(horizontal) tmp[0] += width(true);
-        if(vertical) tmp[1] += height(true);
-        return this;
-    }
-    public TextBuilder end() {
-        tmp[0] = tmp[1] = 0;
+        if (horizontal) tmp[0] += width(true);
+        if (vertical) tmp[1] += height(true);
         return this;
     }
 
-    public static void reset() {
+    public TextBuilder end() {
         tmp[0] = tmp[1] = 0;
+        return this;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -174,13 +183,15 @@ public class TextBuilder {
         int max = 0;
         for (FormattedCharSequence ch : spl) {
             int v = Minecraft.getInstance().font.width(ch);
-            if(v > max) max = v;
+            if (v > max) max = v;
         }
         return max * (useRender ? renderProps.scaleX : 1f);
     }
+
     public float height(boolean useRender) {
         return split(useRender).size() * 9 * (useRender ? renderProps.scaleY : 1f);
     }
+
     public List<FormattedCharSequence> split(boolean useRender) {
         int maxw = renderProps.maxWidth != -1f ? (int) (renderProps.maxWidth / (useRender ? renderProps.scaleX : 1f)) : Integer.MAX_VALUE;
         return Utils.mc().font.split(text, maxw);

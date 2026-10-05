@@ -30,7 +30,7 @@ public class Col {
     }
 
     public TextColor toTextColor() {
-        return TextColor.fromRgb(toARGB());
+        return TextColor.fromRgb(toARGB() & 0xFFFFFF);
     }
 
     public int toARGB() {
@@ -58,21 +58,7 @@ public class Col {
     }
 
     public static int intArgb(Col color) {
-        // Input color string in RRGGBBAA format
-        String rrggbbaa = color.toString(); // Example
-
-        // Extract components
-        String rr = rrggbbaa.substring(0, 2);
-        String gg = rrggbbaa.substring(2, 4);
-        String bb = rrggbbaa.substring(4, 6);
-        String aa = rrggbbaa.substring(6, 8);
-
-        // Rearrange to AARRGGBB
-        String aarrggbb = aa + rr + gg + bb;
-
-        // Convert to integer
-        int colorInt = (int) Long.parseLong(aarrggbb, 16);
-        return colorInt;
+        return color.argb8888();
     }
 
     public static Col fromARGB(int aarrggbb) {
@@ -82,27 +68,6 @@ public class Col {
 
     public static int intArgb(String str) {
         return intArgb(fromHex(str));
-    }
-
-    public static float relativeLuminance(int colorCode) {
-        Col color = new Col(colorCode);
-        float r = color.r <= 0.03928
-                ? color.r/12.92f
-                : (float) Math.pow((color.r + 0.055) / 1.055d, 2.4d);
-        float g = color.g <= 0.03928
-                ? color.g/12.92f
-                : (float) Math.pow((color.g + 0.055) / 1.055d, 2.4d);
-        float b = color.b <= 0.03928
-                ? color.b/12.92f
-                : (float) Math.pow((color.b + 0.055) / 1.055d, 2.4d);
-        return 0.2126f * r + 0.7152f * g + 0.0722f * b;
-    }
-
-    public static float chatContrast(int color) {
-        return contrast(color,0x4B5668);
-    }
-    public static float contrast(int first, int second) {
-        return (float) ((relativeLuminance(first)+0.05)/(relativeLuminance(second)+0.05));
     }
 
     /**

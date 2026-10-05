@@ -110,6 +110,7 @@ dependencies{
     compileOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.7.0")
     compileOnly fg.deobf("curse.maven:mmmmmmmmmmmm-225738:6608233")
     compileOnly fg.deobf("curse.maven:selene-499980:6740431")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

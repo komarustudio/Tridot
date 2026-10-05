@@ -108,13 +108,16 @@ public class TextBuilder {
         x += tmp[0];
         y += tmp[1];
 
-        float w = width(true);
-        float h = height(true);
-
         List<FormattedCharSequence> split = split(true);
+        float h = split.size() * 9 * renderProps.scaleY;
+        float w = 0;
+        for (FormattedCharSequence seq : split) {
+            w = Math.max(w, Utils.mc().font.width(seq));
+        }
 
-        if(renderProps.xCentered) x -= w/2f;
-        if(renderProps.yCentered) y -= h/2f;
+        w *= renderProps.scaleX;
+        if (renderProps.xCentered) x -= w / 2f;
+        if (renderProps.yCentered) y -= h / 2f;
 
         d.push();
         d.move(x,y);

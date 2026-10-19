@@ -1,41 +1,38 @@
 package pro.komaru.tridot.util.phys;
 
-import net.minecraft.nbt.CompoundTag;
-import pro.komaru.tridot.util.comps.phys.Pos3;
-import pro.komaru.tridot.util.comps.phys.X;
-import pro.komaru.tridot.util.comps.phys.Y;
-import pro.komaru.tridot.util.comps.phys.Z;
-import pro.komaru.tridot.util.math.Interp;
+import net.minecraft.nbt.*;
+import pro.komaru.tridot.util.comps.phys.*;
+import pro.komaru.tridot.util.math.*;
 
 import java.io.*;
 
-public class Vec3 implements Pos3,Serializable {
+public class Vec3f implements Pos3, Serializable {
 
-    public float x,y,z;
+    public float x, y, z;
 
-    public Vec3(float x, float y, float z) {
-        set(x,y,z);
+    public Vec3f(float x, float y, float z) {
+        set(x, y, z);
     }
-    public Vec3(double x, double y, double z) {
+    public Vec3f(double x, double y, double z) {
         set((float) x, (float) y, (float) z);
     }
-    public Vec3(Pos3 pos) {
+    public Vec3f(Pos3 pos) {
         set(pos);
     }
-    public Vec3() {
-        set(0f,0f,0f);
+    public Vec3f() {
+        set(0f, 0f, 0f);
     }
 
-    public static Vec3 from(net.minecraft.world.phys.Vec3 mc) {
-        return new Vec3((float) mc.x, (float) mc.y, (float) mc.z);
+    public static Vec3f from(net.minecraft.world.phys.Vec3 mc) {
+        return new Vec3f((float) mc.x, (float) mc.y, (float) mc.z);
     }
 
-    public static Vec3 zero() {
-        return new Vec3();
+    public static Vec3f zero() {
+        return new Vec3f();
     }
 
-    public Vec3 cpy() {
-        return new Vec3(this);
+    public Vec3f cpy() {
+        return new Vec3f(this);
     }
 
     @Override
@@ -44,7 +41,7 @@ public class Vec3 implements Pos3,Serializable {
     }
 
     @Override
-    public Vec3 x(float value) {
+    public Vec3f x(float value) {
         x = value;
         return this;
     }
@@ -55,7 +52,7 @@ public class Vec3 implements Pos3,Serializable {
     }
 
     @Override
-    public Vec3 y(float value) {
+    public Vec3f y(float value) {
         y = value;
         return this;
     }
@@ -66,61 +63,61 @@ public class Vec3 implements Pos3,Serializable {
     }
 
     @Override
-    public Vec3 z(float value) {
+    public Vec3f z(float value) {
         z = value;
         return this;
     }
 
-    public Vec3 add(Pos3 xyz) {
+    public Vec3f add(Pos3 xyz) {
         return add((X & Y & Z) xyz);
     }
-    public <XYZ extends X & Y & Z> Vec3 add(XYZ xyz) {
+    public <XYZ extends X & Y & Z> Vec3f add(XYZ xyz) {
         return add(xyz, xyz, xyz);
     }
-    public Vec3 add(X x, Y y, Z z) {
+    public Vec3f add(X x, Y y, Z z) {
         return add(x.x(), y.y(), z.z());
     }
-    public Vec3 add(float x, float y, float z) {
+    public Vec3f add(float x, float y, float z) {
         set(x() + x, y() + y, z() + z);
         return this;
     }
 
-    public Vec3 sub(Pos3 xyz) {
+    public Vec3f sub(Pos3 xyz) {
         return sub((X & Y & Z) xyz);
     }
-    public <XYZ extends X & Y & Z> Vec3 sub(XYZ xyz) {
+    public <XYZ extends X & Y & Z> Vec3f sub(XYZ xyz) {
         return sub(xyz, xyz, xyz);
     }
-    public Vec3 sub(X x, Y y, Z z) {
+    public Vec3f sub(X x, Y y, Z z) {
         return sub(x.x(), y.y(), z.z());
     }
-    public Vec3 sub(float x, float y, float z) {
+    public Vec3f sub(float x, float y, float z) {
         return add(-x, -y, -z);
     }
 
-    public Vec3 set(Pos3 other) {
-        return set(other.x(),other.y(),other.z());
+    public Vec3f set(Pos3 other) {
+        return set(other.x(), other.y(), other.z());
     }
-    public Vec3 set(float x, float y, float z) {
+    public Vec3f set(float x, float y, float z) {
         this.x(x);
         this.y(y);
         z(z);
         return this;
     }
 
-    public Vec3 scale(float scl) {
+    public Vec3f scale(float scl) {
         return scale(scl, scl, scl);
     }
-    public Vec3 scale(Pos3 xyz) {
+    public Vec3f scale(Pos3 xyz) {
         return scale((X & Y & Z) xyz);
     }
-    public <XYZ extends X & Y & Z> Vec3 scale(XYZ xyz) {
-        return scale(xyz,xyz,xyz);
+    public <XYZ extends X & Y & Z> Vec3f scale(XYZ xyz) {
+        return scale(xyz, xyz, xyz);
     }
-    public Vec3 scale(X x, Y y, Z z) {
+    public Vec3f scale(X x, Y y, Z z) {
         return scale(x.x(), y.y(), z.z());
     }
-    public Vec3 scale(float x, float y, float z) {
+    public Vec3f scale(float x, float y, float z) {
         set(x() * x, y() * y, z() * z);
         return this;
     }
@@ -132,7 +129,7 @@ public class Vec3 implements Pos3,Serializable {
         return (float) Math.sqrt(len2());
     }
 
-    public Vec3 nor() {
+    public Vec3f nor() {
         return scale(1 / len());
     }
 
@@ -146,21 +143,21 @@ public class Vec3 implements Pos3,Serializable {
         nbt.putFloat("z", z());
         return nbt;
     }
-    public Vec3 fromNbtVec(CompoundTag nbt) {
+    public Vec3f fromNbtVec(CompoundTag nbt) {
         return set(nbt.getFloat("x"), nbt.getFloat("y"), nbt.getFloat("z"));
     }
 
-    public Vec3 lerp(Pos3 pos, float progress) {
-        return lerp(pos,progress,Interp.linear);
+    public Vec3f lerp(Pos3 pos, float progress) {
+        return lerp(pos, progress, Interp.linear);
     }
-    public Vec3 lerp(Pos3 pos, float progress, Interp interp) {
+    public Vec3f lerp(Pos3 pos, float progress, Interp interp) {
         float x = interp.apply(progress, x(), pos.x());
         float y = interp.apply(progress, y(), pos.y());
         float z = interp.apply(progress, z(), pos.z());
         return set(x, y, z);
     }
 
-    public Vec3 rotate(float degX, float degY, float degZ) {
+    public Vec3f rotate(float degX, float degY, float degZ) {
         float radiansX = (float) Math.toRadians(degX);
         float radiansY = (float) Math.toRadians(degY);
         float radiansZ = (float) Math.toRadians(degZ);
@@ -189,14 +186,14 @@ public class Vec3 implements Pos3,Serializable {
         return this;
     }
 
-    public Vec3 angle() {
+    public Vec3f angle() {
         Pos3 normalized = cpy().nor();
         float yaw = (float) Math.atan2(normalized.z(), normalized.x());
         float pitch = (float) Math.asin(normalized.y());
-        return set(pitch,yaw,0);
+        return set(pitch, yaw, 0);
     }
 
-    public Vec3 angleBetween(Pos3 other) {
+    public Vec3f angleBetween(Pos3 other) {
         return other.cpypos().vec().sub(this).angle().rotationFix();
     }
 
@@ -204,7 +201,7 @@ public class Vec3 implements Pos3,Serializable {
         return x() * other.y() - y() * other.x();
     }
 
-    public Vec3 rotationFix() {
+    public Vec3f rotationFix() {
         if (x() > 180) this.x(x() - 360);
         if (y() > 180) this.y(y() - 360);
         if (z() > 180) z(z() - 360);
@@ -223,12 +220,12 @@ public class Vec3 implements Pos3,Serializable {
         return b.x() == x() && b.y() == y() && b.z() == z();
     }
 
-    public void constrain(Vec3 target, float targetDist, boolean less, boolean greater) {
+    public void constrain(Vec3f target, float targetDist, boolean less, boolean greater) {
         var delta = target.cpy().sub(this);
         float dst = delta.len();
 
-        if(less && dst < targetDist) return;
-        if(greater && dst > targetDist) return;
+        if (less && dst < targetDist) return;
+        if (greater && dst > targetDist) return;
         if (dst == 0) {
             add(targetDist, 0, 0);
             return;
@@ -242,12 +239,12 @@ public class Vec3 implements Pos3,Serializable {
         set(newX, newY, newZ);
     }
 
-    public void constrain2(Vec3 b, float targetDist, boolean less, boolean greater) {
+    public void constrain2(Vec3f b, float targetDist, boolean less, boolean greater) {
         var delta = b.cpy().sub(this);
         float dst = delta.len();
 
-        if(less && dst < targetDist) return;
-        if(greater && dst > targetDist) return;
+        if (less && dst < targetDist) return;
+        if (greater && dst > targetDist) return;
         if (dst == 0) return;
 
         float diff = (dst - targetDist) / dst / 2f;

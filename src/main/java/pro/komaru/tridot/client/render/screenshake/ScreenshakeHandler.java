@@ -2,22 +2,30 @@ package pro.komaru.tridot.client.render.screenshake;
 
 
 import net.minecraft.client.*;
+import net.minecraft.core.*;
+import net.minecraft.server.level.*;
 import net.minecraft.util.*;
+import net.minecraft.world.entity.player.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
+import net.neoforged.api.distmarker.*;
+import net.neoforged.fml.loading.*;
 import net.neoforged.neoforge.client.event.*;
 import org.jetbrains.annotations.*;
 import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.networking.*;
 import pro.komaru.tridot.client.*;
 import pro.komaru.tridot.common.config.*;
+import pro.komaru.tridot.common.networking.packets.*;
 import pro.komaru.tridot.util.*;
 import pro.komaru.tridot.util.math.*;
 import pro.komaru.tridot.util.math.raycast.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class ScreenshakeHandler{
-    public static final ArrayList<ScreenshakeInstance> INSTANCES = new ArrayList<>();
+    public static final List<ScreenshakeInstance> INSTANCES = new CopyOnWriteArrayList<>();
     public static float intensityRotation;
     public static float intensityPosition;
     public static float intensityFov;
@@ -160,7 +168,31 @@ public class ScreenshakeHandler{
     }
 
     public static void add(ScreenshakeInstance instance){
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) return;
         INSTANCES.add(instance);
+    }
+
+    public static void add(Level level, ScreenshakeInstance instance){
+        if (level != null && !level.isClientSide) {
+            if (instance instanceof PositionedScreenshakeInstance pos) {
+                PacketHandler.sendToTracking(level, BlockPos.containing(pos.position.x, pos.position.y, pos.position.z), new ScreenshakePacket(pos));
+            } else {
+                PacketHandler.sendToAll(new ScreenshakePacket(instance));
+            }
+
+            return;
+        }
+
+        add(instance);
+    }
+
+    public static void add(Player player, ScreenshakeInstance instance){
+        if (player instanceof ServerPlayer serverPlayer) {
+            PacketHandler.sendTo(serverPlayer, new ScreenshakePacket(instance));
+            return;
+        }
+
+        add(instance);
     }
 
     public static float randomizeOffset(float offset){

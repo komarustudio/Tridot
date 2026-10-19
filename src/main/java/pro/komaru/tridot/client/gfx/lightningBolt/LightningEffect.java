@@ -11,7 +11,7 @@ import pro.komaru.tridot.util.phys.*;
 @OnlyIn(Dist.CLIENT)
 public class LightningEffect{
 
-    private static void addLayeredSegments(Vec3 startPos, int segCount, float scaleMod, float segTaper, Col color, float[] segXOffset, float xOffSum, float[] segZOffset, float zOffSum, float relScale, Matrix4f matrix4f, VertexConsumer builder, float segHeight){
+    private static void addLayeredSegments(Vec3f startPos, int segCount, float scaleMod, float segTaper, Col color, float[] segXOffset, float xOffSum, float[] segZOffset, float zOffSum, float relScale, Matrix4f matrix4f, VertexConsumer builder, float segHeight){
         for(int layer = 0; layer < 4; ++layer){
             float red = color.r;
             float green = color.g;
@@ -39,9 +39,9 @@ public class LightningEffect{
         }
     }
 
-    public static void renderLightningP2PRotate(PoseStack mStack, MultiBufferSource getter, Vec3 startPos, Vec3 endPos, LightningInstance cache) {
+    public static void renderLightningP2PRotate(PoseStack mStack, MultiBufferSource getter, Vec3f startPos, Vec3f endPos, LightningInstance cache) {
         mStack.pushPose();
-        Vec3 dirVec = endPos.cpy();
+        Vec3f dirVec = endPos.cpy();
         dirVec.sub(startPos);
         dirVec.nor();
 

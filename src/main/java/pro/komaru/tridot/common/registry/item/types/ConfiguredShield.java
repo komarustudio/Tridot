@@ -19,12 +19,15 @@ import pro.komaru.tridot.*;
 import pro.komaru.tridot.api.*;
 import pro.komaru.tridot.api.interfaces.*;
 import pro.komaru.tridot.api.networking.*;
+import pro.komaru.tridot.client.render.screenshake.*;
 import pro.komaru.tridot.common.networking.packets.*;
 import pro.komaru.tridot.common.registry.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.builders.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.util.*;
+import pro.komaru.tridot.util.comps.phys.*;
+import pro.komaru.tridot.util.math.*;
 import pro.komaru.tridot.util.struct.data.*;
 
 import java.util.*;
@@ -221,6 +224,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             if (builder.parrySound != null) level.playSound(null, player.blockPosition(), builder.parrySound, SoundSource.PLAYERS);
             if (player instanceof ServerPlayer server) PacketHandler.sendTo(server, new ParryParticlePacket(entity.getX(), entity.getY() + 0.5f, entity.getZ()));
 
+            ScreenshakeHandler.add(level, new PositionedScreenshakeInstance(20, Pos3.init((float) entity.getX(), (float) entity.getY(), (float) entity.getZ()), 0, 3, Interp.elastic).interp(Interp.fade).intensity(2));
             player.invulnerableTime = 20;
             onShieldDisable(itemStack, level, player, null, false);
             applyCooldown(player, builder.parryCooldownTicks, false);

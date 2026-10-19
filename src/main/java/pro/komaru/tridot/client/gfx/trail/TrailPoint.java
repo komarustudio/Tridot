@@ -1,15 +1,15 @@
 package pro.komaru.tridot.client.gfx.trail;
 
-import org.joml.Vector4f;
-import pro.komaru.tridot.util.comps.phys.Pos3;
-import pro.komaru.tridot.util.phys.Vec3;
+import org.joml.*;
+import pro.komaru.tridot.util.comps.phys.*;
+import pro.komaru.tridot.util.phys.*;
 
 public class TrailPoint{
-    private final Vec3 position;
+    private final Vec3f position;
     private int timeActive;
 
     public TrailPoint(Pos3 position, int timeActive){
-        this.position = new Vec3(position);
+        this.position = new Vec3f(position);
         this.timeActive = timeActive;
     }
 
@@ -18,11 +18,11 @@ public class TrailPoint{
     }
 
     public Vector4f getMatrixPosition(){
-        Vec3 position = getPosition();
+        Vec3f position = getPosition();
         return new Vector4f(position.x, position.y, position.z, 1.0f);
     }
 
-    public Vec3 getPosition(){
+    public Vec3f getPosition(){
         return position;
     }
 
@@ -31,7 +31,7 @@ public class TrailPoint{
     }
 
     public TrailPoint lerp(TrailPoint trailPoint, float delta){
-        Vec3 position = getPosition();
+        Vec3f position = getPosition();
         return new TrailPoint(position.lerp(trailPoint.position, delta), timeActive);
     }
 

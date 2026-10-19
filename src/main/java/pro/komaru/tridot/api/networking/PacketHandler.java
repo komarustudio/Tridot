@@ -9,10 +9,10 @@ import net.neoforged.neoforge.network.event.*;
 import net.neoforged.neoforge.network.registration.*;
 import net.neoforged.neoforge.server.*;
 import pro.komaru.tridot.*;
-import pro.komaru.tridot.common.networking.AbstractPacketHandler;
+import pro.komaru.tridot.common.networking.*;
 import pro.komaru.tridot.common.networking.packets.*;
-import pro.komaru.tridot.util.struct.data.Seq;
-import pro.komaru.tridot.util.struct.stash.net.SyncStashObjectPacket;
+import pro.komaru.tridot.util.struct.data.*;
+import pro.komaru.tridot.util.struct.stash.net.*;
 
 import java.util.function.*;
 
@@ -34,6 +34,8 @@ public class PacketHandler extends AbstractPacketHandler {
         registrar.playToClient(SyncStashObjectPacket.TYPE, SyncStashObjectPacket.STREAM_CODEC, Packet::handle);
         registrar.playToServer(CutsceneSkippedPacket.TYPE, CutsceneSkippedPacket.STREAM_CODEC, CutsceneSkippedPacket::handle);
         registrar.playToClient(ParryParticlePacket.TYPE, ParryParticlePacket.STREAM_CODEC, ParryParticlePacket::handle);
+        registrar.playToClient(ScreenshakePacket.TYPE, ScreenshakePacket.STREAM_CODEC, Packet::handle);
+        registrar.playToClient(PlayEffectPacket.TYPE, PlayEffectPacket.STREAM_CODEC, Packet::handle);
         EXTRA.each(c -> c.accept(registrar));
     }
 

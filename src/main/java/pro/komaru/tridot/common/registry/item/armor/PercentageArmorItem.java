@@ -1,8 +1,6 @@
 package pro.komaru.tridot.common.registry.item.armor;
 
-import com.google.common.base.Suppliers;
-import org.jetbrains.annotations.*;
-import pro.komaru.tridot.common.config.CommonConfig;
+import com.google.common.base.*;
 import net.minecraft.*;
 import net.minecraft.core.*;
 import net.minecraft.network.chat.*;
@@ -12,10 +10,10 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.*;
 import net.neoforged.api.distmarker.*;
+import pro.komaru.tridot.common.config.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.builders.*;
 
-import java.text.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -30,7 +28,6 @@ public class PercentageArmorItem extends ArmorItem{
         for(ArmorItem.Type type : ArmorItem.Type.values()) map.put(type, ResourceLocation.withDefaultNamespace("armor." + type.getName()));
     });
 
-    public final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), (p_41704_) -> p_41704_.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
     public ItemAttributeModifiers defaultModifiers;
     private final Supplier<ItemAttributeModifiers> percentModifiers = Suppliers.memoize(() -> buildModifiers(true));
     private final Supplier<ItemAttributeModifiers> vanillaModifiers = Suppliers.memoize(() -> buildModifiers(false));

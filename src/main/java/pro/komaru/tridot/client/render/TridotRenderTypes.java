@@ -10,7 +10,7 @@ import net.neoforged.bus.api.*;
 import net.neoforged.fml.common.*;
 import net.neoforged.fml.event.lifecycle.*;
 import org.lwjgl.opengl.*;
-import pro.komaru.tridot.Tridot;
+import pro.komaru.tridot.*;
 import pro.komaru.tridot.client.gfx.*;
 
 import java.util.*;
@@ -111,6 +111,15 @@ public class TridotRenderTypes{
     DefaultVertexFormat.PARTICLE, VertexFormat.Mode.QUADS, 256, false, true, RenderType.CompositeState.builder()
     .setWriteMaskState(COLOR_WRITE).setLightmapState(LIGHTMAP).setTransparencyState(NORMAL_TRANSPARENCY)
     .setShaderState(TRANSLUCENT_SHADER).createCompositeState(true));
+
+    public static RenderType WEAPON_TRAIL = DotRenderType.createRenderType(Tridot.ID + ":weapon_trail",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 2048, false, true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(DotRenderType.LIGHTNING_SHADER)
+                    .setTransparencyState(DotRenderType.LIGHTNING_TRANSPARENCY_STATE)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .createCompositeState(false));
 
     @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{

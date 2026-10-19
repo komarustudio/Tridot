@@ -1,11 +1,13 @@
 package pro.komaru.tridot.util.comps.render;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import org.joml.Matrix4f;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.*;
+import org.joml.*;
 import pro.komaru.tridot.util.comps.phys.*;
-import pro.komaru.tridot.util.phys.Vec3;
-import pro.komaru.tridot.util.struct.func.Cons;
+import pro.komaru.tridot.util.phys.*;
+import pro.komaru.tridot.util.struct.func.*;
+
+import java.lang.Math;
 
 public interface RenderStackc {
     PoseStack stack();
@@ -110,20 +112,20 @@ public interface RenderStackc {
         return pose(s -> s.mulPose(Axis.ZP.rotationDegrees(angle)));
     }
 
-    default Vec3 trns() {
+    default Vec3f trns() {
         var mat = matrix();
-        return new Vec3(mat.m30(), mat.m31(), mat.m32());
+        return new Vec3f(mat.m30(), mat.m31(), mat.m32());
     }
 
-    default Vec3 scl() {
+    default Vec3f scl() {
         var mat = matrix();
         float sclX = (float) Math.sqrt(mat.m00() * mat.m00() + mat.m01() * mat.m01() + mat.m02() * mat.m02());
         float sclY = (float) Math.sqrt(mat.m10() * mat.m10() + mat.m11() * mat.m11() + mat.m12() * mat.m12());
         float sclZ = (float) Math.sqrt(mat.m20() * mat.m20() + mat.m21() * mat.m21() + mat.m22() * mat.m22());
-        return new Vec3(sclX, sclY, sclZ);
+        return new Vec3f(sclX, sclY, sclZ);
     }
 
-    default Vec3 rot() {
+    default Vec3f rot() {
         var mat = matrix();
         var scale = scl();
 
@@ -135,7 +137,7 @@ public interface RenderStackc {
         float pitch = (float) Math.asin(-yYaw);
         float roll = (float) Math.atan2(mat.m12() / scale.z, mat.m11() / scale.y);
 
-        return new Vec3(pitch, yaw, roll);
+        return new Vec3f(pitch, yaw, roll);
     }
 
     default Matrix4f matrix() {

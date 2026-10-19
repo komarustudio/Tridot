@@ -1,6 +1,6 @@
 package pro.komaru.tridot.util.comps.phys;
 
-import pro.komaru.tridot.util.phys.Vec3;
+import pro.komaru.tridot.util.phys.*;
 
 public interface Pos3 extends X,Y,Z {
     @Override
@@ -11,7 +11,7 @@ public interface Pos3 extends X,Y,Z {
     Pos3 z(float value);
 
     static Pos3 init(float x, float y, float z) {
-        return new Vec3(x,y,z);
+        return new Vec3f(x,y,z);
     }
 
     default Pos3 cpypos() {
@@ -21,7 +21,7 @@ public interface Pos3 extends X,Y,Z {
         return init(x,y,z);
     }
 
-    default pro.komaru.tridot.util.phys.Vec3 vec() {
-        return new pro.komaru.tridot.util.phys.Vec3(this);
+    default Vec3f vec() {
+        return new Vec3f(this);
     }
 }

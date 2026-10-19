@@ -350,13 +350,15 @@ public class DotStyleEffects {
         }
 
         @Override
-        public void write(CompoundTag tag){
+        public void write(CompoundTag tag) {
+            tag.putInt("text_color", glintColor.toARGB());
             tag.putFloat("speed", speed);
             tag.putFloat("scl", scl);
         }
 
         @Override
-        public void read(CompoundTag tag){
+        public void read(CompoundTag tag) {
+            glintColor = Col.fromARGB(tag.getInt("text_color"));
             speed = tag.getFloat("speed");
             scl = tag.getFloat("scl");
         }

@@ -103,7 +103,7 @@ public class TrailParticleBehavior extends ParticleBehavior implements ICustomBe
     @Override
     public void updateTraits(GenericParticle particle){
         TrailParticleBehaviorComponent component = getTrailComponent(particle);
-        component.trailPointBuilder.add(Vec3.from(particle.getPosition()));
+        component.trailPointBuilder.add(Vec3f.from(particle.getPosition()));
         component.trailPointBuilder.tick();
 
         pickColor(particle, colorData.colorCurveEasing.apply(colorData.getProgress(particle.age, particle.lifetime)));
@@ -133,14 +133,14 @@ public class TrailParticleBehavior extends ParticleBehavior implements ICustomBe
             float x = Mth.lerp(partialTicks, position.getPosition().x, nextPosition.getPosition().x);
             float y = Mth.lerp(partialTicks, position.getPosition().y, nextPosition.getPosition().y);
             float z = Mth.lerp(partialTicks, position.getPosition().z, nextPosition.getPosition().z);
-            trail.set(0, new TrailPoint(new Vec3(x, y, z)));
+            trail.set(0, new TrailPoint(new Vec3f(x, y, z)));
         }
 
         float x = (float)(Mth.lerp(partialTicks, particle.xo, particle.x));
         float y = (float)(Mth.lerp(partialTicks, particle.yo, particle.y));
         float z = (float)(Mth.lerp(partialTicks, particle.zo, particle.z));
         if(!trail.isEmpty()){
-            trail.set(trail.size() - 1, new TrailPoint(new Vec3(x, y, z)));
+            trail.set(trail.size() - 1, new TrailPoint(new Vec3f(x, y, z)));
         }
 
         RenderBuilder builder = RenderBuilder.create().setRenderType(particle.renderType).setSided(firstSide, secondSide)

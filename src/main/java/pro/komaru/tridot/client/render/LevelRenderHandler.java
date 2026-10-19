@@ -79,6 +79,9 @@ public class LevelRenderHandler{
     public static void shadersDelayedRender(RenderLevelStageEvent event){
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL){
             RenderSystem.setShaderFogStart(FOG_START);
+
+            for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
+
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();
             if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
@@ -86,7 +89,9 @@ public class LevelRenderHandler{
             for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();
-            for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
+
+            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
+
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().setIdentity();
             if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
@@ -94,7 +99,6 @@ public class LevelRenderHandler{
             for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();
-            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
             FogRenderer.setupNoFog();
         }
     }

@@ -34,8 +34,8 @@ import java.util.*;
 @OnlyIn(Dist.CLIENT)
 public class LightningInstance {
     public int age;
-    public final Vec3 start;
-    public final Vec3 end;
+    public final Vec3f start;
+    public final Vec3f end;
     public final LightningBuilder builder;
 
     // cached values for optimization purposes
@@ -49,16 +49,16 @@ public class LightningInstance {
     public final float rotY;
     public final float rotX;
 
-    private LightningInstance(LightningBuilder builder, Vec3 start, Vec3 end) {
+    private LightningInstance(LightningBuilder builder, Vec3f start, Vec3f end) {
         this.builder = builder;
         this.start = start;
         this.end = end;
         this.age = 0;
 
         float length = Mathf.distance(start, end);
-        Vec3 virtualEndPos = start.cpy().add(0, length, 0);
+        Vec3f virtualEndPos = start.cpy().add(0, length, 0);
 
-        Vec3 dirVec = end.cpy().sub(start).nor();
+        Vec3f dirVec = end.cpy().sub(start).nor();
         double dirVecXZDist = Math.sqrt(dirVec.x * dirVec.x + dirVec.z * dirVec.z);
 
         this.rotY = (float)(Mth.atan2(dirVec.x, dirVec.z) * (180F / Math.PI));
@@ -178,8 +178,12 @@ public class LightningInstance {
             return this;
         }
 
-        public LightningInstance build(Vec3 start, Vec3 end) {
+        public LightningInstance build(Vec3f start, Vec3f end) {
             return new LightningInstance(this, start, end);
+        }
+
+        public LightningInstance build(net.minecraft.world.phys.Vec3 start, net.minecraft.world.phys.Vec3 end) {
+            return build(Vec3f.from(start), Vec3f.from(end));
         }
     }
 }

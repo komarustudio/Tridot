@@ -1,5 +1,6 @@
 package pro.komaru.tridot.util.math;
 
+import net.minecraft.world.phys.Vec3;
 import pro.komaru.tridot.util.phys.*;
 import pro.komaru.tridot.util.struct.data.Seq;
 
@@ -42,15 +43,26 @@ public class Mathf {
         return Math.sqrt(dx*dx+dy*dy+dz*dz);
     }
 
-    public static float distanceSq(Vec3 vec1, Vec3 vec2) {
+    public static float distanceSq(Vec3f vec1, Vec3f vec2) {
         float dx = vec1.x - vec2.x;
         float dy = vec1.y - vec2.y;
         float dz = vec1.z - vec2.z;
         return dx * dx + dy * dy + dz * dz;
     }
 
-    public static float distance(Vec3 vec1, Vec3 vec2) {
+    public static float distance(Vec3f vec1, Vec3f vec2) {
         return (float)Math.sqrt(distanceSq(vec1, vec2));
+    }
+
+    public static double distanceSq(Vec3 vec1, net.minecraft.world.phys.Vec3 vec2) {
+        double dx = vec1.x - vec2.x;
+        double dy = vec1.y - vec2.y;
+        double dz = vec1.z - vec2.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static double distance(Vec3 vec1, net.minecraft.world.phys.Vec3 vec2) {
+        return Math.sqrt(distanceSq(vec1, vec2));
     }
 
     /**Lerps from one point to another with specified progress*/

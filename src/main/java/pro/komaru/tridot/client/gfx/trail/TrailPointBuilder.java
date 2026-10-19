@@ -2,7 +2,6 @@ package pro.komaru.tridot.client.gfx.trail;
 
 import org.joml.*;
 import pro.komaru.tridot.util.comps.phys.Pos3;
-import pro.komaru.tridot.util.phys.Vec3;
 
 import java.util.*;
 import java.util.function.*;

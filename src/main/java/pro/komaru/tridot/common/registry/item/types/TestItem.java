@@ -33,7 +33,7 @@ public class TestItem extends Item{
         Col particleColor = Col.pink;
         Col particleColorTo = Col.blue;
 
-        ScreenshakeHandler.add(new ScreenshakeInstance(10).intensity(1).fov(true).vec(true).interp(Interp.bounceIn));
+        ScreenshakeHandler.add(playerIn, new ScreenshakeInstance(10).intensity(1).fov(true).vec(true).interp(Interp.bounceIn));
         ParticleBuilder.create(TridotParticles.HEART.get())
             .setRenderType(TridotRenderTypes.ADDITIVE_PARTICLE)
 

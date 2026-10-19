@@ -22,10 +22,15 @@ import pro.komaru.tridot.util.math.raycast.RayCast;
 import pro.komaru.tridot.util.math.raycast.RayCastContext;
 import pro.komaru.tridot.util.math.raycast.RayHitResult;
 
-import java.util.ArrayList;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ScreenshakeHandler{
-    public static final ArrayList<ScreenshakeInstance> INSTANCES = new ArrayList<>();
+    public static final List<ScreenshakeInstance> INSTANCES = new CopyOnWriteArrayList<>();
     public static float intensityRotation;
     public static float intensityPosition;
     public static float intensityFov;
@@ -168,7 +173,31 @@ public class ScreenshakeHandler{
     }
 
     public static void add(ScreenshakeInstance instance){
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) return;
         INSTANCES.add(instance);
+    }
+
+    public static void add(Level level, ScreenshakeInstance instance){
+        if (level != null && !level.isClientSide) {
+            if (instance instanceof PositionedScreenshakeInstance pos) {
+                PacketHandler.sendToTracking(level, BlockPos.containing(pos.position.x, pos.position.y, pos.position.z), new ScreenshakePacket(pos));
+            } else {
+                PacketHandler.sendToAll(new ScreenshakePacket(instance));
+            }
+
+            return;
+        }
+
+        add(instance);
+    }
+
+    public static void add(Player player, ScreenshakeInstance instance){
+        if (player instanceof ServerPlayer serverPlayer) {
+            PacketHandler.sendTo(serverPlayer, new ScreenshakePacket(instance));
+            return;
+        }
+
+        add(instance);
     }
 
     public static float randomizeOffset(float offset){

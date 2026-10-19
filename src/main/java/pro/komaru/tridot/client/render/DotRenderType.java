@@ -6,6 +6,9 @@ import net.minecraft.client.renderer.*;
 public class DotRenderType extends RenderType {
     public final CompositeState state;
 
+    public static final RenderStateShard.ShaderStateShard LIGHTNING_SHADER = RENDERTYPE_LIGHTNING_SHADER;
+    public static final RenderStateShard.TransparencyStateShard LIGHTNING_TRANSPARENCY_STATE = LIGHTNING_TRANSPARENCY;
+
     public static DotRenderType createRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, CompositeState state){
         return new DotRenderType(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, state);
     }

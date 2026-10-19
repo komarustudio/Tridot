@@ -112,6 +112,15 @@ public class TridotRenderTypes{
     .setWriteMaskState(COLOR_WRITE).setLightmapState(LIGHTMAP).setTransparencyState(NORMAL_TRANSPARENCY)
     .setShaderState(TRANSLUCENT_SHADER).createCompositeState(true));
 
+    public static RenderType WEAPON_TRAIL = DotRenderType.createRenderType(Tridot.ID + ":weapon_trail",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 2048, false, true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(DotRenderType.LIGHTNING_SHADER)
+                    .setTransparencyState(DotRenderType.LIGHTNING_TRANSPARENCY_STATE)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .createCompositeState(false));
+
     @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
         @SubscribeEvent

@@ -28,6 +28,8 @@ public class PacketHandler extends AbstractPacketHandler {
         HANDLER.registerMessage(id++, SyncStashObjectPacket.class, SyncStashObjectPacket::save, SyncStashObjectPacket::new, SyncStashObjectPacket::handle);
         HANDLER.registerMessage(id++, CutsceneSkippedPacket.class, CutsceneSkippedPacket::encode, CutsceneSkippedPacket::decode, CutsceneSkippedPacket::handle);
         HANDLER.registerMessage(id++, ParryParticlePacket.class, ParryParticlePacket::encode, ParryParticlePacket::decode, ParryParticlePacket::handle);
+        HANDLER.registerMessage(id++, PlayEffectPacket.class, PlayEffectPacket::encode, PlayEffectPacket::decode, PlayEffectPacket::handle);
+        HANDLER.registerMessage(id++, ScreenshakePacket.class, ScreenshakePacket::encode, ScreenshakePacket::decode, ScreenshakePacket::handle);
     }
 
     public static SimpleChannel getHandler(){

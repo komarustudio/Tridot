@@ -1,12 +1,13 @@
 package pro.komaru.tridot.common.networking.packets;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+
+
 import net.minecraftforge.network.NetworkEvent;
+import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.api.fx.Effect;
 import pro.komaru.tridot.client.gfx.EffectHandler;
 import pro.komaru.tridot.util.Col;
@@ -75,26 +76,27 @@ public class PlayEffectPacket {
     }
 
     public static void handle(PlayEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                Minecraft mc = Minecraft.getInstance();
-                if (mc.level != null) {
+        if (ctx.get().getDirection().getReceptionSide().isClient()) {
+            ctx.get().enqueueWork(() -> {
+                var level = Tridot.PROXY.getLevel();
+                if (level != null) {
                     Effect effect = Effect.get(msg.effectId);
                     Col col = new Col(msg.colorPacked);
                     Object data = msg.extraData;
                     if (msg.targetVec != null) {
                         data = msg.targetVec;
                     } else if (msg.entityId >= 0) {
-                        Entity ent = mc.level.getEntity(msg.entityId);
+                        Entity ent = level.getEntity(msg.entityId);
                         if (ent != null) {
                             data = ent;
                         }
                     }
 
-                    EffectHandler.spawn(effect, mc.level, msg.x, msg.y, msg.z, msg.yaw, msg.pitch, col, data, msg.seed);
+                    EffectHandler.spawn(effect, level, msg.x, msg.y, msg.z, msg.yaw, msg.pitch, col, data, msg.seed);
                 }
             });
-        });
+        }
+
         ctx.get().setPacketHandled(true);
     }
 }

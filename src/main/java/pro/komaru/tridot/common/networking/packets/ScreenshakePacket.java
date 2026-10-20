@@ -129,6 +129,7 @@ public class ScreenshakePacket extends ClientPacket {
             maxDist = buf.readFloat();
             falloffEasing = buf.readUtf();
         }
+
         int duration = buf.readInt();
         float i1 = buf.readFloat();
         float i2 = buf.readFloat();

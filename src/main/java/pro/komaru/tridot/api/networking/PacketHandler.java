@@ -26,7 +26,6 @@ public class PacketHandler extends AbstractPacketHandler {
 
     public static void register(RegisterPayloadHandlersEvent event){
         PayloadRegistrar registrar = registrar(event, Tridot.ID, PROTOCOL);
-        registrar.playToClient(DashParticlePacket.TYPE, DashParticlePacket.STREAM_CODEC, DashParticlePacket::handle);
         registrar.playToClient(CooldownSoundPacket.TYPE, CooldownSoundPacket.STREAM_CODEC, CooldownSoundPacket::handle);
         registrar.playToClient(DungeonSoundPacket.TYPE, DungeonSoundPacket.STREAM_CODEC, DungeonSoundPacket::handle);
         registrar.playToClient(UpdateBossbarPacket.TYPE, UpdateBossbarPacket.STREAM_CODEC, UpdateBossbarPacket::handle);

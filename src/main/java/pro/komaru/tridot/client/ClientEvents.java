@@ -1,6 +1,6 @@
 package pro.komaru.tridot.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.systems.*;
 import com.mojang.datafixers.util.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
@@ -18,11 +18,11 @@ import pro.komaru.tridot.client.model.render.item.bow.*;
 import pro.komaru.tridot.client.render.gui.particle.*;
 import pro.komaru.tridot.client.render.screenshake.*;
 import pro.komaru.tridot.common.config.*;
-import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
+import pro.komaru.tridot.common.registry.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
-import pro.komaru.tridot.common.registry.item.types.ConfiguredShield;
-import pro.komaru.tridot.util.Col;
+import pro.komaru.tridot.common.registry.item.types.*;
+import pro.komaru.tridot.util.*;
 import pro.komaru.tridot.util.struct.data.*;
 
 import java.util.*;
@@ -92,6 +92,11 @@ public class ClientEvents {
     @SubscribeEvent
     public void handleArmorLevelOverlay(RenderGuiLayerEvent.Pre e){
         if (e.getName().equals(VanillaGuiLayers.ARMOR_LEVEL) && CommonConfig.PERCENT_ARMOR.get()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null && mc.player.getArmorValue() > 0) {
+                return;
+            }
+
             e.setCanceled(true);
         }
     }

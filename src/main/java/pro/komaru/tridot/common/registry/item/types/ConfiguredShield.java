@@ -36,7 +36,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
     public AbstractShieldBuilder<? extends ConfiguredShield> builder;
 
     public ConfiguredShield(AbstractShieldBuilder<? extends ConfiguredShield> builder){
-        super(builder.itemProperties);
+        super(builder.buildProperties());
         this.builder = builder;
     }
 

@@ -9,21 +9,20 @@ import net.neoforged.fml.common.*;
 import net.neoforged.fml.event.lifecycle.*;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.*;
-import pro.komaru.tridot.api.interfaces.OverlayRenderItem;
+import pro.komaru.tridot.api.interfaces.*;
 import pro.komaru.tridot.client.*;
-import pro.komaru.tridot.client.compatibility.ShadersIntegration;
+import pro.komaru.tridot.client.compatibility.*;
 import pro.komaru.tridot.client.gfx.*;
-import pro.komaru.tridot.client.render.gui.overlay.OverlayHandler;
+import pro.komaru.tridot.client.render.gui.overlay.*;
 import pro.komaru.tridot.client.render.gui.particle.*;
-import pro.komaru.tridot.client.sound.LoopedSoundInstance;
-import pro.komaru.tridot.client.sound.TridotSoundInstance;
+import pro.komaru.tridot.client.sound.*;
 import pro.komaru.tridot.client.tooltip.*;
 import pro.komaru.tridot.common.config.*;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.common.registry.item.components.client.*;
 
-import static pro.komaru.tridot.Tridot.*;
+import static pro.komaru.tridot.Tridot.BASE_PROJECTILE_DAMAGE_ID;
 
 public class TridotLibClient{
     public static LoopedSoundInstance BOSS_MUSIC;
@@ -64,13 +63,20 @@ public class TridotLibClient{
             event.registerAboveAll(Tridot.ofTridot("boss_bars"), BossBarsOverlay.INSTANCE);
             event.registerAbove(VanillaGuiLayers.ARMOR_LEVEL, Tridot.ofTridot("tridot_armor"), (guiGraphics, deltaTracker) -> {
                 Minecraft mc = Minecraft.getInstance();
-                if (mc.player == null) return;
+                if (mc.player == null || mc.player.isCreative() || mc.player.isSpectator()) return;
+                if (mc.player.getAttribute(AttributeRegistry.PERCENT_ARMOR) == null) return;
                 float currentArmor = (float) mc.player.getAttributeValue(AttributeRegistry.PERCENT_ARMOR);
                 if (currentArmor > 0 && CommonConfig.PERCENT_ARMOR.get()){
                     int screenWidth = guiGraphics.guiWidth();
                     int screenHeight = guiGraphics.guiHeight();
                     int left = screenWidth / 2 - 91;
-                    int top = screenHeight - 39;
+                    int maxHealth = net.minecraft.util.Mth.ceil(mc.player.getMaxHealth());
+                    int absorption = net.minecraft.util.Mth.ceil(mc.player.getAbsorptionAmount());
+                    int healthRows = Math.max(1, net.minecraft.util.Mth.ceil((maxHealth + absorption) / 20.0F));
+                    int top = screenHeight - 39 - (healthRows - 1) * 10;
+                    if (mc.player.getArmorValue() > 0) {
+                        top -= 10;
+                    }
 
                     guiGraphics.blitSprite(ARMOR_FULL_SPRITE, left + ClientConfig.PERCENT_ARMOR_X_OFFSET.get(), top + ClientConfig.PERCENT_ARMOR_Y_OFFSET.get(), 9, 9);
                     if(Math.abs(currentArmor - lastArmorValue) > 0.01F){

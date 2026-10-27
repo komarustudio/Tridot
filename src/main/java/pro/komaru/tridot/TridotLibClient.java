@@ -55,12 +55,19 @@ public class TridotLibClient{
             event.registerAboveAll("boss_bars", BossBarsOverlay.INSTANCE);
             event.registerAbove(VanillaGuiOverlay.ARMOR_LEVEL.id(), "tridot_armor", (gui, guiGraphics, partialTick, screenWidth, screenHeight) -> {
                 Minecraft mc = Minecraft.getInstance();
-                if (mc.player == null) return;
+                if (mc.player == null || mc.player.isCreative() || mc.player.isSpectator()) return;
+                if (mc.player.getAttribute(AttributeRegistry.PERCENT_ARMOR.get()) == null) return;
                 float currentArmor = (float) mc.player.getAttributeValue(AttributeRegistry.PERCENT_ARMOR.get());
                 if (currentArmor > 0 && CommonConfig.PERCENT_ARMOR.get()){
                     int left = screenWidth / 2 - 91;
-                    int top = screenHeight - 39;
-
+                    int maxHealth = net.minecraft.util.Mth.ceil(mc.player.getMaxHealth());
+                    int absorption = net.minecraft.util.Mth.ceil(mc.player.getAbsorptionAmount());
+                    int healthRows = Math.max(1, net.minecraft.util.Mth.ceil((maxHealth + absorption) / 20.0F));
+                    int top = screenHeight - 39 - (healthRows - 1) * 10;
+                    if (mc.player.getArmorValue() > 0) {
+                        top -= 10;
+                    }
+                    
                     guiGraphics.blit(GUI_ICONS_LOCATION, left + ClientConfig.PERCENT_ARMOR_X_OFFSET.get(), top + ClientConfig.PERCENT_ARMOR_Y_OFFSET.get(), 34, 9, 9, 9);
                     if(Math.abs(currentArmor - lastArmorValue) > 0.01F){
                         String formattedValue = String.format("%.1f%%", currentArmor);

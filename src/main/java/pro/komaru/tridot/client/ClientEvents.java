@@ -95,6 +95,11 @@ public class ClientEvents {
     @SubscribeEvent
     public void handleArmorLevelOverlay(RenderGuiOverlayEvent.Pre e){
         if (e.getOverlay() == VanillaGuiOverlay.ARMOR_LEVEL.type() && CommonConfig.PERCENT_ARMOR.get()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null && mc.player.getArmorValue() > 0) {
+                return;
+            }
+
             e.setCanceled(true);
         }
     }

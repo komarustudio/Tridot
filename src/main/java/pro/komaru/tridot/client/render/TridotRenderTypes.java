@@ -1,20 +1,28 @@
 package pro.komaru.tridot.client.render;
 
-import com.mojang.blaze3d.platform.*;
-import com.mojang.blaze3d.systems.*;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.event.lifecycle.*;
-import org.lwjgl.opengl.*;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.lwjgl.opengl.GL11;
 import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.client.gfx.*;
+import pro.komaru.tridot.client.gfx.TridotShaders;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class TridotRenderTypes{
 
@@ -127,12 +135,12 @@ public class TridotRenderTypes{
         public static void registerRenderTypes(FMLClientSetupEvent event){
             addAdditiveParticleRenderType(ADDITIVE_PARTICLE);
             addAdditiveParticleRenderType(ADDITIVE_BLOCK_PARTICLE);
-            addAdditiveRenderType(ADDITIVE_PARTICLE_TEXTURE);
+            addAdditiveParticleRenderType(ADDITIVE_PARTICLE_TEXTURE);
             addAdditiveRenderType(ADDITIVE_TEXTURE);
             addAdditiveRenderType(ADDITIVE);
             addTranslucentParticleRenderType(TRANSLUCENT_PARTICLE);
             addTranslucentParticleRenderType(TRANSLUCENT_BLOCK_PARTICLE);
-            addTranslucentRenderType(TRANSLUCENT_PARTICLE_TEXTURE);
+            addTranslucentParticleRenderType(TRANSLUCENT_PARTICLE_TEXTURE);
             addTranslucentRenderType(TRANSLUCENT_TEXTURE);
             addTranslucentRenderType(TRANSLUCENT);
         }

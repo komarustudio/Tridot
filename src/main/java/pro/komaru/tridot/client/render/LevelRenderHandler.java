@@ -1,25 +1,33 @@
 package pro.komaru.tridot.client.render;
 
-import com.mojang.blaze3d.pipeline.*;
-import com.mojang.blaze3d.platform.*;
-import com.mojang.blaze3d.systems.*;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.*;
-import net.minecraft.client.renderer.*;
-import net.minecraft.world.phys.*;
-import net.minecraftforge.api.distmarker.*;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.eventbus.api.*;
-import net.minecraftforge.fml.*;
-import net.minecraftforge.fml.common.*;
-import org.joml.*;
-import org.lwjgl.opengl.*;
-import pro.komaru.tridot.client.compatibility.*;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
+import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL30C;
+import pro.komaru.tridot.client.compatibility.ShadersIntegration;
 import pro.komaru.tridot.client.gfx.particle.GenericParticle;
 import pro.komaru.tridot.client.gfx.particle.ICustomParticleRender;
 import pro.komaru.tridot.client.gfx.particle.behavior.ICustomBehaviorParticleRender;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class LevelRenderHandler{
@@ -51,7 +59,7 @@ public class LevelRenderHandler{
             particleList.clear();
             behaviorParticleList.clear();
 
-            if(!ShadersIntegration.shouldApply()) MATRIX4F = new Matrix4f(RenderSystem.getModelViewMatrix());
+            MATRIX4F = new Matrix4f(stack.last().pose());
             FOG_START = RenderSystem.getShaderFogStart();
         }
 
@@ -63,42 +71,37 @@ public class LevelRenderHandler{
     }
 
     public static void standardDelayedRender(RenderLevelStageEvent event){
-        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER){
-            Matrix4f last = new Matrix4f(RenderSystem.getModelViewMatrix());
-            if(MATRIX4F != null) RenderSystem.getModelViewMatrix().set(MATRIX4F);
-            for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewMatrix().set(last);
-            for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            if(MATRIX4F != null) RenderSystem.getModelViewMatrix().set(MATRIX4F);
-            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewMatrix().set(last);
-            for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
-        }
+        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) m4f(event);
+    }
+
+    private static void m4f(RenderLevelStageEvent event) {
+        Matrix4f cameraMatrix = MATRIX4F != null ? MATRIX4F : event.getPoseStack().last().pose();
+
+        for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+
+        for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     public static void shadersDelayedRender(RenderLevelStageEvent event){
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL){
             RenderSystem.setShaderFogStart(FOG_START);
-
-            for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
-
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().setIdentity();
-            if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
-            RenderSystem.applyModelViewMatrix();
-            for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
-
-            for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
-
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().setIdentity();
-            if(MATRIX4F != null) RenderSystem.getModelViewStack().mulPoseMatrix(MATRIX4F);
-            RenderSystem.applyModelViewMatrix();
-            for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
+            m4f(event);
             FogRenderer.setupNoFog();
         }
     }

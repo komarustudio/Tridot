@@ -1,11 +1,11 @@
 package pro.komaru.tridot.client.gfx.particle;
 
-import com.mojang.blaze3d.systems.*;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.texture.*;
-import net.minecraftforge.api.distmarker.*;
-import pro.komaru.tridot.client.compatibility.*;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.texture.TextureManager;
+import org.joml.Matrix4f;
 import pro.komaru.tridot.client.render.LevelRenderHandler;
 
 public class GenericParticleRenderType implements ParticleRenderType{
@@ -13,7 +13,7 @@ public class GenericParticleRenderType implements ParticleRenderType{
 
     @Override
     public void begin(BufferBuilder bufferBuilder, TextureManager textureManager){
-        if(ShadersIntegration.shouldApply()) LevelRenderHandler.MATRIX4F = RenderSystem.getModelViewMatrix();
+        LevelRenderHandler.MATRIX4F = new Matrix4f(RenderSystem.getModelViewMatrix());
     }
 
     @Override

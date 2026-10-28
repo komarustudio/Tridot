@@ -1,33 +1,26 @@
 package pro.komaru.tridot.client.render;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30C;
-import pro.komaru.tridot.client.compatibility.ShadersIntegration;
+import com.mojang.blaze3d.pipeline.*;
+import com.mojang.blaze3d.platform.*;
+import com.mojang.blaze3d.systems.*;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Axis;
+import net.minecraft.client.*;
+import net.minecraft.client.renderer.*;
+import net.minecraft.world.phys.*;
+import net.minecraftforge.api.distmarker.*;
+import net.minecraftforge.client.event.*;
+import net.minecraftforge.eventbus.api.*;
+import net.minecraftforge.fml.*;
+import net.minecraftforge.fml.common.*;
+import org.joml.*;
+import org.lwjgl.opengl.*;
+import pro.komaru.tridot.client.compatibility.*;
 import pro.komaru.tridot.client.gfx.particle.GenericParticle;
 import pro.komaru.tridot.client.gfx.particle.ICustomParticleRender;
 import pro.komaru.tridot.client.gfx.particle.behavior.ICustomBehaviorParticleRender;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class LevelRenderHandler{
@@ -37,6 +30,12 @@ public class LevelRenderHandler{
     public static float FOG_START = 0;
     public static List<ICustomParticleRender> particleList = new ArrayList<>();
     public static Map<GenericParticle, ICustomBehaviorParticleRender> behaviorParticleList = new HashMap<>();
+
+    public static Matrix4f getCameraMatrix(Camera camera){
+        return new Matrix4f()
+                .rotation(Axis.XP.rotationDegrees(camera.getXRot()))
+                .rotate(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLevelRender(RenderLevelStageEvent event){
@@ -55,6 +54,7 @@ public class LevelRenderHandler{
             for(GenericParticle particle : behaviorParticleList.keySet()){
                 behaviorParticleList.get(particle).render(particle, stack, bufferSource, partialTicks);
             }
+
             stack.popPose();
             particleList.clear();
             behaviorParticleList.clear();
@@ -71,39 +71,70 @@ public class LevelRenderHandler{
     }
 
     public static void standardDelayedRender(RenderLevelStageEvent event){
-        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) m4f(event);
-    }
+        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER){
+            Matrix4f prevProjection = RenderSystem.getProjectionMatrix();
+            RenderSystem.setProjectionMatrix(event.getProjectionMatrix(), VertexSorting.DISTANCE_TO_ORIGIN);
 
-    private static void m4f(RenderLevelStageEvent event) {
-        Matrix4f cameraMatrix = MATRIX4F != null ? MATRIX4F : event.getPoseStack().last().pose();
+            Matrix4f cameraMatrix = MATRIX4F != null ? MATRIX4F : getCameraMatrix(event.getCamera());
+            renderBatches(cameraMatrix);
 
-        for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) getDelayedRender().endBatch(renderType);
-
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().setIdentity();
-        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
-        RenderSystem.applyModelViewMatrix();
-        for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) getDelayedRender().endBatch(renderType);
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
-
-        for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) getDelayedRender().endBatch(renderType);
-
-        RenderSystem.getModelViewStack().pushPose();
-        RenderSystem.getModelViewStack().setIdentity();
-        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
-        RenderSystem.applyModelViewMatrix();
-        for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) getDelayedRender().endBatch(renderType);
-        RenderSystem.getModelViewStack().popPose();
-        RenderSystem.applyModelViewMatrix();
+            RenderSystem.setProjectionMatrix(prevProjection, VertexSorting.DISTANCE_TO_ORIGIN);
+        }
     }
 
     public static void shadersDelayedRender(RenderLevelStageEvent event){
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL){
             RenderSystem.setShaderFogStart(FOG_START);
-            m4f(event);
+
+            Matrix4f prevProjection = RenderSystem.getProjectionMatrix();
+            RenderSystem.setProjectionMatrix(event.getProjectionMatrix(), VertexSorting.DISTANCE_TO_ORIGIN);
+
+            Matrix4f cameraMatrix = MATRIX4F != null ? MATRIX4F : getCameraMatrix(event.getCamera());
+            renderBatches(cameraMatrix);
+
+            RenderSystem.setProjectionMatrix(prevProjection, VertexSorting.DISTANCE_TO_ORIGIN);
             FogRenderer.setupNoFog();
         }
+    }
+
+    private static void renderBatches(Matrix4f cameraMatrix){
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.translucentRenderTypes) {
+            getDelayedRender().endBatch(renderType);
+        }
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.translucentParticleRenderTypes) {
+            getDelayedRender().endBatch(renderType);
+        }
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.additiveRenderTypes) {
+            getDelayedRender().endBatch(renderType);
+        }
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
+
+        RenderSystem.getModelViewStack().pushPose();
+        RenderSystem.getModelViewStack().setIdentity();
+        RenderSystem.getModelViewStack().mulPoseMatrix(cameraMatrix);
+        RenderSystem.applyModelViewMatrix();
+        for(RenderType renderType : TridotRenderTypes.additiveParticleRenderTypes) {
+            getDelayedRender().endBatch(renderType);
+        }
+        RenderSystem.getModelViewStack().popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     public static void copyDepthBuffer(RenderTarget tempRenderTarget){

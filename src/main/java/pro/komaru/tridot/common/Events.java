@@ -262,15 +262,16 @@ public class Events{
             float incomingDamage = event.getAmount();
             if (CommonConfig.PERCENT_ARMOR.get()) {
                 if (event.getEntity().getAttribute(AttributeRegistry.PERCENT_ARMOR.get()) == null) return;
+
                 float armor = (float) event.getEntity().getAttributeValue(AttributeRegistry.PERCENT_ARMOR.get()) / 100;
                 float baseMultiplier = Math.max(Math.min(1 - armor, 1), 0);
+
                 var calcEvent = new CalculatePercentArmorEvent(event.getEntity(), incomingDamage, baseMultiplier);
-                if (MinecraftForge.EVENT_BUS.post(calcEvent)) {
-                    return;
-                }
+                if (MinecraftForge.EVENT_BUS.post(calcEvent)) return;
 
                 float finalMultiplier = calcEvent.getMultiplier();
                 float reducedDamage = incomingDamage * finalMultiplier;
+
                 event.setAmount(reducedDamage);
             }
         }

@@ -10,7 +10,8 @@ import net.neoforged.neoforge.network.handling.*;
 import pro.komaru.tridot.*;
 import pro.komaru.tridot.api.networking.Packet;
 import pro.komaru.tridot.api.render.bossbars.*;
-import pro.komaru.tridot.client.*;
+import net.neoforged.fml.loading.FMLEnvironment;
+import pro.komaru.tridot.client.networking.ClientPacketHandlers;
 import pro.komaru.tridot.util.*;
 
 import java.util.*;
@@ -70,7 +71,11 @@ public record UpdateBossbarPacket(UUID id, Operation operation) implements Custo
     }
 
     public static void handle(UpdateBossbarPacket pMsg, IPayloadContext context){
-        BossBarsOverlay.INSTANCE.update(pMsg);
+        context.enqueueWork(() -> {
+            if (FMLEnvironment.dist.isClient()) {
+                ClientPacketHandlers.handleUpdateBossbar(pMsg);
+            }
+        });
     }
 
     public void dispatch(Handler pHandler){

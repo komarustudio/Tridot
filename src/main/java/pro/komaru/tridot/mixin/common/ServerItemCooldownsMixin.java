@@ -20,6 +20,8 @@ public class ServerItemCooldownsMixin {
 
     @Inject(at = @At("TAIL"), method = "onCooldownEnded")
     public void onCooldownEnded(Item pItem, CallbackInfo ci) {
-        CooldownHandler.onCooldownEnd(player, pItem);
+        if (this.player != null) {
+            CooldownHandler.onCooldownEnd(this.player, pItem);
+        }
     }
 }

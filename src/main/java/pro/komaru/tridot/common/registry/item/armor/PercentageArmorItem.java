@@ -92,7 +92,13 @@ public class PercentageArmorItem extends ArmorItem{
 
     @Override
     public ItemAttributeModifiers getDefaultAttributeModifiers(){
-        return CommonConfig.PERCENT_ARMOR.get() ? percentModifiers.get() : vanillaModifiers.get();
+        boolean isPercent = CommonConfig.PERCENT_ARMOR != null && CommonConfig.PERCENT_ARMOR.get() != null && CommonConfig.PERCENT_ARMOR.get();
+        return isPercent ? percentModifiers.get() : vanillaModifiers.get();
+    }
+
+    @Override
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack){
+        return this.getDefaultAttributeModifiers();
     }
 
     private ItemAttributeModifiers buildModifiers(boolean percent){

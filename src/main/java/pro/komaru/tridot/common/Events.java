@@ -1,6 +1,7 @@
 package pro.komaru.tridot.common;
 
 import net.minecraft.core.*;
+import net.minecraft.core.component.*;
 import net.minecraft.core.registries.*;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.*;
@@ -11,9 +12,11 @@ import net.minecraft.world.effect.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.*;
 import net.neoforged.bus.api.*;
 import net.neoforged.fml.loading.*;
 import net.neoforged.neoforge.common.*;
+import net.neoforged.neoforge.event.*;
 import net.neoforged.neoforge.event.entity.*;
 import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
@@ -49,6 +52,21 @@ public class Events{
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         evaluateArmorEffects(event.getEntity());
+    }
+
+    @SubscribeEvent
+    public void onItemAttributeModifier(ItemAttributeModifierEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (stack.getItem() instanceof PercentageArmorItem armor) {
+            if (stack.getComponentsPatch().get(DataComponents.ATTRIBUTE_MODIFIERS) == null ||
+                stack.getComponentsPatch().get(DataComponents.ATTRIBUTE_MODIFIERS).isEmpty()) {
+                ItemAttributeModifiers modifiers = armor.getDefaultAttributeModifiers(stack);
+                event.removeIf(entry -> true);
+                for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
+                    event.addModifier(entry.attribute(), entry.modifier(), entry.slot());
+                }
+            }
+        }
     }
 
     @SubscribeEvent

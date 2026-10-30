@@ -1,38 +1,29 @@
 package pro.komaru.tridot.client.networking;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.TridotLibClient;
-import pro.komaru.tridot.client.BossBarsOverlay;
-import pro.komaru.tridot.client.gfx.particle.ParticleBuilder;
-import pro.komaru.tridot.client.gfx.particle.behavior.SparkParticleBehavior;
-import pro.komaru.tridot.client.gfx.particle.data.ColorParticleData;
-import pro.komaru.tridot.client.gfx.particle.data.GenericParticleData;
-import pro.komaru.tridot.client.render.gui.overlay.OverlayHandler;
-import pro.komaru.tridot.client.render.gui.overlay.TimedOverlayInstance;
-import pro.komaru.tridot.client.render.screenshake.PositionedScreenshakeInstance;
-import pro.komaru.tridot.client.render.screenshake.ScreenshakeHandler;
-import pro.komaru.tridot.client.sound.TridotSoundInstance;
-import pro.komaru.tridot.common.networking.packets.CooldownSoundPacket;
-import pro.komaru.tridot.common.networking.packets.DungeonSoundPacket;
-import pro.komaru.tridot.common.networking.packets.ParryParticlePacket;
-import pro.komaru.tridot.common.networking.packets.UpdateBossbarPacket;
-import pro.komaru.tridot.client.gfx.TridotParticles;
-import pro.komaru.tridot.util.Col;
-import pro.komaru.tridot.util.comps.phys.Pos3;
-import pro.komaru.tridot.util.math.Interp;
+import net.minecraft.client.*;
+import net.minecraft.client.sounds.*;
+import net.minecraft.sounds.*;
+import net.minecraft.world.level.*;
+import net.neoforged.api.distmarker.*;
+import pro.komaru.tridot.*;
+import pro.komaru.tridot.client.*;
+import pro.komaru.tridot.client.gfx.*;
+import pro.komaru.tridot.client.gfx.particle.*;
+import pro.komaru.tridot.client.gfx.particle.behavior.*;
+import pro.komaru.tridot.client.gfx.particle.data.*;
+import pro.komaru.tridot.client.render.gui.overlay.*;
+import pro.komaru.tridot.client.render.screenshake.*;
+import pro.komaru.tridot.client.sound.*;
+import pro.komaru.tridot.common.networking.packets.*;
+import pro.komaru.tridot.util.*;
+import pro.komaru.tridot.util.comps.phys.*;
+import pro.komaru.tridot.util.math.*;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientPacketHandlers {
 
-    public static void handleCooldownSound(CooldownSoundPacket msg) {
-        SoundEvent event = msg.getSoundEvent();
+    public static void playCooldownSound(SoundEvent event) {
+        if (event == null) return;
         SoundManager soundManager = Minecraft.getInstance().getSoundManager();
         if (TridotLibClient.COOLDOWN_SOUND != null && soundManager.isActive(TridotLibClient.COOLDOWN_SOUND)) {
             return;

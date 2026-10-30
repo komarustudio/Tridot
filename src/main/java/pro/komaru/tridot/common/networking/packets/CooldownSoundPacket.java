@@ -1,17 +1,16 @@
 package pro.komaru.tridot.common.networking.packets;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.api.networking.Packet;
-import pro.komaru.tridot.client.networking.ClientPacketHandlers;
+import net.minecraft.core.registries.*;
+import net.minecraft.network.*;
+import net.minecraft.network.codec.*;
+import net.minecraft.network.protocol.common.custom.*;
+import net.minecraft.resources.*;
+import net.minecraft.sounds.*;
+import net.neoforged.fml.loading.*;
+import net.neoforged.neoforge.network.handling.*;
+import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.networking.*;
+import pro.komaru.tridot.client.networking.*;
 
 public class CooldownSoundPacket implements CustomPacketPayload {
     public static final Type<CooldownSoundPacket> TYPE = Packet.type(Tridot.ID, "cooldown_sound");
@@ -38,7 +37,7 @@ public class CooldownSoundPacket implements CustomPacketPayload {
     public static void handle(CooldownSoundPacket msg, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (FMLEnvironment.dist.isClient()) {
-                ClientPacketHandlers.handleCooldownSound(msg);
+                ClientPacketHandlers.playCooldownSound(msg.getSoundEvent());
             }
         });
     }

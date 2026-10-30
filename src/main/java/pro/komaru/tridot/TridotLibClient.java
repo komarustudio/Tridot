@@ -3,6 +3,7 @@ package pro.komaru.tridot;
 import net.minecraft.client.*;
 import net.minecraft.client.resources.language.*;
 import net.minecraft.resources.*;
+import net.minecraft.util.*;
 import net.neoforged.api.distmarker.*;
 import net.neoforged.bus.api.*;
 import net.neoforged.fml.common.*;
@@ -70,15 +71,15 @@ public class TridotLibClient{
                     int screenWidth = guiGraphics.guiWidth();
                     int screenHeight = guiGraphics.guiHeight();
                     int left = screenWidth / 2 - 91;
-                    int maxHealth = net.minecraft.util.Mth.ceil(mc.player.getMaxHealth());
-                    int absorption = net.minecraft.util.Mth.ceil(mc.player.getAbsorptionAmount());
-                    int healthRows = Math.max(1, net.minecraft.util.Mth.ceil((maxHealth + absorption) / 20.0F));
+                    int maxHealth = Mth.ceil(mc.player.getMaxHealth());
+                    int absorption = Mth.ceil(mc.player.getAbsorptionAmount());
+                    int healthRows = Math.max(1, Mth.ceil((maxHealth + absorption) / 20.0F));
                     int top = screenHeight - 39 - (healthRows - 1) * 10;
                     if (mc.player.getArmorValue() > 0) {
                         top -= 10;
                     }
 
-                    guiGraphics.blitSprite(ARMOR_FULL_SPRITE, left + ClientConfig.PERCENT_ARMOR_X_OFFSET.get(), top + ClientConfig.PERCENT_ARMOR_Y_OFFSET.get(), 9, 9);
+                    guiGraphics.blitSprite(ARMOR_FULL_SPRITE, left + ClientConfig.PERCENT_ARMOR_X_OFFSET.get(), top + ClientConfig.PERCENT_ARMOR_Y_OFFSET.get() - 1, 9, 9);
                     if(Math.abs(currentArmor - lastArmorValue) > 0.01F){
                         String formattedValue = String.format("%.1f%%", currentArmor);
                         tridot$cachedArmorText = I18n.get("tooltip.tridot.value", formattedValue);

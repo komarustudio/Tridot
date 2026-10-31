@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.*;
 public class ClientConfig{
     public static ModConfigSpec.ConfigValue<Boolean>
     BOSSBAR_TITLE, ABILITY_OVERLAY,
-    ITEM_PARTICLE, ITEM_GUI_PARTICLE;
+    ITEM_PARTICLE, ITEM_GUI_PARTICLE, BLOOM;
     public static ModConfigSpec.ConfigValue<Double>
     SCREENSHAKE_INTENSITY;
     public static ModConfigSpec.ConfigValue<Integer> BOSSBARS_LIMIT, PERCENT_ARMOR_X_OFFSET, PERCENT_ARMOR_Y_OFFSET;
@@ -19,6 +19,7 @@ public class ClientConfig{
             BOSSBARS_LIMIT = builder.comment("Limit of rendered bossbars (Default: 3)").define("BossbarsLimit", 3);
             PERCENT_ARMOR_X_OFFSET = builder.comment("X Offset of Percent Armor Icon").define("PercentArmorX", 0);
             PERCENT_ARMOR_Y_OFFSET = builder.comment("Y Offset of Percent Armor Icon").define("PercentArmorY", -10);
+            BLOOM = builder.comment("Enable bloom").define("Bloom", true);
 
         builder.comment("Particles").push("particles");
                 ITEM_PARTICLE = builder.comment("Particles of dropped item.").define("itemParticle", true);

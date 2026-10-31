@@ -1,0 +1,12 @@
+{
+    "vertex": "tridot:bloom",
+    "fragment": "tridot:bloom_down",
+    "attributes": [ "Position" ],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "TexelSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "Knee", "type": "float", "count": 1, "values": [ 0.0 ] }
+    ]
+}

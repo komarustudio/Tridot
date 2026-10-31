@@ -7,10 +7,35 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
 import pro.komaru.tridot.client.gfx.postprocess.*;
+import pro.komaru.tridot.client.gfx.postprocess.bloom.BloomRenderer;
 import pro.komaru.tridot.client.render.*;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin{
+
+    @Inject(method = "renderLevel", at = @At("HEAD"))
+    private void tridot$beginBloom(DeltaTracker deltaTracker, CallbackInfo ci) {
+        BloomRenderer.beginFrame();
+    }
+
+    @Inject(
+            method = "renderLevel",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/LevelRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;ZLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V",
+                    shift = At.Shift.AFTER
+            )
+    )
+    private void tridot$flushWorldBloom(DeltaTracker deltaTracker, CallbackInfo ci) {
+        BloomRenderer.flushAndComposite();
+    }
+
+    @Inject(method = "renderLevel", at = @At("TAIL"))
+    private void tridot$flushHandBloom(DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (BloomRenderer.hasPendingWork()) {
+            BloomRenderer.flushAndComposite();
+        }
+    }
 
     @Inject(at = @At(value = "RETURN"), method = "renderItemInHand")
     private void tridot$renderItemInHand(Camera camera, float partialTick, Matrix4f projectionMatrix, CallbackInfo ci){

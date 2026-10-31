@@ -15,6 +15,7 @@ import java.io.*;
 
 public class TridotShaders{
     public static ShaderInstance ADDITIVE_TEXTURE, ADDITIVE, TRANSLUCENT_TEXTURE, TRANSLUCENT, SCREEN_PARTICLE;
+    public static ShaderInstance BLOOM_DOWN, BLOOM_UP, BLOOM_COMPOSITE;
 
     @EventBusSubscriber(modid = Tridot.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{
@@ -30,6 +31,10 @@ public class TridotShaders{
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("translucent_texture"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT_TEXTURE = shader);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("translucent"), DefaultVertexFormat.PARTICLE), shader -> TRANSLUCENT = shader);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("screen_particle"), DefaultVertexFormat.POSITION_TEX_COLOR), shader -> SCREEN_PARTICLE = shader);
+
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("bloom_down"), DefaultVertexFormat.POSITION), shader -> BLOOM_DOWN = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("bloom_up"), DefaultVertexFormat.POSITION), shader -> BLOOM_UP = shader);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Tridot.ofTridot("bloom_composite"), DefaultVertexFormat.POSITION), shader -> BLOOM_COMPOSITE = shader);
         }
     }
 
@@ -51,5 +56,17 @@ public class TridotShaders{
 
     public static ShaderInstance getTranslucent(){
         return TRANSLUCENT;
+    }
+
+    public static ShaderInstance getBloomDownShader() {
+        return BLOOM_DOWN;
+    }
+
+    public static ShaderInstance getBloomUpShader() {
+        return BLOOM_UP;
+    }
+
+    public static ShaderInstance getBloomCompositeShader() {
+        return BLOOM_COMPOSITE;
     }
 }

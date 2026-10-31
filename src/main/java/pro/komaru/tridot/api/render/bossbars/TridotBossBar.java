@@ -87,6 +87,7 @@ public abstract class TridotBossBar{
     public TridotBossBar setHealth(float health, float maxHealth){
         this.health = health;
         this.maxHealth = maxHealth;
+        this.percentage = (maxHealth > 0.0F) ? (health / maxHealth) : 0.0F;
         return this;
     }
 

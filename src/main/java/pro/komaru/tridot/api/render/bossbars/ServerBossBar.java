@@ -84,7 +84,7 @@ public class ServerBossBar extends TridotBossBar{
     public ServerBossBar setName(Component pName) {
         if (!Objects.equals(pName, this.name)) {
             super.setName(pName);
-            PacketHandler.sendToAll(UpdateBossbarPacket.createUpdateNamePacket(this));
+            this.broadcast(UpdateBossbarPacket::createUpdateNamePacket);
         }
 
         return this;

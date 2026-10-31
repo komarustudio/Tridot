@@ -38,6 +38,7 @@ public class BossBarsOverlay implements LayeredDraw.Layer {
 
             public void updateProgress(UUID uuid, float health, float maxHealth){
                 ClientBossbar bossbar = events.get(uuid);
+                if (bossbar == null) return;
                 bossbar.setHealth(health, maxHealth);
                 float percent = (maxHealth > 0.0F) ? (health / maxHealth) : 0.0F;
                 bossbar.setPercentage(percent);
@@ -45,29 +46,35 @@ public class BossBarsOverlay implements LayeredDraw.Layer {
 
             public void updateName(UUID uuid, Component component) {
                 ClientBossbar bossbar = events.get(uuid);
+                if (bossbar == null) return;
                 this.updateName(bossbar, component);
             }
 
             public void updateStyle(UUID uuid, Col color){
                 ClientBossbar bossbar = events.get(uuid);
+                if (bossbar == null) return;
                 this.updateStyle(bossbar, color);
             }
 
             public void updateProperties(UUID uuid, ResourceLocation type, ResourceLocation texture, SoundEvent event, boolean darkenSky, boolean shouldPlayBossMusic, boolean createFog, boolean isRainbow, boolean aboutToDie){
                 ClientBossbar bossbar = events.get(uuid);
+                if (bossbar == null) return;
                 bossbar.setAboutToDie(aboutToDie);
                 this.updateProperties(bossbar, type, texture, event, darkenSky, shouldPlayBossMusic, createFog, isRainbow);
             }
 
             public void updateName(ClientBossbar bossbar, Component component) {
+                if (bossbar == null) return;
                 bossbar.setName(component);
             }
 
             public void updateStyle(ClientBossbar bossbar, Col color){
+                if (bossbar == null) return;
                 bossbar.setColor(color);
             }
 
             public void updateProperties(ClientBossbar bossbar, ResourceLocation type, ResourceLocation texture, SoundEvent event, boolean darkenSky, boolean shouldPlayBossMusic, boolean createFog, boolean isRainbow){
+                if (bossbar == null) return;
                 bossbar.setTexture(texture);
                 bossbar.setType(type);
                 bossbar.setDarkenScreen(darkenSky);

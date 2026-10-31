@@ -36,7 +36,7 @@ public class ServerBossBar extends TridotBossBar{
     }
 
     public ServerBossBar setHealth(float health, float maxHealth){
-        if (health != this.health || maxHealth != this.maxHealth || health / maxHealth != this.percentage) {
+        if (health != this.health || maxHealth != this.maxHealth) {
             super.setHealth(health, maxHealth);
             this.broadcast(UpdateBossbarPacket::createUpdateProgressPacket);
         }

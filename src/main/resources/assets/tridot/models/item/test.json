@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tridot:item/debug",
+    "tridot_bloom": "tridot:item/debug_bloom"
+  }
+}

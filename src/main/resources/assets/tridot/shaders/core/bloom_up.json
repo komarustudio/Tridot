@@ -1,0 +1,11 @@
+{
+    "vertex": "tridot:bloom",
+    "fragment": "tridot:bloom_up",
+    "attributes": [ "Position" ],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "TexelSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] }
+    ]
+}

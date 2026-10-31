@@ -6,12 +6,10 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,9 +17,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.lwjgl.opengl.GL11;
 import pro.komaru.tridot.Tridot;
 import pro.komaru.tridot.client.gfx.TridotShaders;
+import pro.komaru.tridot.client.gfx.postprocess.bloom.BloomRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class TridotRenderTypes{
@@ -64,6 +65,7 @@ public class TridotRenderTypes{
     public static final RenderStateShard.TextureStateShard BLOCK_SHEET_MIPPED = new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, true);
     public static final RenderStateShard.TextureStateShard PARTICLE_SHEET = new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, false, false);
     public static final RenderStateShard.TextureStateShard PARTICLE_SHEET_MIPPED = new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, false, true);
+    public static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeEntityTranslucentEmissiveShader);
 
     public static final RenderStateShard.ShaderStateShard ADDITIVE_TEXTURE_SHADER = new RenderStateShard.ShaderStateShard(TridotShaders::getAdditiveTexture);
     public static final RenderStateShard.ShaderStateShard ADDITIVE_SHADER = new RenderStateShard.ShaderStateShard(TridotShaders::getAdditive);
@@ -128,6 +130,70 @@ public class TridotRenderTypes{
                     .setCullState(NO_CULL)
                     .setWriteMaskState(COLOR_WRITE)
                     .createCompositeState(false));
+
+    private static final RenderStateShard.TransparencyStateShard BLOOM_ADDITIVE = new RenderStateShard.TransparencyStateShard("tridot_bloom_additive", () -> {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+    }, () -> {
+        RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+    });
+
+    private static final Map<Key, RenderType> ENTITY_BLOOM = new ConcurrentHashMap<>();
+    private static final Map<Float, RenderType> ITEM_BLOOM = new ConcurrentHashMap<>();
+    private record Key(ResourceLocation texture, float intensity) {}
+
+    public static RenderType bloom(ResourceLocation texture) {
+        return bloom(texture, 1.0F);
+    }
+
+    public static RenderType bloom(ResourceLocation texture, float intensity) {
+        return ENTITY_BLOOM.computeIfAbsent(new Key(texture, intensity), k -> DotRenderType.createRenderType("tridot_bloom_entity",
+                DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                        .setTextureState(new RenderStateShard.TextureStateShard(k.texture, false, false))
+                        .setTransparencyState(BLOOM_ADDITIVE)
+                        .setCullState(NO_CULL)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOverlayState(OVERLAY)
+                        .setOutputState(bloomOutput(k.intensity))
+                        .createCompositeState(false)));
+    }
+
+    /** Bloom for item models (block/item atlas). Used automatically for {@code models/item/<id>_bloom.json}. */
+    public static RenderType bloomItem() {
+        return bloomItem(1.0F);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static RenderType bloomItem(float intensity) {
+        return ITEM_BLOOM.computeIfAbsent(intensity, i -> DotRenderType.createRenderType("tridot_bloom_item",
+                DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                        .setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, false))
+                        .setTransparencyState(BLOOM_ADDITIVE)
+                        .setCullState(NO_CULL)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOverlayState(OVERLAY)
+                        .setOutputState(bloomOutput(i))
+                        .createCompositeState(false)));
+    }
+
+    private static RenderStateShard.OutputStateShard bloomOutput(float intensity) {
+        float[] savedFog = new float[1];
+        return new RenderStateShard.OutputStateShard("tridot_bloom_target_" + intensity, () -> {
+            BloomRenderer.bindMask();
+            RenderSystem.setShaderColor(intensity, intensity, intensity, 1.0F);
+            savedFog[0] = RenderSystem.getShaderFogStart();
+            RenderSystem.setShaderFogStart(Float.MAX_VALUE);
+        }, () -> {
+            RenderSystem.setShaderFogStart(savedFog[0]);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            BloomRenderer.unbindMask();
+        });
+    }
 
     @Mod.EventBusSubscriber(modid = Tridot.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientRegistryEvents{

@@ -79,8 +79,7 @@ public class Effect {
 
     public void at(Entity entity, Col color) {
         if (entity == null) return;
-        at(entity.level(), entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
-                entity.getYRot(), entity.getXRot(), color, entity);
+        at(entity.level(), entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), entity.getYRot(), entity.getXRot(), color, entity);
     }
 
     public void at(Level level, double x, double y, double z) {
@@ -126,8 +125,7 @@ public class Effect {
             float extra = data instanceof Number num ? num.floatValue() : 0.0F;
             int entityId = data instanceof Entity ent ? ent.getId() : -1;
             Vec3 targetVec = data instanceof Vec3 vec ? vec : null;
-            PacketHandler.sendToTracking(level, BlockPos.containing(x, y, z),
-                    new PlayEffectPacket(this.id, x, y, z, yaw, pitch, c.pack(), seed, extra, entityId, targetVec));
+            PacketHandler.sendToTracking(level, BlockPos.containing(x, y, z), new PlayEffectPacket(this.id, x, y, z, yaw, pitch, c.pack(), seed, extra, entityId, targetVec));
             return;
         }
 

@@ -9,13 +9,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.*;
+import pro.komaru.tridot.api.EffectApplier;
 
 import java.util.*;
 import java.util.function.*;
 
 //example: public static final ArmorRegistry COBALT = new ArmorRegistry.Builder("cobalt").protection(18).mul(46).enchantValue(18).knockbackRes(0.05f).ingredient(() -> Ingredient.of(ItemsRegistry.cobaltIngot.get())).build();
-// PORT NOTE: attributes, mob effects and equip sounds are Holders in 1.21 (Attributes.*, DeferredHolder and
-// SoundEvents.* all qualify), so the Supplier<Attribute>/Supplier<MobEffect>/SoundEvent parameters became Holders.
 public abstract class AbstractArmorBuilder<T>{
     public String name;
     public float headPercent = 20;
@@ -51,33 +50,28 @@ public abstract class AbstractArmorBuilder<T>{
 
     /**
      * Represents an effect that can be applied by wearing a specific armor set.
-     * @param instance Supplier for the MobEffectInstance to apply.
+     * @param applier EffectApplier data for applying effects.
      * @param condition Predicate determining when the effect should apply.
      */
-    public record ArmorEffectData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
+    public record ArmorEffectData(EffectApplier applier, Predicate<Player> condition) {
         public static final Predicate<Player> ALWAYS_TRUE = player -> true;
-        public static final int INFINITE_DURATION = -1;
         public static ArmorEffectData createData(Holder<MobEffect> effect) {
-            return new ArmorEffectData(() -> new MobEffectInstance(effect, INFINITE_DURATION), ALWAYS_TRUE);
+            return new ArmorEffectData(EffectApplier.of(effect), ALWAYS_TRUE);
         }
 
-        public static ArmorEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
-            return new ArmorEffectData(instance, condition);
+        public static ArmorEffectData createData(EffectApplier applier, Predicate<Player> condition) {
+            return new ArmorEffectData(applier, condition);
         }
     }
 
-    public record HitEffectData(Supplier<MobEffectInstance> instance, Predicate<Player> condition, float chance) {
+    public record HitEffectData(EffectApplier applier, Predicate<Player> condition) {
         public static final Predicate<Player> ALWAYS_TRUE = player -> true;
         public static HitEffectData createData(Holder<MobEffect> effect) {
-            return new HitEffectData(() -> new MobEffectInstance(effect, 120), ALWAYS_TRUE, 1);
+            return new HitEffectData(EffectApplier.of(effect, 120), ALWAYS_TRUE);
         }
 
-        public static HitEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition, float chance) {
-            return new HitEffectData(instance, condition, chance);
-        }
-
-        public static HitEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
-            return new HitEffectData(instance, condition, 1);
+        public static HitEffectData createData(EffectApplier applier, Predicate<Player> condition) {
+            return new HitEffectData(applier, condition);
         }
     }
 

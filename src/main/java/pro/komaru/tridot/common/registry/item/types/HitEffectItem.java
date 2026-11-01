@@ -14,17 +14,8 @@ import pro.komaru.tridot.util.math.*;
 import java.util.*;
 
 public class HitEffectItem extends SwordItem{
-    public float chance = 1;
-    public final ImmutableList<MobEffectInstance> effects;
-    public ArcRandom arcRandom = Tmp.rnd;
-
-    public HitEffectItem(Tier tier, float attackDamageIn, float attackSpeedIn, Item.Properties builderIn, float pChance, MobEffectInstance... pEffects){
-        super(tier, builderIn.attributes(SwordItem.createAttributes(tier, (int)attackDamageIn, attackSpeedIn)));
-        this.chance = pChance;
-        this.effects = ImmutableList.copyOf(pEffects);
-    }
-
-    public HitEffectItem(Tier tier, float attackDamageIn, float attackSpeedIn, Item.Properties builderIn, MobEffectInstance... pEffects){
+    public final ImmutableList<EffectApplier> effects;
+    public HitEffectItem(Tier tier, float attackDamageIn, float attackSpeedIn, Item.Properties builderIn, EffectApplier... pEffects){
         super(tier, builderIn.attributes(SwordItem.createAttributes(tier, (int)attackDamageIn, attackSpeedIn)));
         this.effects = ImmutableList.copyOf(pEffects);
     }
@@ -33,7 +24,7 @@ public class HitEffectItem extends SwordItem{
         if(!(attacker instanceof Player player)) return true;
         stack.hurtAndBreak(2, attacker, EquipmentSlot.MAINHAND);
         if(Utils.Items.getAttackStrengthScale(player, 0.9f)){
-            Utils.Entities.applyWithChance(target, effects, chance, arcRandom);
+            Utils.Entities.apply(target, effects);
         }
 
         return true;
@@ -42,6 +33,6 @@ public class HitEffectItem extends SwordItem{
     @Override
     public void appendHoverText(@NotNull ItemStack stack, TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flags){
         super.appendHoverText(stack, context, tooltip, flags);
-        Utils.Items.effectTooltip(effects, tooltip, 1, chance);
+        Utils.Items.effectTooltip(effects, tooltip, 1);
     }
 }

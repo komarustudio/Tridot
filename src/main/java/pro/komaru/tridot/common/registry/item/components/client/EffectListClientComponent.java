@@ -7,29 +7,30 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.effect.*;
 import org.joml.*;
+import pro.komaru.tridot.api.EffectApplier;
 
 import java.util.*;
 
 public class EffectListClientComponent implements ClientTooltipComponent{
-    private final List<MobEffectInstance> effects;
+    private final List<EffectApplier> effects;
     private final Component component;
     private final int iconSize = 10;
     private final int padding = 0;
     private int textCurrentY = 0;
 
-    public EffectListClientComponent(List<MobEffectInstance> items, Component component) {
+    public EffectListClientComponent(List<EffectApplier> items, Component component) {
         this.effects = items;
         this.component = component;
     }
 
-    public static EffectListClientComponent create(List<MobEffectInstance> items, Component component) {
+    public static EffectListClientComponent create(List<EffectApplier> items, Component component) {
         return new EffectListClientComponent(items, component);
     }
 
     @Override
     public int getHeight() {
         int offset = 4;
-        if(component != null && component != Component.empty()){
+        if(component != null && !component.equals(Component.empty())){
             offset += 10;
         }
 
@@ -44,13 +45,13 @@ public class EffectListClientComponent implements ClientTooltipComponent{
         }
 
         for (var entry : effects) {
-            MutableComponent mutablecomponent = Component.translatable(entry.getDescriptionId());
-            if(entry.getAmplifier() > 0){
-                mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + entry.getAmplifier()));
+            MutableComponent mutablecomponent = Component.translatable(entry.effect().value().getDescriptionId());
+            if(entry.amplifier() > 0){
+                mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + entry.amplifier()));
             }
 
             if(!entry.endsWithin(20)){
-                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1, 20.0F));
+                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, entry.formatDuration());
             }
 
             int currentWidth = iconSize + padding + font.width(mutablecomponent);
@@ -65,20 +66,20 @@ public class EffectListClientComponent implements ClientTooltipComponent{
     @Override
     public void renderText(Font font, int x, int y, Matrix4f matrix, MultiBufferSource.BufferSource bufferSource) {
         textCurrentY = y;
-        if(component != null && component != Component.empty()){
+        if(component != null && !component.equals(Component.empty())){
             font.drawInBatch(component, x, y, -1, false, matrix, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
             textCurrentY = y + 10;
         }
 
         for (var entry : effects) {
-            MutableComponent mutablecomponent = Component.translatable(entry.getDescriptionId());
-            MobEffect mobeffect = entry.getEffect().value();
-            if(entry.getAmplifier() > 0){
-                mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + entry.getAmplifier()));
+            MutableComponent mutablecomponent = Component.translatable(entry.effect().value().getDescriptionId());
+            MobEffect mobeffect = entry.effect().value();
+            if(entry.amplifier() > 0){
+                mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + entry.amplifier()));
             }
 
             if(!entry.endsWithin(20)){
-                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(entry, 1, 20.0F));
+                mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, entry.formatDuration());
             }
 
             int nameX = x + iconSize + 2 + padding;
@@ -91,9 +92,9 @@ public class EffectListClientComponent implements ClientTooltipComponent{
     @Override
     public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
         int currentY = y;
-        if(component != null && component != Component.empty()) currentY += 10;
+        if(component != null && !component.equals(Component.empty())) currentY += 10;
         for (var entry : effects) {
-            var sprite = Minecraft.getInstance().getMobEffectTextures().get(entry.getEffect());
+            var sprite = Minecraft.getInstance().getMobEffectTextures().get(entry.effect());
             graphics.blit(x, currentY, 0, iconSize, iconSize, sprite);
             currentY += iconSize + padding;
         }

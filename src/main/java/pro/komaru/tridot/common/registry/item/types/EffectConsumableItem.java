@@ -10,26 +10,28 @@ import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.tooltip.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
+import pro.komaru.tridot.api.EffectApplier;
+import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.common.registry.item.*;
 import pro.komaru.tridot.common.registry.item.components.*;
 import pro.komaru.tridot.util.struct.data.*;
 
 public class EffectConsumableItem extends AbstractConsumableItem implements TooltipComponentItem{
-    private final ImmutableList<MobEffectInstance> effects;
+    private final ImmutableList<EffectApplier> effects;
     public int cooldownTicks = 75;
 
-    public EffectConsumableItem(Properties pProperties, MobEffectInstance... pEffects){
+    public EffectConsumableItem(Properties pProperties, EffectApplier... pEffects){
         super(pProperties);
         this.effects = ImmutableList.copyOf(pEffects);
     }
 
-    public EffectConsumableItem(int drinkDuration, Properties pProperties, MobEffectInstance... pEffects){
+    public EffectConsumableItem(int drinkDuration, Properties pProperties, EffectApplier... pEffects){
         super(pProperties);
         this.effects = ImmutableList.copyOf(pEffects);
         this.useDuration = drinkDuration;
     }
 
-    public EffectConsumableItem(int cooldownTicks, int drinkDuration, Properties pProperties, MobEffectInstance... pEffects){
+    public EffectConsumableItem(int cooldownTicks, int drinkDuration, Properties pProperties, EffectApplier... pEffects){
         super(pProperties);
         this.effects = ImmutableList.copyOf(pEffects);
         this.useDuration = drinkDuration;
@@ -63,10 +65,7 @@ public class EffectConsumableItem extends AbstractConsumableItem implements Tool
 
     @Override
     public void onConsume(ItemStack pStack, Level pLevel, Player player){
-        for(MobEffectInstance mobeffectinstance : effects){
-            player.addEffect(new MobEffectInstance(mobeffectinstance));
-        }
-
+        Utils.Entities.apply(player, effects);
         for(Item item : BuiltInRegistries.ITEM) {
             if(item instanceof EffectConsumableItem) {
                 player.getCooldowns().addCooldown(item, cooldownTicks);

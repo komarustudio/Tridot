@@ -22,6 +22,7 @@ import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.tick.*;
 import pro.komaru.tridot.*;
+import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.api.events.*;
 import pro.komaru.tridot.api.networking.*;
 import pro.komaru.tridot.client.sound.*;
@@ -131,11 +132,10 @@ public class Events{
             if (SuitArmorItem.hasCorrectArmorOn(material, player)) {
                 for (var effectData : entry.getValue()) {
                     if (effectData.condition().test(player)) {
-                        Holder<MobEffect> effect = effectData.instance().get().getEffect();
+                        Holder<MobEffect> effect = effectData.applier().effect();
                         newApplied.add(effect);
                         if (!player.hasEffect(effect)) {
-                            MobEffectInstance instance = effectData.instance().get();
-                            player.addEffect(instance);
+                            effectData.applier().applyWithChance(player);
                         }
                     }
                 }
@@ -195,9 +195,8 @@ public class Events{
             var material = entry.getKey();
             if (!SuitArmorItem.hasCorrectArmorOn(material, attacker)) return;
             for (var effectData : entry.getValue()) {
-                float chance = effectData.chance();
-                if (!Tmp.rnd.chance(chance) || !effectData.condition().test(attacker)) continue;
-                living.addEffect(effectData.instance().get());
+                if (!effectData.condition().test(attacker)) continue;
+                effectData.applier().applyWithChance(living);
             }
         }
     }

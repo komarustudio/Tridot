@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.*;
+import pro.komaru.tridot.api.EffectApplier;
 import pro.komaru.tridot.common.registry.item.types.*;
 
 import javax.annotation.*;
@@ -38,14 +39,14 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
     public int parryWindow = 12;
     public int onShieldReleaseTicks = 32;
 
-    public EffectList defenderBlockEffects = EffectList.EMPTY;
-    public EffectList defenderParryEffects = EffectList.EMPTY;
+    public ImmutableList<EffectApplier> defenderBlockEffects = ImmutableList.of();
+    public ImmutableList<EffectApplier> defenderParryEffects = ImmutableList.of();
 
-    public EffectList attackerParryEffects = EffectList.EMPTY;
-    public EffectList attackerBlockEffects = EffectList.EMPTY;
+    public ImmutableList<EffectApplier> attackerParryEffects = ImmutableList.of();
+    public ImmutableList<EffectApplier> attackerBlockEffects = ImmutableList.of();
 
-    public EffectList attackerShieldDisableEffects = EffectList.EMPTY;
-    public EffectList defenderShieldDisableEffects = EffectList.EMPTY;
+    public ImmutableList<EffectApplier> attackerShieldDisableEffects = ImmutableList.of();
+    public ImmutableList<EffectApplier> defenderShieldDisableEffects = ImmutableList.of();
 
     public AbstractShieldBuilder(Properties itemProperties){
         this.itemProperties = itemProperties;
@@ -102,48 +103,48 @@ public abstract class AbstractShieldBuilder<T extends ConfiguredShield>{
     /**
      * @param effects Effect list that will be applied to Defender on shield disable
      */
-    public AbstractShieldBuilder<T> addDefenderShieldDisableEffects(EffectList effects){
-        this.defenderShieldDisableEffects = effects;
+    public AbstractShieldBuilder<T> addDefenderShieldDisableEffects(EffectApplier... effects){
+        this.defenderShieldDisableEffects = ImmutableList.copyOf(effects);
         return this;
     }
 
     /**
      * @param effects Effect list that will be applied to Attacker on shield disable
      */
-    public AbstractShieldBuilder<T> addAttackerShieldDisableEffects(EffectList effects){
-        this.attackerShieldDisableEffects = effects;
+    public AbstractShieldBuilder<T> addAttackerShieldDisableEffects(EffectApplier... effects){
+        this.attackerShieldDisableEffects = ImmutableList.copyOf(effects);
         return this;
     }
 
     /**
      * @param effects Effect list that will be applied to Defender on block
      */
-    public AbstractShieldBuilder<T> addDefenderBlockEffects(EffectList effects){
-        this.defenderBlockEffects = effects;
+    public AbstractShieldBuilder<T> addDefenderBlockEffects(EffectApplier... effects){
+        this.defenderBlockEffects = ImmutableList.copyOf(effects);
         return this;
     }
 
     /**
      * @param effects Effect list that will be applied to Defender on parry
      */
-    public AbstractShieldBuilder<T> addDefenderParryEffects(EffectList effects){
-        this.defenderParryEffects = effects;
+    public AbstractShieldBuilder<T> addDefenderParryEffects(EffectApplier... effects){
+        this.defenderParryEffects = ImmutableList.copyOf(effects);
         return this;
     }
 
     /**
      * @param effects Effect list that will be applied to Attacker on block
      */
-    public AbstractShieldBuilder<T> addAttackerBlockEffects(EffectList effects){
-        this.attackerBlockEffects = effects;
+    public AbstractShieldBuilder<T> addAttackerBlockEffects(EffectApplier... effects){
+        this.attackerBlockEffects = ImmutableList.copyOf(effects);
         return this;
     }
 
     /**
      * @param effects Effect list that will be applied to Attacker on parry
      */
-    public AbstractShieldBuilder<T> addAttackerParryEffects(EffectList effects){
-        this.attackerParryEffects = effects;
+    public AbstractShieldBuilder<T> addAttackerParryEffects(EffectApplier... effects){
+        this.attackerParryEffects = ImmutableList.copyOf(effects);
         return this;
     }
 

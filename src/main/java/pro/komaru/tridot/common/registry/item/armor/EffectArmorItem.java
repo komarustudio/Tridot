@@ -23,7 +23,7 @@ public class EffectArmorItem extends SuitArmorItem{
             if (effects != null) {
                 var component = Component.translatable("tooltip.tridot.applies_fullkit").withStyle(ChatFormatting.GRAY);
                 for (int i = 0; i < effects.size(); i++) {
-                    Holder<MobEffect> effect = effects.get(i).instance().get().getEffect();
+                    Holder<MobEffect> effect = effects.get(i).applier().effect();
                     var effectName = effect.value().getDisplayName().getString();
                     component.append(Component.literal(effectName).withStyle(stack.getRarity().getStyleModifier()));
                     if (i < effects.size() - 1) {

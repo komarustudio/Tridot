@@ -1,5 +1,7 @@
 package pro.komaru.tridot.common.registry.item.types;
 
+import com.google.common.collect.ImmutableList;
+import pro.komaru.tridot.api.EffectApplier;
 import net.minecraft.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +34,6 @@ import pro.komaru.tridot.common.registry.EnchantmentsRegistry;
 import pro.komaru.tridot.common.registry.TagsRegistry;
 import pro.komaru.tridot.common.registry.item.TooltipComponentItem;
 import pro.komaru.tridot.common.registry.item.builders.AbstractShieldBuilder;
-import pro.komaru.tridot.common.registry.item.builders.EffectList;
 import pro.komaru.tridot.common.registry.item.components.AbilityComponent;
 import pro.komaru.tridot.common.registry.item.components.EmptyComponent;
 import pro.komaru.tridot.common.registry.item.components.SeparatorComponent;
@@ -90,17 +91,10 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
         addEffectTooltip(pTooltip, builder.defenderShieldDisableEffects , "defender.disable");
     }
 
-    private void addEffectTooltip(List<Component> pTooltip, EffectList effectData, String key) {
-        var effects = effectData.getEffects();
-        if (effects.isEmpty()) return;
-
-        var chance = effectData.getChance();
-        pTooltip.add(Component.empty());
-        if (chance > 0 && chance < 1) {
-            pTooltip.add(Component.translatable("tooltip.tridot.applies_with_chance_to_" + key, String.format("%.1f%%", chance * 100)).withStyle(ChatFormatting.GRAY));
-        } else pTooltip.add(Component.translatable("tooltip.tridot.applies_to_" + key).withStyle(ChatFormatting.GRAY));
-
-        Utils.Items.effectLines(effects, pTooltip, 1);
+    private void addEffectTooltip(List<Component> pTooltip, ImmutableList<EffectApplier> appliers, String key) {
+        if (appliers.isEmpty()) return;
+        pTooltip.add(Component.translatable("tooltip.tridot.applies_to_" + key).withStyle(ChatFormatting.GRAY));
+        Utils.Items.effectLines(appliers, pTooltip, 1);
     }
 
     public Component formatDuration(int useDuration) {
@@ -135,8 +129,8 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
     public void onShieldDisable(ItemStack itemStack, Level level, Player player, @Nullable LivingEntity attacker, boolean pBecauseOfAxe) {
         if(!pBecauseOfAxe) return;
 
-        Utils.Entities.applyWithChance(player, builder.defenderShieldDisableEffects.getEffects(), builder.defenderShieldDisableEffects.getChance(), Tmp.rnd);
-        if (attacker != null) Utils.Entities.applyWithChance(attacker, builder.attackerShieldDisableEffects.getEffects(), builder.attackerShieldDisableEffects.getChance(), Tmp.rnd);
+        Utils.Entities.apply(player, builder.defenderShieldDisableEffects);
+        if (attacker != null) Utils.Entities.apply(attacker, builder.attackerShieldDisableEffects);
     }
 
     public float onPostBlock(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity, float armor){
@@ -163,13 +157,11 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
 
     public void onShieldBlock(DamageSource source, float pAmount, ItemStack itemStack, LivingEntity entity){
         var attacker = source.getEntity();
-        if(attacker != null) {
-            if (attacker instanceof LivingEntity livingAttacker) {
-                Utils.Entities.applyWithChance(livingAttacker, builder.attackerBlockEffects.getEffects(), builder.attackerBlockEffects.getChance(), Tmp.rnd);
-            }
+        if (attacker instanceof LivingEntity livingAttacker) {
+            Utils.Entities.apply(livingAttacker, builder.attackerBlockEffects);
         }
 
-        Utils.Entities.applyWithChance(entity, builder.defenderBlockEffects.getEffects(), builder.defenderBlockEffects.getChance(), Tmp.rnd);
+        Utils.Entities.apply(entity, builder.defenderBlockEffects);
         if(source.getDirectEntity() != null){
             source.getDirectEntity().hurt(entity.level().damageSources().thorns(entity), pAmount * builder.returnedDamagePercent);
         }
@@ -224,7 +216,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
                 int pushLvl = itemStack.getEnchantmentLevel(EnchantmentsRegistry.PUSH.get());
                 float knockbackStrength = Math.min(0.6F + (pushLvl * 0.3F), 2.5F);
                 if (attacker instanceof LivingEntity livingAttacker) {
-                    Utils.Entities.applyWithChance(livingAttacker, builder.attackerParryEffects.getEffects(), builder.attackerParryEffects.getChance(), Tmp.rnd);
+                    Utils.Entities.apply(livingAttacker, builder.attackerParryEffects);
                     livingAttacker.knockback(knockbackStrength * 0.5F, Mth.sin(player.getYRot() * ((float) Math.PI / 180F)), -Mth.cos(player.getYRot() * ((float) Math.PI / 180F)));
                 } else attacker.push(-Mth.sin(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F, 0.1D, Mth.cos(player.getYRot() * ((float) Math.PI / 180F)) * knockbackStrength * 0.5F);
 
@@ -239,7 +231,7 @@ public class ConfiguredShield extends ShieldItem implements TooltipComponentItem
             onShieldDisable(itemStack, level, player, null, false);
             applyCooldown(player, builder.parryCooldownTicks, false);
             if(resonanceLvl == 0) player.stopUsingItem();
-            Utils.Entities.applyWithChance(player, builder.defenderParryEffects.getEffects(), builder.defenderParryEffects.getChance(), Tmp.rnd);
+            Utils.Entities.apply(player, builder.defenderParryEffects);
         }
     }
 

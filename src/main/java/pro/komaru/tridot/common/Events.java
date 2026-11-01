@@ -143,11 +143,10 @@ public class Events{
             if (SuitArmorItem.hasCorrectArmorOn(material, player)) {
                 for (var effectData : entry.getValue()) {
                     if (effectData.condition().test(player)) {
-                        MobEffect effect = effectData.instance().get().getEffect();
+                        MobEffect effect = effectData.applier().effect();
                         newApplied.add(effect);
                         if (!player.hasEffect(effect)) {
-                            MobEffectInstance instance = effectData.instance().get();
-                            player.addEffect(instance);
+                            effectData.applier().applyWithChance(player);
                         }
                     }
                 }
@@ -206,9 +205,8 @@ public class Events{
             ArmorMaterial material = entry.getKey();
             if (!SuitArmorItem.hasCorrectArmorOn(material, attacker)) return;
             for (var effectData : entry.getValue()) {
-                float chance = effectData.chance();
-                if (!Tmp.rnd.chance(chance) || !effectData.condition().test(attacker)) continue;
-                living.addEffect(effectData.instance().get());
+                if (!effectData.condition().test(attacker)) continue;
+                effectData.applier().applyWithChance(living);
             }
         }
     }

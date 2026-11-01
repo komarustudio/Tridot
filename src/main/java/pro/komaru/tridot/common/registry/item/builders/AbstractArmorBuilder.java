@@ -1,5 +1,6 @@
 package pro.komaru.tridot.common.registry.item.builders;
 
+import pro.komaru.tridot.api.EffectApplier;
 import com.google.common.collect.*;
 import net.minecraft.sounds.*;
 import net.minecraft.world.effect.*;
@@ -48,33 +49,50 @@ public abstract class AbstractArmorBuilder<T extends ArmorMaterial>{
 
     /**
      * Represents an effect that can be applied by wearing a specific armor set.
-     * @param instance Supplier for the MobEffectInstance to apply.
+     * @param applier EffectApplier to apply effect from.
      * @param condition Predicate determining when the effect should apply.
      */
-    public record ArmorEffectData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
+    public record ArmorEffectData(EffectApplier applier, Predicate<Player> condition) {
         public static final Predicate<Player> ALWAYS_TRUE = player -> true;
-        public static final int INFINITE_DURATION = -1;
         public static ArmorEffectData createData(Supplier<MobEffect> effectSupplier) {
-            return new ArmorEffectData(() -> new MobEffectInstance(effectSupplier.get(), INFINITE_DURATION), ALWAYS_TRUE);
+            return new ArmorEffectData(EffectApplier.of(effectSupplier), ALWAYS_TRUE);
+        }
+
+        public static ArmorEffectData createData(MobEffect effect) {
+            return new ArmorEffectData(EffectApplier.of(effect), ALWAYS_TRUE);
+        }
+
+        public static ArmorEffectData createData(EffectApplier applier, Predicate<Player> condition) {
+            return new ArmorEffectData(applier, condition);
         }
 
         public static ArmorEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
-            return new ArmorEffectData(instance, condition);
+            MobEffectInstance sample = instance.get();
+            return new ArmorEffectData(new EffectApplier(sample.getEffect(), sample.getDuration(), sample.getAmplifier(), 1.0F), condition);
         }
     }
 
-    public record HitEffectData(Supplier<MobEffectInstance> instance, Predicate<Player> condition, float chance) {
+    public record HitEffectData(EffectApplier applier, Predicate<Player> condition) {
         public static final Predicate<Player> ALWAYS_TRUE = player -> true;
         public static HitEffectData createData(Supplier<MobEffect> effectSupplier) {
-            return new HitEffectData(() -> new MobEffectInstance(effectSupplier.get(), 120), ALWAYS_TRUE, 1);
+            return new HitEffectData(EffectApplier.of(effectSupplier, 120), ALWAYS_TRUE);
+        }
+
+        public static HitEffectData createData(MobEffect effect) {
+            return new HitEffectData(EffectApplier.of(effect, 120), ALWAYS_TRUE);
+        }
+
+        public static HitEffectData createData(EffectApplier applier, Predicate<Player> condition) {
+            return new HitEffectData(applier, condition);
         }
 
         public static HitEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition, float chance) {
-            return new HitEffectData(instance, condition, chance);
+            MobEffectInstance sample = instance.get();
+            return new HitEffectData(new EffectApplier(sample.getEffect(), sample.getDuration(), sample.getAmplifier(), chance), condition);
         }
 
         public static HitEffectData createData(Supplier<MobEffectInstance> instance, Predicate<Player> condition) {
-            return new HitEffectData(instance, condition, 1);
+            return createData(instance, condition, 1.0F);
         }
     }
 

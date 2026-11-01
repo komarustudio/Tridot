@@ -847,51 +847,36 @@ public class Utils {
          * Adds effect tooltips to list
          * @param effects Effect list
          * @param tooltipList Tooltip list
-         * @param duration Duration of effects
-         * @param chance Chance of effects
          */
-        public static void effectTooltip(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration, float chance) {
+        public static void effectTooltip(ImmutableList<EffectApplier> effects, List<Component> tooltipList, float durationFactor) {
             if (!effects.isEmpty()) {
-                if (chance > 0 && chance < 1) {
-                    tooltipList.add(Component.translatable("tooltip.tridot.applies_with_chance", String.format("%.1f%%", chance * 100)).withStyle(ChatFormatting.GRAY));
-                } else {
-                    tooltipList.add(Component.translatable("tooltip.tridot.applies").withStyle(ChatFormatting.GRAY));
-                }
-
-                effectLines(effects, tooltipList, duration);
+                tooltipList.add(Component.translatable("tooltip.tridot.applies").withStyle(ChatFormatting.GRAY));
+                effectLines(effects, tooltipList, durationFactor);
             }
         }
 
-
-        /**
-         * Adds effect tooltips to list
-         * @param effects Effect list
-         * @param tooltipList Tooltip list
-         * @param duration Duration of effects
-         * @param chance Chance of effects
-         */
-        public static void effectTargetTooltip(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration, float chance) {
+        public static void effectTargetTooltip(ImmutableList<EffectApplier> effects, List<Component> tooltipList, float durationFactor) {
             if (!effects.isEmpty()) {
-                if (chance > 0 && chance < 1) {
-                    tooltipList.add(Component.translatable("tooltip.tridot.applies_with_chance_target", String.format("%.1f%%", chance * 100)).withStyle(ChatFormatting.GRAY));
-                } else {
-                    tooltipList.add(Component.translatable("tooltip.tridot.applies_to_target").withStyle(ChatFormatting.GRAY));
-                }
-
-                effectLines(effects, tooltipList, duration);
+                tooltipList.add(Component.translatable("tooltip.tridot.applies_to_target").withStyle(ChatFormatting.GRAY));
+                effectLines(effects, tooltipList, durationFactor);
             }
         }
 
-        public static void effectLines(ImmutableList<MobEffectInstance> effects, List<Component> tooltipList, float duration){
-            for (MobEffectInstance mobeffectinstance : effects) {
-                MutableComponent mutablecomponent = Component.translatable(mobeffectinstance.getDescriptionId());
-                MobEffect mobeffect = mobeffectinstance.getEffect();
-                if (mobeffectinstance.getAmplifier() > 0) {
-                    mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + mobeffectinstance.getAmplifier()));
+        public static void effectLines(ImmutableList<EffectApplier> effects, List<Component> tooltipList, float durationFactor){
+            for (var applier : effects) {
+                MutableComponent mutablecomponent = Component.translatable(applier.effect().getDescriptionId());
+                MobEffect mobeffect = applier.effect();
+                if (applier.amplifier() > 0) {
+                    mutablecomponent = Component.translatable("potion.withAmplifier", mutablecomponent, Component.translatable("potion.potency." + applier.amplifier()));
                 }
 
-                if (!mobeffectinstance.endsWithin(20)) {
-                    mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, MobEffectUtil.formatDuration(mobeffectinstance, duration));
+                if (!applier.endsWithin(20)) {
+                    mutablecomponent = Component.translatable("potion.withDuration", mutablecomponent, applier.formatDuration(durationFactor));
+                }
+
+                if (applier.chance() > 0 && applier.chance() < 1.0F) {
+                    String chanceStr = String.format(" (%.0f%%)", applier.chance() * 100);
+                    mutablecomponent.append(Component.literal(chanceStr).withStyle(ChatFormatting.GRAY));
                 }
 
                 tooltipList.add(Component.literal(" ♦ ").withStyle(mobeffect.getCategory().getTooltipFormatting()).append(mutablecomponent.withStyle(mobeffect.getCategory().getTooltipFormatting())));
@@ -1146,6 +1131,14 @@ public class Utils {
             if (attacker instanceof Player player) return attacker.damageSources().playerAttack(player);
 
             return attacker.damageSources().mobAttack(attacker);
+        }
+
+        public static void apply(LivingEntity pTarget, Iterable<EffectApplier> effects) {
+            if (pTarget != null && effects != null) {
+                for (EffectApplier applier : effects) {
+                    applier.applyWithChance(pTarget);
+                }
+            }
         }
 
         public static void applyWithChance(LivingEntity pTarget, ImmutableList<MobEffectInstance> effects, float chance, ArcRandom arcRandom) {

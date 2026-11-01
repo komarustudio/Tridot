@@ -74,8 +74,6 @@ public class ClientEvents {
                     int currentWidth = (int) (barWidth * (1.0f - ((float)ticksUsing / shield.getParryWindow(useItem))));
                 
                     graphics.pose().pushPose();
-
-//                    Col col = ticksUsing > 5 ? Col.green : Col.red;
                     Col col = Col.white;
 
                     RenderSystem.setShaderColor(1,1,1,1);
@@ -90,6 +88,11 @@ public class ClientEvents {
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onPlayerClone(ClientPlayerNetworkEvent.Clone event) {
+        BossBarsOverlay.reset();
     }
 
     @SubscribeEvent

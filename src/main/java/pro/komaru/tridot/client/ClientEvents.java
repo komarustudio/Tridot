@@ -102,6 +102,11 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
+    public void onPlayerClone(ClientPlayerNetworkEvent.Clone event) {
+        BossBarsOverlay.reset();
+    }
+
+    @SubscribeEvent
     public void onTooltipGatherComponents(RenderTooltipEvent.GatherComponents event) {
         List<Either<FormattedText, TooltipComponent>> elements = event.getTooltipElements();
         if (event.getItemStack().getItem() instanceof TooltipComponentItem componentItem) {

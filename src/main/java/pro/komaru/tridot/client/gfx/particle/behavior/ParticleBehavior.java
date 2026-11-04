@@ -16,6 +16,14 @@ public class ParticleBehavior{
 
     public static final Random random = new Random();
 
+    private static final Vector3f[] QUAD_BUFFERS = new Vector3f[]{
+        new Vector3f(-1.0F, -1.0F, 0.0F),
+        new Vector3f(-1.0F, 1.0F, 0.0F),
+        new Vector3f(1.0F, 1.0F, 0.0F),
+        new Vector3f(1.0F, -1.0F, 0.0F)
+    };
+    private static final Quaternionf ROT_BUFFER = new Quaternionf();
+
     public SpinParticleData xSpinData;
     public SpinParticleData ySpinData;
     public SpinParticleData zSpinData;
@@ -112,9 +120,12 @@ public class ParticleBehavior{
     public void render(GenericParticle particle, VertexConsumer vertexConsumer, Camera renderInfo, float partialTicks){
         if(particle.shouldRenderTraits) updateRenderTraits(particle, partialTicks);
 
-        Vec3 pos = getPosition(particle, renderInfo, partialTicks);
-        Quaternionf quaternionf = getRotate(particle, renderInfo, partialTicks);
+        Vec3 camPos = renderInfo.getPosition();
+        float px = (float)(Mth.lerp(partialTicks, particle.xo, particle.x) - camPos.x());
+        float py = (float)(Mth.lerp(partialTicks, particle.yo, particle.y) - camPos.y());
+        float pz = (float)(Mth.lerp(partialTicks, particle.zo, particle.z) - camPos.z());
 
+        Quaternionf quaternionf = getRotate(particle, renderInfo, partialTicks, ROT_BUFFER);
         Vector3f[] avector3f = getQuad(particle, renderInfo, partialTicks);
         float f3 = particle.getQuadSize(partialTicks);
 
@@ -122,7 +133,7 @@ public class ParticleBehavior{
             Vector3f vector3f = avector3f[i];
             vector3f.rotate(quaternionf);
             vector3f.mul(f3);
-            vector3f.add((float)pos.x(), (float)pos.y(), (float)pos.z());
+            vector3f.add(px, py, pz);
         }
 
         float u0 = particle.getU0();
@@ -154,8 +165,8 @@ public class ParticleBehavior{
         return new Vec3(x, y, z);
     }
 
-    public Quaternionf getRotate(GenericParticle particle, Camera renderInfo, float partialTicks){
-        Quaternionf quaternionf = new Quaternionf();
+    public Quaternionf getRotate(GenericParticle particle, Camera renderInfo, float partialTicks, Quaternionf quaternionf){
+        quaternionf.identity();
         if(camera){
             float x = xRotCam ? renderInfo.getXRot() : 0;
             float y = yRotCam ? renderInfo.getYRot() : 0;
@@ -174,7 +185,15 @@ public class ParticleBehavior{
         return quaternionf;
     }
 
+    public Quaternionf getRotate(GenericParticle particle, Camera renderInfo, float partialTicks){
+        return getRotate(particle, renderInfo, partialTicks, new Quaternionf());
+    }
+
     public Vector3f[] getQuad(GenericParticle particle, Camera renderInfo, float partialTicks){
-        return new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
+        QUAD_BUFFERS[0].set(-1.0F, -1.0F, 0.0F);
+        QUAD_BUFFERS[1].set(-1.0F, 1.0F, 0.0F);
+        QUAD_BUFFERS[2].set(1.0F, 1.0F, 0.0F);
+        QUAD_BUFFERS[3].set(1.0F, -1.0F, 0.0F);
+        return QUAD_BUFFERS;
     }
 }

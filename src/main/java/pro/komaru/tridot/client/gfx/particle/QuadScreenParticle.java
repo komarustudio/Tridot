@@ -1,14 +1,9 @@
 package pro.komaru.tridot.client.gfx.particle;
 
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
-import net.minecraft.client.*;
 import net.minecraft.client.multiplayer.*;
-import net.minecraft.core.Direction.*;
 import net.minecraft.util.*;
 import net.neoforged.api.distmarker.*;
-import org.jetbrains.annotations.*;
-import org.joml.*;
 import pro.komaru.tridot.client.ClientTick;
 
 @OnlyIn(Dist.CLIENT)
@@ -31,25 +26,32 @@ public abstract class QuadScreenParticle extends ScreenParticle {
         float u1 = getU1();
         float v0 = getV0();
         float v1 = getV1();
-        Vector3f[] vectors = getVector3fs(partialTicks, size);
-        float quadZ = getQuadZPosition();
-        bufferBuilder.addVertex(vectors[0].x(), vectors[0].y(), quadZ).setUv(u1, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
-        bufferBuilder.addVertex(vectors[1].x(), vectors[1].y(), quadZ).setUv(u1, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
-        bufferBuilder.addVertex(vectors[2].x(), vectors[2].y(), quadZ).setUv(u0, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
-        bufferBuilder.addVertex(vectors[3].x(), vectors[3].y(), quadZ).setUv(u0, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
-    }
 
-    private Vector3f @NotNull [] getVector3fs(float partialTicks, float size){
         float roll = Mth.lerp(partialTicks, this.oRoll, this.roll);
-        Vector3f[] vectors = new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
-        Quaternionf rotation = new Quaternionf(Axis.ZN.rotationDegrees(roll));
-        for (int i = 0; i < 4; ++i) {
-            Vector3f vector3f = vectors[i];
-            vector3f.rotate(rotation);
-            vector3f.mul(size);
-            vector3f.add((float) x, (float) y, 0);
-        }
-        return vectors;
+        float rad = roll * Mth.DEG_TO_RAD;
+        float cos = Mth.cos(rad) * size;
+        float sin = Mth.sin(rad) * size;
+
+        float px = (float) this.x;
+        float py = (float) this.y;
+        float quadZ = getQuadZPosition();
+
+        float x0 = -cos - sin + px;
+        float y0 =  sin - cos + py;
+
+        float x1 = -cos + sin + px;
+        float y1 =  sin + cos + py;
+
+        float x2 =  cos + sin + px;
+        float y2 = -sin + cos + py;
+
+        float x3 =  cos - sin + px;
+        float y3 = -sin - cos + py;
+
+        bufferBuilder.addVertex(x0, y0, quadZ).setUv(u1, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(x1, y1, quadZ).setUv(u1, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(x2, y2, quadZ).setUv(u0, v0).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
+        bufferBuilder.addVertex(x3, y3, quadZ).setUv(u0, v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha);
     }
 
     public float getQuadSize(float partialTicks) {

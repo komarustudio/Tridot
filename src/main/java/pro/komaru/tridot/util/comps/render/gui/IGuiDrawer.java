@@ -10,7 +10,7 @@ import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.util.Col;
 import pro.komaru.tridot.util.comps.render.RenderStackc;
 import pro.komaru.tridot.util.phys.AbsRect;
-import pro.komaru.tridot.util.phys.Vec2;
+import pro.komaru.tridot.util.phys.Vec2f;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 public interface IGuiDrawer extends RenderStackc {
 
-    Map<String,Vec2> CACHED_DIMS = new HashMap<>();
+    Map<String, Vec2f> CACHED_DIMS = new HashMap<>();
 
     GuiGraphics graphics();
 
@@ -101,7 +101,7 @@ public interface IGuiDrawer extends RenderStackc {
     }
     String namespace();
 
-    private Vec2 textureSize(ResourceLocation location) {
+    private Vec2f textureSize(ResourceLocation location) {
         TextureManager mng = Minecraft.getInstance().getTextureManager();
         if(IGuiDrawer.CACHED_DIMS.containsKey(location.toString())) {
             return IGuiDrawer.CACHED_DIMS.get(location.toString());
@@ -110,11 +110,11 @@ public interface IGuiDrawer extends RenderStackc {
             NativeImage img = NativeImage.read(
                     Minecraft.getInstance().getResourceManager().getResource(location).get().open()
             );
-            IGuiDrawer.CACHED_DIMS.put(location.toString(), new Vec2(img.getWidth(), img.getHeight()));
-            return new Vec2(img.getWidth(), img.getHeight());
+            IGuiDrawer.CACHED_DIMS.put(location.toString(), new Vec2f(img.getWidth(), img.getHeight()));
+            return new Vec2f(img.getWidth(), img.getHeight());
         } catch (IOException e) {
             e.printStackTrace();
-            return new Vec2(256, 256);
+            return new Vec2f(256, 256);
         }
     }
 

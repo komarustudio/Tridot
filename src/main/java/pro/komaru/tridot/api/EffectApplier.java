@@ -35,6 +35,14 @@ public record EffectApplier(Holder<MobEffect> effect, int duration, int amplifie
         return new EffectApplier(effect, duration, 0, 1);
     }
 
+    public static EffectApplier of(MobEffectInstance instance, float chance) {
+        return new EffectApplier(instance.getEffect(), instance.getDuration(), instance.getAmplifier(), chance);
+    }
+
+    public static EffectApplier of(MobEffectInstance instance) {
+        return new EffectApplier(instance.getEffect(), instance.getDuration(), instance.getAmplifier(), 1.0F);
+    }
+
     public static EffectApplier of(Holder<MobEffect> effect) {
         return new EffectApplier(effect, -1, 0, 1.0F);
     }

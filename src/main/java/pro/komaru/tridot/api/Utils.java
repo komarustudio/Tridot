@@ -71,6 +71,8 @@ import pro.komaru.tridot.client.model.render.item.CustomItemRenderer;
 import pro.komaru.tridot.common.*;
 import pro.komaru.tridot.common.compatibility.snakeyaml.internal.*;
 import pro.komaru.tridot.util.*;
+
+import pro.komaru.tridot.util.phys.Vec3f;
 import pro.komaru.tridot.util.struct.Structs;
 import pro.komaru.tridot.util.struct.data.Seq;
 import pro.komaru.tridot.util.struct.func.Boolf;
@@ -1031,28 +1033,35 @@ public class Utils {
          *                    <pre>{@code new AABB(projectile.getX() - 3.5, projectile.getY() - 0.5, projectile.getZ() - 3.5, projectile.getX() + 3.5, projectile.getY() + 0.5, projectile.getZ() + 3.5);
          *                    }</pre>
          */
-        public static void homingTo(double strength, Entity projectile, Level level, Entity pOwner, AABB boundingBox) {
+        public static void homingTo(float strength, Entity projectile, Level level, Entity pOwner, AABB boundingBox) {
             if (level.isClientSide) return;
 
             List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, boundingBox);
             LivingEntity nearest = null;
             double nearestDist = Double.MAX_VALUE;
+
             for (LivingEntity target : targets) {
-                if (target == pOwner || !target.isAlive()) continue;
+                if (target == projectile || target == pOwner || !target.isAlive()) continue;
                 double dist = projectile.distanceToSqr(target);
                 if (dist < nearestDist) {
-                    nearest = target;
                     nearestDist = dist;
+                    nearest = target;
                 }
             }
 
             if (nearest != null) {
-                Vec3 currentVelocity = projectile.getDeltaMovement();
-                Vec3 toTarget = nearest.position().add(0, 1, 0).subtract(projectile.position()).normalize();
-                Vec3 newVelocity = currentVelocity.add(toTarget.scale(strength)).normalize().scale(currentVelocity.length());
-                projectile.setDeltaMovement(newVelocity);
+                Vec3 vel  = projectile.getDeltaMovement();
+                float speed = (float) vel.length();
+
+                Tmp.v3.set((float) (nearest.getX() - projectile.getX()), (float) (nearest.getY() + 1.0 - projectile.getY()), (float) (nearest.getZ() - projectile.getZ())).nor();
+                Tmp.v4.set((float)vel.x, (float)vel.y, (float)vel.z).add(Tmp.v3.scale(strength)).nor().scale(speed);
+                projectile.setDeltaMovement(Tmp.v4.x, Tmp.v4.y, Tmp.v4.z);
                 projectile.hurtMarked = true;
             }
+        }
+
+        public static void homingTo(double strength, Entity projectile, Level level, Entity pOwner, AABB boundingBox) {
+            homingTo((float) strength, projectile, level, pOwner, boundingBox);
         }
 
         /**
@@ -1476,6 +1485,10 @@ public class Utils {
         }
 
         public static void renderConnectLine(PoseStack stack, Vec3 from, Vec3 to, Col color, float alpha){
+            renderConnectLine(stack, Tmp.v3.set(from), Tmp.v4.set(to), color, alpha);
+        }
+
+        public static void renderConnectLine(PoseStack stack, Vec3f from, Vec3f to, Col color, float alpha){
             double dX = to.x() - from.x();
             double dY = to.y() - from.y();
             double dZ = to.z() - from.z();
@@ -1487,9 +1500,10 @@ public class Utils {
             stack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(-yaw)));
             stack.mulPose(Axis.ZP.rotationDegrees((float)Math.toDegrees(-pitch) - 180f));
             RenderBuilder.create().setRenderType(TridotRenderTypes.ADDITIVE)
-            .setColor(color)
-            .setAlpha(alpha)
-            .renderRay(stack, 0.01f, (float)from.distanceTo(to) + 0.01f);
+                    .setColor(color)
+                    .setAlpha(alpha)
+                    .renderRay(stack, 0.01f, from.dst(to) + 0.01f);
+
             stack.popPose();
         }
 
@@ -1497,61 +1511,84 @@ public class Utils {
             renderConnectLine(stack, posFrom.getCenter(), posTo.getCenter(), color, alpha);
         }
 
-        public static void renderConnectLineOffset(PoseStack stack, Vec3 from, Vec3 to, Col color, float alpha){
+        public static void renderConnectLineOffset(PoseStack stack, Vec3f from, Vec3f to, Col color, float alpha){
+            renderConnectLineOffset(stack, from.x, from.y, from.z, to.x, to.y, to.z, color, alpha);
+        }
+
+        public static void renderConnectLineOffset(PoseStack stack, float x, float y, float z, float toX, float toY, float toZ, Col color, float alpha){
             stack.pushPose();
-            stack.translate(from.x(), from.y(), from.z());
-            renderConnectLine(stack, from, to, color, alpha);
+            stack.translate(x, y, z);
+            renderConnectLine(stack, Tmp.v3.set(x, y, z), Tmp.v4.set(toX, toY, toZ), color, alpha);
             stack.popPose();
         }
 
+        public static void renderConnectLineOffset(PoseStack stack, Vec3 from, Vec3 to, Col color, float alpha){
+            renderConnectLineOffset(stack, (float)from.x, (float)from.y, (float)from.z, (float)to.x, (float)to.y, (float)to.z, color, alpha);
+        }
+
         public static void renderConnectBoxLines(PoseStack stack, Vec3 size, Col color, float alpha){
-            renderConnectLineOffset(stack, new Vec3(0, 0, 0), new Vec3(size.x(), 0, 0), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, 0), new Vec3(size.x(), 0, size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, size.z()), new Vec3(0, 0, size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(0, 0, size.z()), new Vec3(0, 0, 0), color, alpha);
+            renderConnectBoxLines(stack, (float)size.x(), (float)size.y(), (float)size.z(), color, alpha);
+        }
 
-            renderConnectLineOffset(stack, new Vec3(0, 0, 0), new Vec3(0, size.y(), 0), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, 0), new Vec3(size.x(), size.y(), 0), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, size.z()), new Vec3(size.x(), size.y(), size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(0, 0, size.z()), new Vec3(0, size.y(), size.z()), color, alpha);
+        public static void renderConnectBoxLines(PoseStack stack, Vec3f size, Col color, float alpha){
+            renderConnectBoxLines(stack, size.x, size.y, size.z, color, alpha);
+        }
 
-            renderConnectLineOffset(stack, new Vec3(0, size.y(), 0), new Vec3(size.x(), size.y(), 0), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), size.y(), 0), new Vec3(size.x(), size.y(), size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), size.y(), size.z()), new Vec3(0, size.y(), size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(0, size.y(), size.z()), new Vec3(0, size.y(), 0), color, alpha);
+        public static void renderConnectBoxLines(PoseStack stack, float sx, float sy, float sz, Col color, float alpha){
+            renderConnectLineOffset(stack, 0, 0, 0, sx, 0, 0, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, 0, sx, 0, sz, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, sz, 0, 0, sz, color, alpha);
+            renderConnectLineOffset(stack, 0, 0, sz, 0, 0, 0, color, alpha);
+
+            renderConnectLineOffset(stack, 0, 0, 0, 0, sy, 0, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, 0, sx, sy, 0, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, sz, sx, sy, sz, color, alpha);
+            renderConnectLineOffset(stack, 0, 0, sz, 0, sy, sz, color, alpha);
+
+            renderConnectLineOffset(stack, 0, sy, 0, sx, sy, 0, color, alpha);
+            renderConnectLineOffset(stack, sx, sy, 0, sx, sy, sz, color, alpha);
+            renderConnectLineOffset(stack, sx, sy, sz, 0, sy, sz, color, alpha);
+            renderConnectLineOffset(stack, 0, sy, sz, 0, sy, 0, color, alpha);
             stack.pushPose();
             stack.translate(0.01f, 0.01f, 0.01f);
             RenderBuilder.create().setRenderType(TridotRenderTypes.ADDITIVE)
             .setColor(color)
             .setAlpha(alpha / 8f)
             .enableSided()
-            .renderCube(stack, (float)size.x() - 0.02f, (float)size.y() - 0.02f, (float)size.z() - 0.02f);
+            .renderCube(stack, sx - 0.02f, sy - 0.02f, sz - 0.02f);
             stack.popPose();
         }
 
         public static void renderConnectSideLines(PoseStack stack, Vec3 size, Col color, float alpha){
-            renderConnectLineOffset(stack, new Vec3(0, 0, 0), new Vec3(size.x(), 0, 0), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, 0), new Vec3(size.x(), 0, size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(size.x(), 0, size.z()), new Vec3(0, 0, size.z()), color, alpha);
-            renderConnectLineOffset(stack, new Vec3(0, 0, size.z()), new Vec3(0, 0, 0), color, alpha);
+            renderConnectSideLines(stack, (float)size.x(), (float)size.y(), (float)size.z(), color, alpha);
+        }
+
+        public static void renderConnectSideLines(PoseStack stack, Vec3f size, Col color, float alpha){
+            renderConnectSideLines(stack, size.x, size.y, size.z, color, alpha);
+        }
+
+        public static void renderConnectSideLines(PoseStack stack, float sx, float sy, float sz, Col color, float alpha){
+            renderConnectLineOffset(stack, 0, 0, 0, sx, 0, 0, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, 0, sx, 0, sz, color, alpha);
+            renderConnectLineOffset(stack, sx, 0, sz, 0, 0, sz, color, alpha);
+            renderConnectLineOffset(stack, 0, 0, sz, 0, 0, 0, color, alpha);
             stack.pushPose();
             stack.mulPose(Axis.XP.rotationDegrees(90f));
             RenderBuilder.create().setRenderType(TridotRenderTypes.ADDITIVE)
             .setColor(color)
             .setAlpha(alpha / 8f)
             .enableSided()
-            .renderQuad(stack, (float)size.x(), (float)size.y());
+            .renderQuad(stack, sx, sy);
             stack.popPose();
         }
 
         public static void renderConnectSide(PoseStack stack, Direction side, Col color, float alpha){
-            Vec3 size = new Vec3(1, 1, 1);
             stack.pushPose();
             stack.translate(0.5f, 0.5f, 0.5f);
             stack.mulPose(side.getOpposite().getRotation());
             stack.translate(0, -0.001f, 0);
-            stack.translate(-size.x() / 2f, -size.y() / 2f, -size.z() / 2f);
-            renderConnectSideLines(stack, size, color, alpha);
+            stack.translate(-0.5f, -0.5f, -0.5f);
+            renderConnectSideLines(stack, 1f, 1f, 1f, color, alpha);
             stack.popPose();
         }
 

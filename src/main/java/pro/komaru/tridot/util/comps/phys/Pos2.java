@@ -1,11 +1,11 @@
 package pro.komaru.tridot.util.comps.phys;
 
-import pro.komaru.tridot.util.phys.Vec2;
+import pro.komaru.tridot.util.phys.Vec2f;
 
-public interface Pos2 extends X,Y {
+public interface Pos2 extends X, Y {
 
     static Pos2 init(float x, float y) {
-        return new Vec2(x,y);
+        return new Vec2f(x, y);
     }
 
     @Override
@@ -13,15 +13,13 @@ public interface Pos2 extends X,Y {
     @Override
     Pos2 y(float value);
 
-
     default Pos2 cpypos() {
         float x = x();
         float y = y();
-        return init(x,y);
+        return init(x, y);
     }
 
-    default pro.komaru.tridot.util.phys.Vec2 vec() {
-        return new Vec2(this);
+    default Vec2f vec() {
+        return new Vec2f(this);
     }
-
 }

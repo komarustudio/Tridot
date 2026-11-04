@@ -193,7 +193,7 @@ public class Events{
         if (!(target instanceof LivingEntity living)) return;
         for (var entry : AbstractArmorRegistry.HIT_EFFECTS.entrySet()) {
             var material = entry.getKey();
-            if (!SuitArmorItem.hasCorrectArmorOn(material, attacker)) return;
+            if (!SuitArmorItem.hasCorrectArmorOn(material, attacker)) continue;
             for (var effectData : entry.getValue()) {
                 if (!effectData.condition().test(attacker)) continue;
                 effectData.applier().applyWithChance(living);

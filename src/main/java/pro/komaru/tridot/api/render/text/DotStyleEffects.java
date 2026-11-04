@@ -7,7 +7,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import pro.komaru.tridot.client.ClientTick;
@@ -19,11 +18,9 @@ import pro.komaru.tridot.util.Tmp;
 import pro.komaru.tridot.util.math.ArcRandom;
 import pro.komaru.tridot.util.math.Direction2;
 import pro.komaru.tridot.util.math.Mathf;
-import pro.komaru.tridot.util.phys.Vec2;
-import pro.komaru.tridot.util.struct.Structs;
+import pro.komaru.tridot.util.phys.Vec2f;
 import pro.komaru.tridot.util.struct.func.Prov;
 
-import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -436,8 +433,8 @@ public class DotStyleEffects {
             VertexConsumer consumer = self.bufferSource.getBuffer(glyph.renderType(self.mode));
             Col col = outlineColor != null ? outlineColor : Col.black;
             float boldOffset = style.isBold() ? glyphInfo.getBoldOffset() : 0.0f;
-            Vec2[] directions = square ? Direction2.d8 : Direction2.d4;
-            for (Vec2 dir : directions) {
+            Vec2f[] directions = square ? Direction2.d8 : Direction2.d4;
+            for (Vec2f dir : directions) {
                 font.renderChar(glyph, style.isBold(), style.isItalic(), boldOffset, self.x + dir.x, self.y + dir.y, self.pose, consumer, col.r, col.g, col.b, col.a, self.packedLightCoords);
             }
         }

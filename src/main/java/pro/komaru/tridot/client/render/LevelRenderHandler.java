@@ -24,17 +24,22 @@ import java.util.*;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class LevelRenderHandler{
-    public static Matrix4f MATRIX4F = null;
+    public static final Matrix4f MATRIX4F = new Matrix4f();
+    private static final Matrix4f CAM_MAT_CACHE = new Matrix4f();
     static MultiBufferSource.BufferSource DELAYED_RENDER = null;
     public static RenderTarget DEPTH_CACHE;
     public static float FOG_START = 0;
     public static List<ICustomParticleRender> particleList = new ArrayList<>();
     public static Map<GenericParticle, ICustomBehaviorParticleRender> behaviorParticleList = new HashMap<>();
 
-    public static Matrix4f getCameraMatrix(Camera camera){
-        return new Matrix4f()
+    public static Matrix4f getCameraMatrix(Camera camera, Matrix4f dest){
+        return dest.identity()
                 .rotation(Axis.XP.rotationDegrees(camera.getXRot()))
                 .rotate(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+    }
+
+    public static Matrix4f getCameraMatrix(Camera camera){
+        return getCameraMatrix(camera, CAM_MAT_CACHE);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -59,7 +64,7 @@ public class LevelRenderHandler{
             particleList.clear();
             behaviorParticleList.clear();
 
-            MATRIX4F = new Matrix4f(stack.last().pose());
+            MATRIX4F.set(stack.last().pose());
             FOG_START = RenderSystem.getShaderFogStart();
         }
 

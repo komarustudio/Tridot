@@ -3,7 +3,7 @@ package pro.komaru.tridot.util.comps.phys;
 
 import pro.komaru.tridot.util.phys.AbsRect;
 import pro.komaru.tridot.util.phys.CenteredRect;
-import pro.komaru.tridot.util.phys.Vec2;
+import pro.komaru.tridot.util.phys.Vec2f;
 
 public interface Rectc extends X,Y {
     @Override
@@ -113,17 +113,17 @@ public interface Rectc extends X,Y {
                 -h()/2f <= otherY && otherY <= h()/2f;
     }
 
-    default Vec2 topLeft() {
-        return new Vec2(x(), y()).add(-w()/2f,-h()/2f);
+    default Vec2f topLeft() {
+        return new Vec2f(x(), y()).add(-w()/2f,-h()/2f);
     }
-    default Vec2 topRight() {
-        return new Vec2(x(), y()).add(w()/2f,-h()/2f);
+    default Vec2f topRight() {
+        return new Vec2f(x(), y()).add(w()/2f,-h()/2f);
     }
-    default Vec2 botLeft() {
-        return new Vec2(x(), y()).add(-w()/2f,h()/2f);
+    default Vec2f botLeft() {
+        return new Vec2f(x(), y()).add(-w()/2f,h()/2f);
     }
-    default Vec2 botRight() {
-        return new Vec2(x(), y()).add(w()/2f,h()/2f);
+    default Vec2f botRight() {
+        return new Vec2f(x(), y()).add(w()/2f,h()/2f);
     }
 
     default CenteredRect centered() {

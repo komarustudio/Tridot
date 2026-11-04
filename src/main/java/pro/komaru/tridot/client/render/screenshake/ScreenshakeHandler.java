@@ -25,6 +25,7 @@ import pro.komaru.tridot.util.math.raycast.RayHitResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import pro.komaru.tridot.util.phys.Vec3f;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,8 +36,8 @@ public class ScreenshakeHandler{
     public static float intensityPosition;
     public static float intensityFov;
     public static float intensityFovNormalize;
-    public static Vec3 intensityVector = Vec3.ZERO;
-    public static Vec3 intensityVectorOld = Vec3.ZERO;
+    public static Vec3f intensityVector = new Vec3f();
+    public static Vec3f intensityVectorOld = new Vec3f();
 
     public static ArcRandom rand = Tmp.rnd;
 
@@ -48,44 +49,57 @@ public class ScreenshakeHandler{
         }
 
         boolean cameraUpdate = false;
-        Vec3 pos = camera.getPosition();
-        Vec3 cameraPos = pos;
-
+        Tmp.v3.set(camera.getPosition());
+        Tmp.v4.set(Tmp.v3);
         if(intensityPosition > 0){
-            pos = intensityPosVec(pos);
+            Tmp.v3.set(intensityPosVec(Tmp.v3));
             cameraUpdate = true;
         }
-        if(!intensityVector.equals(Vec3.ZERO) && !intensityVectorOld.equals(Vec3.ZERO)){
-            pos = intensityVec(pos);
+
+        if(!intensityVector.isZero() && !intensityVectorOld.isZero()){
+            Tmp.v3.set(intensityVec(Tmp.v3));
             cameraUpdate = true;
         }
 
         if(cameraUpdate){
             Level level = Tridot.PROXY.getLevel();
             if(level != null){
-                RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(cameraPos, pos).setBlockShape(RayCastContext.Block.VISUAL));
-                double distance = Math.max(0f,cameraPos.subtract(hitResult.getPos()).length() - 0.1f);
+                RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(Tmp.v4, Tmp.v3).setBlockShape(RayCastContext.Block.VISUAL));
+                Vec3 hitPos = hitResult.getPos();
+                double distance = Math.max(0f, Tmp.v4.dst((float) hitPos.x, (float) hitPos.y, (float) hitPos.z) - 0.1f);
 
-                double dX = cameraPos.x() - hitResult.getPos().x();
-                double dY = cameraPos.y() - hitResult.getPos().y();
-                double dZ = cameraPos.z() - hitResult.getPos().z();
+                double dX = Tmp.v4.x() - hitPos.x();
+                double dY = Tmp.v4.y() - hitPos.y();
+                double dZ = Tmp.v4.z() - hitPos.z();
 
                 float pitch = (float) (Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI);
                 float x = (float) (Math.sin(pitch) * Math.cos(Math.atan2(dZ, dX)) * distance);
                 float y = (float) (Math.cos(pitch) * distance);
                 float z = (float) (Math.sin(pitch) * Math.sin(Math.atan2(dZ, dX)) * distance);
-                pos = cameraPos.add(x,y,z);
+                Tmp.v3.set(Tmp.v4.add(x,y,z));
             }
 
-            camera.setPosition(pos.x(), pos.y(), pos.z());
+            camera.setPosition(Tmp.v3.x(), Tmp.v3.y(), Tmp.v3.z());
         }
     }
 
-    private static @NotNull Vec3 intensityVec(Vec3 pos) {
-        return pos.add(intensityVectorOld.lerp(intensityVector,ClientTick.partialTicks));
+    private static @NotNull Vec3f intensityVec(Vec3 pos) {
+        return Vec3f.from(pos).add(intensityVectorOld.lerp(intensityVector, ClientTick.partialTicks));
     }
 
-    private static @NotNull Vec3 intensityPosVec(Vec3 pos) {
+    private static @NotNull Vec3f intensityVec(Vec3f pos) {
+        float pt = ClientTick.partialTicks;
+        float lx = Mth.lerp(pt, intensityVectorOld.x, intensityVector.x);
+        float ly = Mth.lerp(pt, intensityVectorOld.y, intensityVector.y);
+        float lz = Mth.lerp(pt, intensityVectorOld.z, intensityVector.z);
+        return pos.add(lx, ly, lz);
+    }
+
+    private static @NotNull Vec3f intensityPosVec(Vec3 pos) {
+        return Vec3f.from(pos).add(intensityVectorOld.lerp(intensityVector, ClientTick.partialTicks));
+    }
+
+    private static @NotNull Vec3f intensityPosVec(Vec3f pos) {
         float angleA = rand.nextFloat() * Mathf.pi * 2f;
         float angleB = rand.nextFloat() * Mathf.pi * 2f;
         float x = (float)(Math.cos(angleA) * Math.cos(angleB)) * randomizeOffset(intensityPosition);
@@ -129,11 +143,12 @@ public class ScreenshakeHandler{
         float rotation = 0;
         float position = 0;
         float fov = 0;
-        Vec3 vector = Vec3.ZERO;
+
+        Tmp.v3.clear();
         for(ScreenshakeInstance instance : INSTANCES){
             float update = instance.updateIntensity(camera);
-            if(instance.isRotation)rotation = apply(instance, rotationNormalize, update);
-            if(instance.isPosition)position = apply(instance, positionNormalize, update);
+            if(instance.isRotation) rotation = apply(instance, rotationNormalize, update);
+            if(instance.isPosition) position = apply(instance, positionNormalize, update);
             if(instance.isFov){
                 if(instance.isNormalize){
                     fovNormalize = fovNormalize + update;
@@ -147,11 +162,11 @@ public class ScreenshakeHandler{
             }
 
             if(instance.isVector){
-                Vec3 scaledVector = instance.vector.scale(update * intensity);
+                Tmp.v4.set(instance.vx, instance.vy, instance.vz).scale(update * intensity);
                 if (instance.isNormalize) {
-                    vector = vector.add(scaledVector.subtract(vector));
+                    Tmp.v3.add(Tmp.v4.sub(Tmp.v3));
                 } else {
-                    vector = vector.add(scaledVector);
+                    Tmp.v3.add(Tmp.v4);
                 }
             }
         }
@@ -167,8 +182,8 @@ public class ScreenshakeHandler{
         intensityPosition = (float)Math.max(Math.pow(positionNormalize / 2f, 3f), position);
         intensityFov = Math.max(fovNorm, fov);
         intensityFovNormalize = fovNormalize;
-        intensityVectorOld = intensityVector;
-        intensityVector = vector;
+        intensityVectorOld.set(intensityVector);
+        intensityVector.set(Tmp.v3);
         INSTANCES.removeIf(i -> i.progress >= i.duration);
     }
 

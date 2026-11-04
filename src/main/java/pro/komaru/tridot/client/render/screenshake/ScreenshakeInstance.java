@@ -11,6 +11,7 @@ public class ScreenshakeInstance{
     public int progress;
     public final int duration;
     public float intensity1, intensity2, intensity3;
+    public float vx = 0, vy = 0, vz = 0;
     public Interp intensityCurveStartEasing = Interp.linear, intensityCurveEndEasing = Interp.linear;
 
     public boolean isNormalize = true;
@@ -19,8 +20,6 @@ public class ScreenshakeInstance{
     public boolean isVector = false;
     public boolean isFov = false;
     public boolean isFovNormalize = false;
-
-    public Vec3 vector = Vec3.ZERO;
 
     public static final ArcRandom random = Tmp.rnd;
 
@@ -74,17 +73,25 @@ public class ScreenshakeInstance{
     }
 
     public ScreenshakeInstance vec(Vec3 vector){
-        this.vector = vector;
+        this.vx = (float) vector.x;
+        this.vy = (float) vector.y;
+        this.vz = (float) vector.z;
+        return this;
+    }
+
+    public ScreenshakeInstance vec(float x, float y, float z){
+        this.vx = x;
+        this.vy = y;
+        this.vz = z;
         return this;
     }
 
     public ScreenshakeInstance randVec(){
         double angleA = random.nextDouble() * Math.PI * 2;
         double angleB = random.nextDouble() * Math.PI * 2;
-        float x = (float)(Math.cos(angleA) * Math.cos(angleB));
-        float y = (float)(Math.sin(angleA) * Math.cos(angleB));
-        float z = (float)Math.sin(angleB);
-        this.vector = new Vec3(x, y, z);
+        this.vx = (float)(Math.cos(angleA) * Math.cos(angleB));
+        this.vy = (float)(Math.sin(angleA) * Math.cos(angleB));
+        this.vz = (float)Math.sin(angleB);
         return this;
     }
 

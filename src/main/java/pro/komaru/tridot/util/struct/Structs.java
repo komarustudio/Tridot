@@ -17,6 +17,7 @@ public class Structs {
     }
 
     //todo better system for this stuff
+    //skoow, when? You forgot about our kid Tridot
     public static Object cast(Object obj, String type) {
         try {
             return switch (type.toLowerCase()) {
@@ -95,7 +96,6 @@ public class Structs {
         return map;
     }
 
-    /** Объект в массив байтов */
     public static byte[] obj(Object obj) {
         if (obj == null) {
             throw new IllegalArgumentException("Object is null");
@@ -116,7 +116,6 @@ public class Structs {
         return byteArrayOutputStream.toByteArray();
     }
 
-    /** Массив байтов в объект */
     public static <K> K obj(Class<K> cast, byte[] bytes) {
         if (bytes == null) {
             throw new IllegalArgumentException("Bytes can't be null");

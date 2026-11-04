@@ -61,10 +61,9 @@ public class ScreenshakePacket extends ClientPacket {
         this.isVector = instance.isVector;
         this.isFov = instance.isFov;
         this.isFovNormalize = instance.isFovNormalize;
-        Vec3 v = instance.vector != null ? instance.vector : Vec3.ZERO;
-        this.vx = (float) v.x;
-        this.vy = (float) v.y;
-        this.vz = (float) v.z;
+        this.vx = instance.vx;
+        this.vy = instance.vy;
+        this.vz = instance.vz;
     }
 
     public ScreenshakePacket(boolean positioned, float x, float y, float z, float falloffDistance, float maxDistance, String falloffEasing, int duration, float intensity1, float intensity2, float intensity3, String startEasing, String endEasing, boolean isNormalize, boolean isRotation, boolean isPosition, boolean isVector, boolean isFov, boolean isFovNormalize, float vx, float vy, float vz) {
@@ -173,7 +172,7 @@ public class ScreenshakePacket extends ClientPacket {
             .normalizeFov(isFovNormalize);
 
         if (isVector) {
-            inst.vec(new Vec3(vx, vy, vz));
+            inst.vec(vx, vy, vz);
         }
 
         ScreenshakeHandler.add(inst);

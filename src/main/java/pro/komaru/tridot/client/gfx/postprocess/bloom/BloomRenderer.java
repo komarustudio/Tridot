@@ -137,13 +137,11 @@ public final class BloomRenderer {
         RenderSystem.enableDepthTest();
     }
 
-    @ApiStatus.Internal
     public static void bindMask() {
         if (mask == null) return;
         mask.bindWrite(false);
     }
 
-    @ApiStatus.Internal
     public static void unbindMask() {
         Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
     }

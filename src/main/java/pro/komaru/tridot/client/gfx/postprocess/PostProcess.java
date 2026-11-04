@@ -28,20 +28,25 @@ import static com.mojang.blaze3d.platform.GlConst.GL_DRAW_FRAMEBUFFER;
 public abstract class PostProcess{
     public static final Minecraft minecraft = Minecraft.getInstance();
 
+    private static final Vector3f CAM_POS_VEC = new Vector3f();
+    private static final Matrix4f INV_VIEW_MAT = new Matrix4f();
+    private static final Matrix4f INV_PROJ_MAT = new Matrix4f();
+
     public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
-    Pair.of("cameraPos", u -> u.set(new Vector3f(minecraft.gameRenderer.getMainCamera().getPosition().toVector3f()))),
+    Pair.of("cameraPos", u -> {
+        net.minecraft.world.phys.Vec3 pos = minecraft.gameRenderer.getMainCamera().getPosition();
+        u.set(CAM_POS_VEC.set((float) pos.x, (float) pos.y, (float) pos.z));
+    }),
     Pair.of("lookVector", u -> u.set(minecraft.gameRenderer.getMainCamera().getLookVector())),
     Pair.of("upVector", u -> u.set(minecraft.gameRenderer.getMainCamera().getUpVector())),
     Pair.of("leftVector", u -> u.set(minecraft.gameRenderer.getMainCamera().getLeftVector())),
     Pair.of("invViewMat", u -> {
-        Matrix4f invertedViewMatrix = new Matrix4f(PostProcess.viewModelStack.last().pose());
-        invertedViewMatrix.invert();
-        u.set(invertedViewMatrix);
+        INV_VIEW_MAT.set(PostProcess.viewModelStack.last().pose()).invert();
+        u.set(INV_VIEW_MAT);
     }),
     Pair.of("invProjMat", u -> {
-        Matrix4f invertedProjectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
-        invertedProjectionMatrix.invert();
-        u.set(invertedProjectionMatrix);
+        INV_PROJ_MAT.set(RenderSystem.getProjectionMatrix()).invert();
+        u.set(INV_PROJ_MAT);
     }),
     Pair.of("nearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
     Pair.of("farPlaneDistance", u -> u.set(minecraft.gameRenderer.getDepthFar())),

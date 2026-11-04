@@ -8,12 +8,13 @@ import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.material.*;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.*;
+import pro.komaru.tridot.util.phys.Vec3f;
 
 import java.util.function.*;
 
 public class RayCastContext{
-    public Vec3 startPos;
-    public Vec3 endPos;
+    public Vec3f startPos = Vec3f.zero();
+    public Vec3f endPos = Vec3f.zero();
     public Predicate<BlockPos> blockPosFilter = (b) -> true;
     public Predicate<FluidState> fluidFilter = Fluid.NONE;
     public Predicate<Entity> entityFilter = (e) -> false;
@@ -24,22 +25,27 @@ public class RayCastContext{
     public CollisionContext collisionContext = CollisionContext.empty();
 
     public RayCastContext(){
-        this.startPos = Vec3.ZERO;
-        this.endPos = Vec3.ZERO;
+        this.startPos.clear();
+        this.endPos.clear();
     }
 
-    public RayCastContext(Vec3 startPos, Vec3 endPos){
+    public RayCastContext(Vec3f startPos, Vec3f endPos){
         this.startPos = startPos;
         this.endPos = endPos;
     }
 
+    public RayCastContext(Vec3 startPos, Vec3 endPos){
+        this.startPos.set(startPos);
+        this.endPos.set(endPos);
+    }
+
     public RayCastContext setStartPos(Vec3 startPos){
-        this.startPos = startPos;
+        this.startPos.set(startPos);
         return this;
     }
 
     public RayCastContext setEndPos(Vec3 endPos){
-        this.endPos = endPos;
+        this.endPos.set(endPos);
         return this;
     }
 
@@ -83,11 +89,11 @@ public class RayCastContext{
         return this;
     }
 
-    public Vec3 getStartPos(){
+    public Vec3f getStartPos(){
         return startPos;
     }
 
-    public Vec3 getEndPos(){
+    public Vec3f getEndPos(){
         return endPos;
     }
 
@@ -119,6 +125,19 @@ public class RayCastContext{
         return blockShape;
     }
 
+    public net.minecraft.world.level.ClipContext.Block getVanillaBlockShape(){
+        if(this.blockShape == Block.OUTLINE) return net.minecraft.world.level.ClipContext.Block.OUTLINE;
+        if(this.blockShape == Block.VISUAL) return net.minecraft.world.level.ClipContext.Block.VISUAL;
+        return net.minecraft.world.level.ClipContext.Block.COLLIDER;
+    }
+
+    public net.minecraft.world.level.ClipContext.Fluid getVanillaFluidShape(){
+        if(this.fluidFilter == Fluid.SOURCE_ONLY) return net.minecraft.world.level.ClipContext.Fluid.SOURCE_ONLY;
+        if(this.fluidFilter == Fluid.ANY) return net.minecraft.world.level.ClipContext.Fluid.ANY;
+        if(this.fluidFilter == Fluid.WATER) return net.minecraft.world.level.ClipContext.Fluid.WATER;
+        return net.minecraft.world.level.ClipContext.Fluid.NONE;
+    }
+
     public CollisionContext getCollisionContext(){
         return collisionContext;
     }
@@ -131,21 +150,15 @@ public class RayCastContext{
         return fluidFilter.test(state) ? state.getShape(level, pos) : Shapes.empty();
     }
 
-    public static class Block implements ShapeGetter{
-        public static Block COLLIDER = new Block(BlockBehaviour.BlockStateBase::getCollisionShape);
-        public static Block OUTLINE = new Block(BlockBehaviour.BlockStateBase::getShape);
-        public static Block VISUAL = new Block(BlockBehaviour.BlockStateBase::getVisualShape);
+    public record Block(ShapeGetter shapeGetter) implements ShapeGetter {
+            public static Block COLLIDER = new Block(BlockBehaviour.BlockStateBase::getCollisionShape);
+            public static Block OUTLINE = new Block(BlockBehaviour.BlockStateBase::getShape);
+            public static Block VISUAL = new Block(BlockBehaviour.BlockStateBase::getVisualShape);
 
-        public final ShapeGetter shapeGetter;
-
-        public Block(ShapeGetter shapeGetter){
-            this.shapeGetter = shapeGetter;
+        public VoxelShape get(BlockState state, BlockGetter block, BlockPos pos, CollisionContext collisionContext) {
+                return this.shapeGetter.get(state, block, pos, collisionContext);
+            }
         }
-
-        public VoxelShape get(BlockState state, BlockGetter block, BlockPos pos, CollisionContext collisionContext){
-            return this.shapeGetter.get(state, block, pos, collisionContext);
-        }
-    }
 
     public static class Fluid{
         public static Predicate<FluidState> NONE = (f) -> false;

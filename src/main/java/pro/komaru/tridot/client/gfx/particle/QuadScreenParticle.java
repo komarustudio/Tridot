@@ -30,25 +30,32 @@ public abstract class QuadScreenParticle extends ScreenParticle {
         float u1 = getU1();
         float v0 = getV0();
         float v1 = getV1();
-        Vector3f[] vectors = getVector3fs(partialTicks, size);
-        float quadZ = getQuadZPosition();
-        bufferBuilder.vertex(vectors[0].x(), vectors[0].y(), quadZ).uv(u1, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[1].x(), vectors[1].y(), quadZ).uv(u1, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[2].x(), vectors[2].y(), quadZ).uv(u0, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-        bufferBuilder.vertex(vectors[3].x(), vectors[3].y(), quadZ).uv(u0, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
-    }
 
-    private Vector3f @NotNull [] getVector3fs(float partialTicks, float size){
         float roll = Mth.lerp(partialTicks, this.oRoll, this.roll);
-        Vector3f[] vectors = new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
-        Quaternionf rotation = new Quaternionf(Axis.ZN.rotationDegrees(roll));
-        for (int i = 0; i < 4; ++i) {
-            Vector3f vector3f = vectors[i];
-            vector3f.rotate(rotation);
-            vector3f.mul(size);
-            vector3f.add((float) x, (float) y, 0);
-        }
-        return vectors;
+        float rad = roll * Mth.DEG_TO_RAD;
+        float cos = Mth.cos(rad) * size;
+        float sin = Mth.sin(rad) * size;
+
+        float px = (float) this.x;
+        float py = (float) this.y;
+        float quadZ = getQuadZPosition();
+
+        float x0 = -cos - sin + px;
+        float y0 =  sin - cos + py;
+
+        float x1 = -cos + sin + px;
+        float y1 =  sin + cos + py;
+
+        float x2 =  cos + sin + px;
+        float y2 = -sin + cos + py;
+
+        float x3 =  cos - sin + px;
+        float y3 = -sin - cos + py;
+
+        bufferBuilder.vertex(x0, y0, quadZ).uv(u1, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
+        bufferBuilder.vertex(x1, y1, quadZ).uv(u1, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
+        bufferBuilder.vertex(x2, y2, quadZ).uv(u0, v0).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
+        bufferBuilder.vertex(x3, y3, quadZ).uv(u0, v1).color(this.rCol, this.gCol, this.bCol, this.alpha).endVertex();
     }
 
     public float getQuadSize(float partialTicks) {

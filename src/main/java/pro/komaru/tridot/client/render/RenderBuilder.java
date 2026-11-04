@@ -24,6 +24,15 @@ import java.util.*;
 import java.util.function.*;
 
 public class RenderBuilder{
+
+    private static final Vector3f[] QUAD_POS = new Vector3f[]{
+        new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f()
+    };
+    private static final Vector3f[] CUBE_POS = new Vector3f[]{
+        new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f(),
+        new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f()
+    };
+
     public float r1 = 1, g1 = 1, b1 = 1, a1 = 1;
     public float r2 = 1, g2 = 1, b2 = 1, a2 = 1;
     public float r3 = 1, g3 = 1, b3 = 1, a3 = 1;
@@ -356,8 +365,11 @@ public class RenderBuilder{
     }
 
     public RenderBuilder renderQuad(PoseStack stack, float width, float height){
-        Vector3f[] positions = new Vector3f[]{new Vector3f(0, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 0)};
-        return renderQuad(stack, positions, width, height);
+        QUAD_POS[0].set(0, height, 0);
+        QUAD_POS[1].set(width, height, 0);
+        QUAD_POS[2].set(width, 0, 0);
+        QUAD_POS[3].set(0, 0, 0);
+        return renderQuad(stack.last().pose(), QUAD_POS);
     }
 
     public RenderBuilder renderCenteredQuad(PoseStack stack, float size){
@@ -365,8 +377,11 @@ public class RenderBuilder{
     }
 
     public RenderBuilder renderCenteredQuad(PoseStack stack, float width, float height){
-        Vector3f[] positions = new Vector3f[]{new Vector3f(-1, 1, 0), new Vector3f(1, 1, 0), new Vector3f(1, -1, 0), new Vector3f(-1, -1, 0)};
-        return renderQuad(stack, positions, width, height);
+        QUAD_POS[0].set(-width,  height, 0);
+        QUAD_POS[1].set( width,  height, 0);
+        QUAD_POS[2].set( width, -height, 0);
+        QUAD_POS[3].set(-width, -height, 0);
+        return renderQuad(stack.last().pose(), QUAD_POS);
     }
 
     public RenderBuilder renderQuad(PoseStack stack, Vector3f[] positions, float size){
@@ -403,13 +418,15 @@ public class RenderBuilder{
     }
 
     public RenderBuilder renderCube(PoseStack stack, float width, float height, float length){
-        Vector3f[] positions = new Vector3f[]{
-        new Vector3f(0, 1, 0), new Vector3f(0, 1, 1), new Vector3f(1, 1, 1), new Vector3f(1, 1, 0),
-        new Vector3f(1, 0, 0), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1), new Vector3f(0, 0, 0)};
-        for(Vector3f position : positions){
-            position.mul(width, height, length);
-        }
-        return renderCube(stack.last().pose(), positions);
+        CUBE_POS[0].set(0, height, 0);
+        CUBE_POS[1].set(0, height, length);
+        CUBE_POS[2].set(width, height, length);
+        CUBE_POS[3].set(width, height, 0);
+        CUBE_POS[4].set(width, 0, 0);
+        CUBE_POS[5].set(width, 0, length);
+        CUBE_POS[6].set(0, 0, length);
+        CUBE_POS[7].set(0, 0, 0);
+        return renderCube(stack.last().pose(), CUBE_POS);
     }
 
     public RenderBuilder renderCenteredCube(PoseStack stack, float size){
@@ -417,13 +434,15 @@ public class RenderBuilder{
     }
 
     public RenderBuilder renderCenteredCube(PoseStack stack, float width, float height, float length){
-        Vector3f[] positions = new Vector3f[]{
-        new Vector3f(-1, 1, -1), new Vector3f(-1, 1, 1), new Vector3f(1, 1, 1), new Vector3f(1, 1, -1),
-        new Vector3f(1, -1, -1), new Vector3f(1, -1, 1), new Vector3f(-1, -1, 1), new Vector3f(-1, -1, -1)};
-        for(Vector3f position : positions){
-            position.mul(width, height, length);
-        }
-        return renderCube(stack.last().pose(), positions);
+        CUBE_POS[0].set(-width,  height, -length);
+        CUBE_POS[1].set(-width,  height,  length);
+        CUBE_POS[2].set( width,  height,  length);
+        CUBE_POS[3].set( width,  height, -length);
+        CUBE_POS[4].set( width, -height, -length);
+        CUBE_POS[5].set( width, -height,  length);
+        CUBE_POS[6].set(-width, -height,  length);
+        CUBE_POS[7].set(-width, -height, -length);
+        return renderCube(stack.last().pose(), CUBE_POS);
     }
 
     public RenderBuilder renderCube(Matrix4f last, Vector3f[] positions){
@@ -811,10 +830,23 @@ public class RenderBuilder{
                 float v = j * stepV + startV;
                 float un = (i + 1 == longs) ? endU : (i + 1) * stepU + startU;
                 float vn = (j + 1 == lats) ? endV : (j + 1) * stepV + startV;
-                Vector3f p0 = Utils.Render.parametricSphere(u, v, radius);
-                Vector3f p1 = Utils.Render.parametricSphere(u, vn, radius);
-                Vector3f p2 = Utils.Render.parametricSphere(un, v, radius);
-                Vector3f p3 = Utils.Render.parametricSphere(un, vn, radius);
+                float sinV = Mth.sin(v) * radius;
+                float p0x = Mth.cos(u) * sinV;
+                float p0y = Mth.cos(v) * radius;
+                float p0z = Mth.sin(u) * sinV;
+
+                float sinVn = Mth.sin(vn) * radius;
+                float p1x = Mth.cos(u) * sinVn;
+                float p1y = Mth.cos(vn) * radius;
+                float p1z = Mth.sin(u) * sinVn;
+
+                float p2x = Mth.cos(un) * sinV;
+                float p2y = p0y;
+                float p2z = Mth.sin(un) * sinV;
+
+                float p3x = Mth.cos(un) * sinVn;
+                float p3y = p1y;
+                float p3z = Mth.sin(un) * sinVn;
 
                 float textureU = u0;
                 float textureV = v0;
@@ -829,27 +861,27 @@ public class RenderBuilder{
                 }
 
                 if(firstSide){
-                    supplier.placeVertex(getVertexConsumer(), last, this, p0.x(), p0.y(), p0.z(), r1, g1, b1, a1, textureU, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p0.x(), p0.y(), p0.z(), r1, g1, b1, a1, textureU, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p2.x(), p2.y(), p2.z(), r1, g1, b1, a1, textureUN, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p1.x(), p1.y(), p1.z(), r1, g1, b1, a1, textureU, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p0x, p0y, p0z, r1, g1, b1, a1, textureU, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p0x, p0y, p0z, r1, g1, b1, a1, textureU, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p2x, p2y, p2z, r1, g1, b1, a1, textureUN, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p1x, p1y, p1z, r1, g1, b1, a1, textureU, textureVN, l1);
 
-                    supplier.placeVertex(getVertexConsumer(), last, this, p3.x(), p3.y(), p3.z(), r1, g1, b1, a1, textureUN, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p3.x(), p3.y(), p3.z(), r1, g1, b1, a1, textureUN, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p1.x(), p1.y(), p1.z(), r1, g1, b1, a1, textureU, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p2.x(), p2.y(), p2.z(), r1, g1, b1, a1, textureUN, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p3x, p3y, p3z, r1, g1, b1, a1, textureUN, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p3x, p3y, p3z, r1, g1, b1, a1, textureUN, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p1x, p1y, p1z, r1, g1, b1, a1, textureU, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p2x, p2y, p2z, r1, g1, b1, a1, textureUN, textureV, l1);
                 }
 
                 if(secondSide){
-                    supplier.placeVertex(getVertexConsumer(), last, this, p1.x(), p1.y(), p1.z(), r1, g1, b1, a1, textureU, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p1.x(), p1.y(), p1.z(), r1, g1, b1, a1, textureU, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p3.x(), p3.y(), p3.z(), r1, g1, b1, a1, textureUN, textureVN, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p0.x(), p0.y(), p0.z(), r1, g1, b1, a1, textureU, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p1x, p1y, p1z, r1, g1, b1, a1, textureU, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p1x, p1y, p1z, r1, g1, b1, a1, textureU, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p3x, p3y, p3z, r1, g1, b1, a1, textureUN, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p0x, p0y, p0z, r1, g1, b1, a1, textureU, textureV, l1);
 
-                    supplier.placeVertex(getVertexConsumer(), last, this, p2.x(), p2.y(), p2.z(), r1, g1, b1, a1, textureUN, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p2.x(), p2.y(), p2.z(), r1, g1, b1, a1, textureUN, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p0.x(), p0.y(), p0.z(), r1, g1, b1, a1, textureU, textureV, l1);
-                    supplier.placeVertex(getVertexConsumer(), last, this, p3.x(), p3.y(), p3.z(), r1, g1, b1, a1, textureUN, textureVN, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p2x, p2y, p2z, r1, g1, b1, a1, textureUN, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p2x, p2y, p2z, r1, g1, b1, a1, textureUN, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p0x, p0y, p0z, r1, g1, b1, a1, textureU, textureV, l1);
+                    supplier.placeVertex(getVertexConsumer(), last, this, p3x, p3y, p3z, r1, g1, b1, a1, textureUN, textureVN, l1);
                 }
             }
         }

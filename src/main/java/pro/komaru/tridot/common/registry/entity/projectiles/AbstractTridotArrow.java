@@ -13,13 +13,15 @@ import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.phys.*;
 import net.neoforged.api.distmarker.*;
 import org.jetbrains.annotations.*;
+import pro.komaru.tridot.api.EffectApplier;
+import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.util.Log;
 
 import java.util.*;
 
 public abstract class AbstractTridotArrow extends AbstractArrow{
     public ItemStack arrowItem = ItemStack.EMPTY;
-    private final Set<MobEffectInstance> effects = Sets.newHashSet();
+    private List<EffectApplier> effects = new ArrayList<>();
 
     public AbstractTridotArrow(EntityType<? extends AbstractArrow> pEntityType, Level pLevel){
         super(pEntityType, pLevel);
@@ -65,15 +67,18 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
     }
 
     public void addEffect(MobEffectInstance pEffectInstance){
-        this.effects.add(pEffectInstance);
+        this.effects.add(EffectApplier.of(pEffectInstance));
     }
 
     public void addAdditionalSaveData(@NotNull CompoundTag compound){
         super.addAdditionalSaveData(compound);
         if(!this.effects.isEmpty()){
             ListTag listtag = new ListTag();
-            for(MobEffectInstance mobeffectinstance : this.effects){
-                listtag.add(mobeffectinstance.save());
+            for(var applier : this.effects){
+                MobEffectInstance inst = applier.createInstance();
+                if(inst != null && inst.getEffect() != null){
+                    listtag.add(inst.save());
+                }
             }
 
             compound.put("CustomPotionEffects", listtag);
@@ -101,12 +106,7 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
 
     protected void doPostHurtEffects(LivingEntity pLiving){
         super.doPostHurtEffects(pLiving);
-        Entity entity = this.getEffectSource();
-        if(!this.effects.isEmpty()){
-            for(MobEffectInstance effect : this.effects){
-                pLiving.addEffect(effect, entity);
-            }
-        }
+        Utils.Entities.apply(pLiving, this.effects);
     }
 
     @Override
@@ -115,10 +115,12 @@ public abstract class AbstractTridotArrow extends AbstractArrow{
         super.onHitEntity(pResult);
     }
 
-    public void setEffectsFromList(ImmutableList<MobEffectInstance> effects){
-        for(MobEffectInstance mobeffectinstance : effects){
-            this.effects.add(new MobEffectInstance(mobeffectinstance));
-        }
+    public void setEffectsFromList(ImmutableList<EffectApplier> effects){
+        this.effects = new ArrayList<>(effects);
+    }
+
+    public void setEffectsFromList(EffectApplier... effects){
+        this.effects = new ArrayList<>(List.of(effects));
     }
 
     @OnlyIn(Dist.CLIENT)

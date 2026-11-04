@@ -1,6 +1,7 @@
 package pro.komaru.tridot.common.registry.entity.projectiles;
 
 import com.google.common.collect.*;
+import pro.komaru.tridot.api.EffectApplier;
 import pro.komaru.tridot.common.registry.item.AttributeRegistry;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.advancements.*;
@@ -32,7 +33,6 @@ import java.util.*;
 public abstract class AbstractSupplierProjectile extends AbstractProjectile implements ItemSupplier{
     public static final EntityDataAccessor<Byte> LOYALTY_LEVEL = SynchedEntityData.defineId(AbstractSupplierProjectile.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(AbstractSupplierProjectile.class, EntityDataSerializers.ITEM_STACK);
-    public final Set<MobEffectInstance> effects = Sets.newHashSet();
     public int returningTicks;
     public boolean returnToPlayer;
     public boolean wasInGround;
@@ -52,21 +52,8 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
     }
 
-    public void addEffect(MobEffectInstance pEffectInstance){
-        this.effects.add(pEffectInstance);
-    }
-
     public void addAdditionalSaveData(@NotNull CompoundTag compound){
         super.addAdditionalSaveData(compound);
-        if(!this.effects.isEmpty()){
-            ListTag listtag = new ListTag();
-            for(MobEffectInstance mobeffectinstance : this.effects){
-                listtag.add(mobeffectinstance.save(new CompoundTag()));
-            }
-
-            compound.put("CustomPotionEffects", listtag);
-        }
-
         compound.putBoolean("DealtDamage", this.returnToPlayer);
         ItemStack itemstack = this.getItemRaw();
         if(!itemstack.isEmpty()){
@@ -76,10 +63,6 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
 
     public void readAdditionalSaveData(CompoundTag pCompound){
         super.readAdditionalSaveData(pCompound);
-        for(MobEffectInstance mobeffectinstance : PotionUtils.getCustomEffects(pCompound)){
-            this.addEffect(mobeffectinstance);
-        }
-
         this.returnToPlayer = pCompound.getBoolean("DealtDamage");
         this.entityData.set(LOYALTY_LEVEL, (byte)EnchantmentHelper.getLoyalty(this.getItem()));
         ItemStack itemstack = ItemStack.of(pCompound.getCompound("Item"));
@@ -175,16 +158,6 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         super.onBelowWorld();
     }
 
-    protected void doPostHurtEffects(LivingEntity pLiving){
-        super.doPostHurtEffects(pLiving);
-        Entity entity = this.getEffectSource();
-        if(!this.effects.isEmpty()){
-            for(MobEffectInstance effect : this.effects){
-                pLiving.addEffect(effect, entity);
-            }
-        }
-    }
-
     protected void onHitBlock(BlockHitResult pResult){
         super.onHitBlock(pResult);
         this.wasInGround = true;
@@ -257,10 +230,6 @@ public abstract class AbstractSupplierProjectile extends AbstractProjectile impl
         if(EnchantmentHelper.getTagEnchantmentLevel(Enchantments.PIERCING, this.getItem()) == 0){
             this.returnToPlayer = true;
         }
-    }
-
-    public void setEffectsFromList(ImmutableList<MobEffectInstance> effects){
-        this.effects.addAll(effects);
     }
 
     protected abstract Item getDefaultItem();

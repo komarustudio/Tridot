@@ -9,6 +9,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.komaru.tridot.api.render.text.DotStyleEffects;
 import pro.komaru.tridot.util.Col;
@@ -25,12 +26,12 @@ public class DotStyle extends Style {
 
     public Seq<StyleEffect> effects = Seq.with();
 
-    public DotStyle(@Nullable TextColor pColor, @Nullable Boolean pBold, @Nullable Boolean pItalic, @Nullable Boolean pUnderlined, @Nullable Boolean pStrikethrough, @Nullable Boolean pObfuscated, @Nullable ClickEvent pClickEvent, @Nullable HoverEvent pHoverEvent, @Nullable String pInsertion, @Nullable ResourceLocation pFont) {
+    public DotStyle(@NotNull TextColor pColor, @Nullable Boolean pBold, @Nullable Boolean pItalic, @Nullable Boolean pUnderlined, @Nullable Boolean pStrikethrough, @Nullable Boolean pObfuscated, @Nullable ClickEvent pClickEvent, @Nullable HoverEvent pHoverEvent, @Nullable String pInsertion, @Nullable ResourceLocation pFont) {
         super(pColor, pBold, pItalic, pUnderlined, pStrikethrough, pObfuscated, pClickEvent, pHoverEvent, pInsertion, pFont);
     }
 
     public DotStyle() {
-        super(null, null, null, null, null, null, null, null, null, null);
+        super(Col.white.toTextColor(), null, null, null, null, null, null, null, null, null);
     }
 
     public static DotStyle of() {
@@ -38,7 +39,7 @@ public class DotStyle extends Style {
     }
 
     public DotStyle from(Style style) {
-        color = style.color;
+        color = style.getColor();
         bold = style.bold;
         italic = style.italic;
         underlined = style.underlined;
@@ -50,6 +51,12 @@ public class DotStyle extends Style {
         font = style.font;
         if (style instanceof DotStyle dot) effects.addAll(dot.effects);
         return this;
+    }
+
+    @Override
+    @NotNull
+    public TextColor getColor() {
+        return this.color != null ? color : Col.white.toTextColor();
     }
 
     @Override
@@ -158,8 +165,7 @@ public class DotStyle extends Style {
     }
 
     public Col color() {
-        if (color == null) return Col.white;
-        return Col.fromARGB(color.getValue());
+        return Col.fromARGB(this.getColor().getValue());
     }
 
     public List<String> effectStrings() {

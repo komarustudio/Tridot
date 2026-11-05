@@ -20,19 +20,27 @@ public class RayHitResult{
 
     }
 
-    public RayHitResult setHit(Vec3f pos) {
-        this.pos = pos;
-        this.hitPos = pos;
+    public RayHitResult setHit(Vec3f p){
+        pos.set(p);
+        hitPos.set(p);
         return this;
     }
 
-    public RayHitResult setPos(Vec3f pos){
-        this.pos = pos;
+    public RayHitResult setPos(Vec3f p){
+        pos.set(p);
         return this;
     }
 
-    public RayHitResult setHitPos(Vec3f pos){
-        this.hitPos = pos;
+    public RayHitResult setHitPos(Vec3f p){
+        hitPos.set(p);
+        return this;
+    }
+
+    public RayHitResult setEntities(List<Entity> list){
+        if(list != entities){
+            entities.clear();
+            entities.addAll(list);
+        }
         return this;
     }
 
@@ -48,11 +56,6 @@ public class RayHitResult{
 
     public RayHitResult setBlock(boolean block){
         this.block = block;
-        return this;
-    }
-
-    public RayHitResult setEntities(List<Entity> entities){
-        this.entities = entities;
         return this;
     }
 

@@ -20,59 +20,31 @@ public class RayCast{
     private static final ArrayList<EntityHit> HITS = new ArrayList<>();
     private static final Comparator<EntityHit> BY_DIST = Comparator.comparingDouble(EntityHit::distSqr);
 
-    public static RayHitResult getHit(Level level, RayCastContext context, RayHitResult out){
-        Vec3f start = context.getStartPos();
-        Vec3f end = context.getEndPos();
-        int entityCount = context.getEntityCount();
-        float size = context.getEntitySize();
-        boolean entityEnd = context.getEntityEnd();
-        Predicate<BlockPos> blockPosFilter = context.getBlockPosFilter();
-
+    public static RayHitResult getHit(Level level, RayCastContext ctx, RayHitResult out){
+        Vec3f start = ctx.getStartPos();
+        Vec3f end = ctx.getEndPos();
         Vec3 s = start.mcVec();
         Vec3 e = end.mcVec();
 
         out.reset();
         out.setPos(start);
-        List<Entity> hitEntities = out.entities;
 
-        BlockHitResult blockHit = level.clip(new ClipContext(s, e, context.getVanillaBlockShape(), context.getVanillaFluidShape(), null));
-        double blockDistSqr = blockHit.getType() != HitResult.Type.MISS && blockPosFilter.test(blockHit.getBlockPos())
+        BlockHitResult blockHit = level.clip(new ClipContext(s, e, ctx.getVanillaBlockShape(), ctx.getVanillaFluidShape(), null));
+        double blockDistSqr = blockHit.getType() != HitResult.Type.MISS && ctx.getBlockPosFilter().test(blockHit.getBlockPos())
                 ? s.distanceToSqr(blockHit.getLocation())
                 : Double.MAX_VALUE;
 
-        try{
-            AABB rayBounds = new AABB(s, e).inflate(size + 1.0);
-            for(Entity entity : level.getEntitiesOfClass(Entity.class, rayBounds, context.getEntityFilter())){
-                Optional<Vec3> clip = entity.getBoundingBox().inflate(size).clip(s, e);
-                if(clip.isEmpty()) continue;
-
-                double distSqr = s.distanceToSqr(clip.get());
-                if(distSqr <= blockDistSqr) HITS.add(new EntityHit(entity, clip.get(), distSqr));
-            }
-            HITS.sort(BY_DIST);
-
-            for (EntityHit hit : HITS) {
-                hitEntities.add(hit.entity());
-                if (entityEnd && entityCount > 0 && hitEntities.size() >= entityCount) {
-                    out.getHitPos().set(hit.hitPos);
-                    return out;
-                }
-            }
-
-            if(entityEnd && !HITS.isEmpty()){
-                Vec3 p = HITS.get(0).hitPos();
-                out.getHitPos().set(p);
+        if(ctx.getEntityFilter() != RayCastContext.NO_ENTITIES){
+            Vec3 entityPos = collectEntities(level, ctx, s, e, blockDistSqr, out);
+            if(entityPos != null){
+                out.getHitPos().set(entityPos);
                 return out;
             }
-        }finally{
-            HITS.clear();
         }
 
         if(blockDistSqr < Double.MAX_VALUE){
-            Vec3 p = blockHit.getLocation();
-            out.getHitPos().set(p);
-            return out
-                    .setBlockPos(blockHit.getBlockPos())
+            out.getHitPos().set(blockHit.getLocation());
+            return out.setBlockPos(blockHit.getBlockPos())
                     .setDirection(blockHit.getDirection())
                     .setBlock(!level.getBlockState(blockHit.getBlockPos()).isAir());
         }
@@ -81,21 +53,40 @@ public class RayCast{
         return out;
     }
 
-    public static RayHitResult getHit(Level level, Vec3 start, Vec3 end){
-        return getHit(level, new RayCastContext(start, end));
+    private static Vec3 collectEntities(Level level, RayCastContext ctx, Vec3 s, Vec3 e, double blockDistSqr, RayHitResult out){
+        float size = ctx.getEntitySize();
+        int count = ctx.getEntityCount();
+        boolean entityEnd = ctx.getEntityEnd();
+
+        try{
+            AABB bounds = new AABB(s, e).inflate(size + 1.0);
+            for(Entity entity : level.getEntitiesOfClass(Entity.class, bounds, ctx.getEntityFilter())){
+                Optional<Vec3> clip = entity.getBoundingBox().inflate(size).clip(s, e);
+                if(clip.isEmpty()) continue;
+
+                double distSqr = s.distanceToSqr(clip.get());
+                if(distSqr <= blockDistSqr) HITS.add(new EntityHit(entity, clip.get(), distSqr));
+            }
+            HITS.sort(BY_DIST);
+
+            for(EntityHit hit : HITS){
+                out.entities.add(hit.entity());
+                if(entityEnd && count > 0 && out.entities.size() >= count) return hit.hitPos();
+            }
+            return entityEnd && !HITS.isEmpty() ? HITS.get(0).hitPos() : null;
+        }finally{
+            HITS.clear();
+        }
     }
 
-    public static List<Entity> getHitEntities(Level level, Vec3 start, Vec3 endPos, float distance){
-        AABB box = new AABB(start, endPos).inflate(distance);
-        List<Entity> candidates = level.getEntitiesOfClass(Entity.class, box);
-        List<Entity> list = new ArrayList<>();
-        for (Entity entity : candidates) {
-            AABB tb = entity.getBoundingBox().inflate(distance);
-            if (tb.clip(start, endPos).isPresent()) {
-                list.add(entity);
-            }
+    public static List<Entity> getHitEntities(Level level, Vec3 start, Vec3 end, float distance, List<Entity> out){
+        for(Entity entity : level.getEntitiesOfClass(Entity.class, new AABB(start, end).inflate(distance))){
+            if(entity.getBoundingBox().inflate(distance).clip(start, end).isPresent()) out.add(entity);
         }
+        return out;
+    }
 
-        return list;
+    public static List<Entity> getHitEntities(Level level, Vec3 start, Vec3 end, float distance){
+        return getHitEntities(level, start, end, distance, new ArrayList<>());
     }
 }

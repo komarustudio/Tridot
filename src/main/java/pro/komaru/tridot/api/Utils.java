@@ -1211,29 +1211,6 @@ public class Utils {
         }
     }
 
-    /**Text utils*/
-    public static class Text {
-        public static String cleanText(String text) {
-            return text.replaceAll("[^\\p{L}\\p{N}\\s]+", "").toLowerCase();
-        }
-        public static Component formatf(String template, Object... values) {
-            return Component.literal(format(template,values));
-        }
-
-        public static String format(String template, Object... values) {
-            return format(template, Structs.map(values));
-        }
-
-        public static String format(String template, Map<String, Object> values) {
-            for (Map.Entry<String, Object> entry : values.entrySet()) {
-                String placeholder = "$" + entry.getKey();
-                template = template.replace(placeholder, entry.getValue().toString());
-            }
-
-            return template;
-        }
-    }
-
     /**Render utils*/
     public static class Render{
 

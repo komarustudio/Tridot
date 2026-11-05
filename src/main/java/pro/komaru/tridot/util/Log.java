@@ -3,6 +3,7 @@ package pro.komaru.tridot.util;
 import com.mojang.logging.*;
 import org.slf4j.*;
 
+//todo remove this shit
 public class Log {
     public static void info(String s,Object...objs) {
         getLogger().info(String.format(s,objs));

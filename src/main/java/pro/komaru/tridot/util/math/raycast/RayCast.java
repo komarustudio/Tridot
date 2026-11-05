@@ -14,6 +14,7 @@ public class RayCast{
 
     private record EntityHit(Entity entity, Vec3 hitPos, double distSqr) {}
 
+    //todo out argument and pool, mutable RayHitResult, RayCastContext
     public static RayHitResult getHit(Level level, RayCastContext context){
         Vec3 start = context.getStartPos().mcVec();
         Vec3 end = context.getEndPos().mcVec();

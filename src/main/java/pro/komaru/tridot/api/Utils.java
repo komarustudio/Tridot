@@ -1050,12 +1050,20 @@ public class Utils {
             }
 
             if (nearest != null) {
-                Vec3 vel  = projectile.getDeltaMovement();
+                Vec3 vel = projectile.getDeltaMovement();
                 float speed = (float) vel.length();
 
-                Tmp.v3.set((float) (nearest.getX() - projectile.getX()), (float) (nearest.getY() + 1.0 - projectile.getY()), (float) (nearest.getZ() - projectile.getZ())).nor();
-                Tmp.v4.set((float)vel.x, (float)vel.y, (float)vel.z).add(Tmp.v3.scale(strength)).nor().scale(speed);
-                projectile.setDeltaMovement(Tmp.v4.x, Tmp.v4.y, Tmp.v4.z);
+                Vec3f dir = Tmp.vec3f.take().set(
+                        (float) (nearest.getX() - projectile.getX()),
+                        (float) (nearest.getY() + 1.0 - projectile.getY()),
+                        (float) (nearest.getZ() - projectile.getZ())
+                ).nor();
+                Vec3f newVel = Tmp.vec3f.take().set((float) vel.x, (float) vel.y, (float) vel.z)
+                        .add(dir.scale(strength))
+                        .nor()
+                        .scale(speed);
+
+                projectile.setDeltaMovement(newVel.x, newVel.y, newVel.z);
                 projectile.hurtMarked = true;
             }
         }
@@ -1485,7 +1493,7 @@ public class Utils {
         }
 
         public static void renderConnectLine(PoseStack stack, Vec3 from, Vec3 to, Col color, float alpha){
-            renderConnectLine(stack, Tmp.v3.set(from), Tmp.v4.set(to), color, alpha);
+            renderConnectLine(stack, Tmp.vec3f.take().set(from), Tmp.vec3f.take().set(to), color, alpha);
         }
 
         public static void renderConnectLine(PoseStack stack, Vec3f from, Vec3f to, Col color, float alpha){
@@ -1518,7 +1526,7 @@ public class Utils {
         public static void renderConnectLineOffset(PoseStack stack, float x, float y, float z, float toX, float toY, float toZ, Col color, float alpha){
             stack.pushPose();
             stack.translate(x, y, z);
-            renderConnectLine(stack, Tmp.v3.set(x, y, z), Tmp.v4.set(toX, toY, toZ), color, alpha);
+            renderConnectLine(stack, Tmp.vec3f.take().set(x, y, z), Tmp.vec3f.take().set(toX, toY, toZ), color, alpha);
             stack.popPose();
         }
 

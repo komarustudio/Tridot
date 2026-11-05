@@ -25,16 +25,17 @@ public class RayCastContext{
     public CollisionContext collisionContext = CollisionContext.empty();
 
     public RayCastContext(){
-        this.startPos.clear();
-        this.endPos.clear();
+        reset();
     }
 
     public RayCastContext(Vec3f startPos, Vec3f endPos){
+        reset();
         this.startPos = startPos;
         this.endPos = endPos;
     }
 
     public RayCastContext(Vec3 startPos, Vec3 endPos){
+        reset();
         this.startPos.set(startPos);
         this.endPos.set(endPos);
     }
@@ -46,16 +47,6 @@ public class RayCastContext{
 
     public RayCastContext setEndPos(Vec3 endPos){
         this.endPos.set(endPos);
-        return this;
-    }
-
-    public RayCastContext setStartPos(Vec3f startPos){
-        this.startPos = startPos;
-        return this;
-    }
-
-    public RayCastContext setEndPos(Vec3f endPos){
-        this.endPos = endPos;
         return this;
     }
 
@@ -160,21 +151,28 @@ public class RayCastContext{
         return fluidFilter.test(state) ? state.getShape(level, pos) : Shapes.empty();
     }
 
-    public static class Block implements ShapeGetter{
-        public static Block COLLIDER = new Block(BlockBehaviour.BlockStateBase::getCollisionShape);
-        public static Block OUTLINE = new Block(BlockBehaviour.BlockStateBase::getShape);
-        public static Block VISUAL = new Block(BlockBehaviour.BlockStateBase::getVisualShape);
-
-        public final ShapeGetter shapeGetter;
-
-        public Block(ShapeGetter shapeGetter){
-            this.shapeGetter = shapeGetter;
-        }
-
-        public VoxelShape get(BlockState state, BlockGetter block, BlockPos pos, CollisionContext collisionContext){
-            return this.shapeGetter.get(state, block, pos, collisionContext);
-        }
+    public void reset() {
+        startPos.reset();
+        endPos.reset();
+        blockPosFilter = b -> true;
+        fluidFilter = Fluid.NONE;
+        entityFilter = e -> false;
+        entityCount = 0;
+        entitySize = 0;
+        entityEnd = false;
+        blockShape = Block.COLLIDER;
+        collisionContext = CollisionContext.empty();
     }
+
+    public record Block(ShapeGetter shapeGetter) implements ShapeGetter {
+            public static Block COLLIDER = new Block(BlockBehaviour.BlockStateBase::getCollisionShape);
+            public static Block OUTLINE = new Block(BlockBehaviour.BlockStateBase::getShape);
+            public static Block VISUAL = new Block(BlockBehaviour.BlockStateBase::getVisualShape);
+
+        public VoxelShape get(BlockState state, BlockGetter block, BlockPos pos, CollisionContext collisionContext) {
+                return this.shapeGetter.get(state, block, pos, collisionContext);
+            }
+        }
 
     public static class Fluid{
         public static Predicate<FluidState> NONE = (f) -> false;

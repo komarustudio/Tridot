@@ -4,7 +4,6 @@ import net.minecraft.core.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.phys.*;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import pro.komaru.tridot.util.phys.Vec3f;
 
 import java.util.*;
@@ -14,71 +13,72 @@ public class RayCast{
 
     private record EntityHit(Entity entity, Vec3 hitPos, double distSqr) {}
 
-    //todo out argument and pool, mutable RayHitResult, RayCastContext
     public static RayHitResult getHit(Level level, RayCastContext context){
-        Vec3 start = context.getStartPos().mcVec();
-        Vec3 end = context.getEndPos().mcVec();
+        return getHit(level, context, new RayHitResult());
+    }
+
+    private static final ArrayList<EntityHit> HITS = new ArrayList<>();
+    private static final Comparator<EntityHit> BY_DIST = Comparator.comparingDouble(EntityHit::distSqr);
+
+    public static RayHitResult getHit(Level level, RayCastContext context, RayHitResult out){
+        Vec3f start = context.getStartPos();
+        Vec3f end = context.getEndPos();
         int entityCount = context.getEntityCount();
         float size = context.getEntitySize();
         boolean entityEnd = context.getEntityEnd();
-        Predicate<Entity> entityFilter = context.getEntityFilter();
         Predicate<BlockPos> blockPosFilter = context.getBlockPosFilter();
 
-        ClipContext clipContext = new ClipContext(
-            start, end, 
-            context.getVanillaBlockShape(), 
-            context.getVanillaFluidShape(), 
-            CollisionContext.empty()
-        );
-        BlockHitResult blockHit = level.clip(clipContext);
-        double blockDistSqr = (blockHit.getType() != HitResult.Type.MISS && blockPosFilter.test(blockHit.getBlockPos()))
-                ? start.distanceToSqr(blockHit.getLocation()) 
+        Vec3 s = start.mcVec();
+        Vec3 e = end.mcVec();
+
+        out.reset();
+        out.setPos(start);
+        List<Entity> hitEntities = out.entities;
+
+        BlockHitResult blockHit = level.clip(new ClipContext(s, e, context.getVanillaBlockShape(), context.getVanillaFluidShape(), context.getCollisionContext()));
+        double blockDistSqr = blockHit.getType() != HitResult.Type.MISS && blockPosFilter.test(blockHit.getBlockPos())
+                ? s.distanceToSqr(blockHit.getLocation())
                 : Double.MAX_VALUE;
 
-        List<Entity> hitEntities = new ArrayList<>();
-        AABB rayBounds = new AABB(start, end).inflate(size + 1.0);
-        List<Entity> candidates = level.getEntitiesOfClass(Entity.class, rayBounds, entityFilter);
+        try{
+            AABB rayBounds = new AABB(s, e).inflate(size + 1.0);
+            for(Entity entity : level.getEntitiesOfClass(Entity.class, rayBounds, context.getEntityFilter())){
+                Optional<Vec3> clip = entity.getBoundingBox().inflate(size).clip(s, e);
+                if(clip.isEmpty()) continue;
 
-        List<EntityHit> clippedHits = new ArrayList<>();
-        for (Entity entity : candidates) {
-            AABB targetBox = entity.getBoundingBox().inflate(size);
-            Optional<Vec3> clip = targetBox.clip(start, end);
-            if (clip.isPresent()) {
-                double distSqr = start.distanceToSqr(clip.get());
-                if (distSqr <= blockDistSqr) {
-                    clippedHits.add(new EntityHit(entity, clip.get(), distSqr));
+                double distSqr = s.distanceToSqr(clip.get());
+                if(distSqr <= blockDistSqr) HITS.add(new EntityHit(entity, clip.get(), distSqr));
+            }
+            HITS.sort(BY_DIST);
+
+            for (EntityHit hit : HITS) {
+                hitEntities.add(hit.entity());
+                if (entityEnd && entityCount > 0 && hitEntities.size() >= entityCount) {
+                    out.getHitPos().set(hit.hitPos);
+                    return out;
                 }
             }
-        }
 
-        clippedHits.sort(Comparator.comparingDouble(EntityHit::distSqr));
-
-        for (EntityHit hit : clippedHits) {
-            hitEntities.add(hit.entity());
-            if (entityEnd && entityCount > 0 && hitEntities.size() >= entityCount) {
-                return new RayHitResult(start)
-                        .setHitPos(hit.hitPos())
-                        .setEntities(hitEntities);
+            if(entityEnd && !HITS.isEmpty()){
+                Vec3 p = HITS.get(0).hitPos();
+                out.getHitPos().set(p);
+                return out;
             }
+        }finally{
+            HITS.clear();
         }
 
-        if (entityEnd && !clippedHits.isEmpty()) {
-            return new RayHitResult(start)
-                    .setHitPos(clippedHits.get(0).hitPos())
-                    .setEntities(hitEntities);
-        }
-
-        if (blockDistSqr < Double.MAX_VALUE) {
-            boolean isBlock = !level.getBlockState(blockHit.getBlockPos()).isAir();
-            return new RayHitResult(start)
-                    .setHitPos(blockHit.getLocation())
+        if(blockDistSqr < Double.MAX_VALUE){
+            Vec3 p = blockHit.getLocation();
+            out.getHitPos().set(p);
+            return out
                     .setBlockPos(blockHit.getBlockPos())
                     .setDirection(blockHit.getDirection())
-                    .setBlock(isBlock)
-                    .setEntities(hitEntities);
+                    .setBlock(!level.getBlockState(blockHit.getBlockPos()).isAir());
         }
 
-        return new RayHitResult(start).setHitPos(end).setEntities(hitEntities);
+        out.getHitPos().set(end);
+        return out;
     }
 
     public static RayHitResult getHit(Level level, Vec3 start, Vec3 end){
@@ -95,6 +95,7 @@ public class RayCast{
                 list.add(entity);
             }
         }
+
         return list;
     }
 }

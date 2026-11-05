@@ -8,8 +8,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import pro.komaru.tridot.api.Utils;
 import pro.komaru.tridot.api.render.GuiDraw;
 import pro.komaru.tridot.client.gfx.text.DotStyle;
@@ -117,6 +117,9 @@ public class TextBuilder {
 
     public TextBuilder render(GuiGraphics g, float x, float y) {
         GuiDraw d = new GuiDraw(g);
+
+        x += tmp[0];
+        y += tmp[1];
         List<FormattedCharSequence> split = split(true);
         float h = split.size() * 9 * renderProps.scaleY;
         float w = 0;

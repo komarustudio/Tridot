@@ -1,30 +1,29 @@
 package pro.komaru.tridot.client.render.screenshake;
 
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.*;
-import net.minecraft.server.level.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.*;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
 import org.jetbrains.annotations.NotNull;
 import pro.komaru.tridot.Tridot;
-import pro.komaru.tridot.api.networking.*;
+import pro.komaru.tridot.api.networking.PacketHandler;
 import pro.komaru.tridot.client.ClientTick;
 import pro.komaru.tridot.common.config.ClientConfig;
-import pro.komaru.tridot.common.networking.packets.*;
+import pro.komaru.tridot.common.networking.packets.ScreenshakePacket;
 import pro.komaru.tridot.util.Tmp;
 import pro.komaru.tridot.util.math.ArcRandom;
 import pro.komaru.tridot.util.math.Mathf;
 import pro.komaru.tridot.util.math.raycast.RayCast;
 import pro.komaru.tridot.util.math.raycast.RayCastContext;
 import pro.komaru.tridot.util.math.raycast.RayHitResult;
-
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import pro.komaru.tridot.util.phys.Vec3f;
 
 import java.util.List;
@@ -45,7 +44,7 @@ public class ScreenshakeHandler{
         if(intensityRotation > 0){
             float yawOffset = randomizeOffset(intensityRotation);
             float pitchOffset = randomizeOffset(intensityRotation);
-            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset);
+            camera.setRotation(camera.getYRot() + yawOffset, camera.getXRot() + pitchOffset, camera.getRoll());
         }
 
         boolean cameraUpdate = false;
@@ -66,8 +65,8 @@ public class ScreenshakeHandler{
             Level level = Tridot.PROXY.getLevel();
             if(level != null){
                 RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(origin, target).setBlockShape(RayCastContext.Block.VISUAL));
-                Vec3 hitPos = hitResult.getPos();
-                double distance = Math.max(0f, origin.dst((float) hitPos.x, (float) hitPos.y, (float) hitPos.z) - 0.1f);
+                Vec3f hitPos = hitResult.getPos();
+                double distance = Math.max(0f, origin.dst(hitPos) - 0.1f);
 
                 double dX = origin.x() - hitPos.x();
                 double dY = origin.y() - hitPos.y();
@@ -216,6 +215,24 @@ public class ScreenshakeHandler{
         }
 
         add(instance);
+    }
+
+    public static void addInstance(ScreenshakeInstance instance){
+        add(instance);
+    }
+
+    public static void addInstance(ScreenshakeInstance instance, Level level, BlockPos pos, double radius){
+        if(level instanceof ServerLevel serverLevel){
+            for(ServerPlayer player : serverLevel.players()){
+                if(player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < radius * radius){
+                    add(player, instance);
+                }
+            }
+        }
+    }
+
+    public static void addInstance(ScreenshakeInstance instance, Player player){
+        add(player, instance);
     }
 
     public static float randomizeOffset(float offset){

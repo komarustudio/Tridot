@@ -1,8 +1,5 @@
 package pro.komaru.tridot.util.struct;
 
-
-import pro.komaru.tridot.util.Log;
-import pro.komaru.tridot.util.struct.data.Seq;
 import pro.komaru.tridot.util.struct.func.Cons;
 import pro.komaru.tridot.util.struct.func.Func;
 import pro.komaru.tridot.util.struct.func.Prov;

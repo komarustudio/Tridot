@@ -5,6 +5,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import pro.komaru.tridot.util.comps.phys.Pos3;
 import pro.komaru.tridot.util.math.ArcRandom;
+import pro.komaru.tridot.util.math.raycast.RayCastContext;
+import pro.komaru.tridot.util.math.raycast.RayHitResult;
 import pro.komaru.tridot.util.phys.Vec2f;
 import pro.komaru.tridot.util.phys.Vec3f;
 import pro.komaru.tridot.util.struct.TempPool;
@@ -23,6 +25,8 @@ public class Tmp {
             BlockPos.MutableBlockPos::new,
             bp -> bp.set(0, 0, 0)
     );
+    public static final TempPool<RayCastContext> rayCastContext = new TempPool<>(64, RayCastContext::new, RayCastContext::reset);
+    public static final TempPool<RayHitResult> rayHitResult = new TempPool<>(64, RayHitResult::new, RayHitResult::reset);
     
     @Deprecated
     public static final Col

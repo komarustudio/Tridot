@@ -3,28 +3,35 @@ package pro.komaru.tridot.util.math.raycast;
 import net.minecraft.core.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.phys.*;
+import pro.komaru.tridot.util.phys.Vec3f;
 
 import java.util.*;
 
 public class RayHitResult{
-    public Vec3 pos;
-    public Vec3 hitPos;
+    public Vec3f pos = Vec3f.zero();
+    public Vec3f hitPos = Vec3f.zero();
     public BlockPos blockPos = BlockPos.ZERO;
     public Direction direction = Direction.UP;
     public boolean block = false;
     public List<Entity> entities = new ArrayList<>();
 
-    public RayHitResult(Vec3 pos){
-        this.pos = pos;
-        this.hitPos = pos;
+
+    public RayHitResult() {
+
     }
 
-    public RayHitResult setPos(Vec3 pos){
+    public RayHitResult setHit(Vec3f pos) {
+        this.pos = pos;
+        this.hitPos = pos;
+        return this;
+    }
+
+    public RayHitResult setPos(Vec3f pos){
         this.pos = pos;
         return this;
     }
 
-    public RayHitResult setHitPos(Vec3 pos){
+    public RayHitResult setHitPos(Vec3f pos){
         this.hitPos = pos;
         return this;
     }
@@ -49,11 +56,11 @@ public class RayHitResult{
         return this;
     }
 
-    public Vec3 getPos(){
+    public Vec3f getPos(){
         return pos;
     }
 
-    public Vec3 getHitPos(){
+    public Vec3f getHitPos(){
         return hitPos;
     }
 
@@ -75,5 +82,14 @@ public class RayHitResult{
 
     public boolean hasEntities(){
         return !entities.isEmpty();
+    }
+
+    public void reset() {
+        pos.reset();
+        hitPos.reset();
+        blockPos = BlockPos.ZERO;
+        direction = Direction.UP;
+        block = false;
+        entities.clear();
     }
 }

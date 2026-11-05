@@ -25,16 +25,17 @@ public class RayCastContext{
     public CollisionContext collisionContext = CollisionContext.empty();
 
     public RayCastContext(){
-        this.startPos.clear();
-        this.endPos.clear();
+        reset();
     }
 
     public RayCastContext(Vec3f startPos, Vec3f endPos){
+        reset();
         this.startPos = startPos;
         this.endPos = endPos;
     }
 
     public RayCastContext(Vec3 startPos, Vec3 endPos){
+        reset();
         this.startPos.set(startPos);
         this.endPos.set(endPos);
     }
@@ -148,6 +149,19 @@ public class RayCastContext{
 
     public VoxelShape getFluidShape(FluidState state, BlockGetter level, BlockPos pos){
         return fluidFilter.test(state) ? state.getShape(level, pos) : Shapes.empty();
+    }
+
+    public void reset() {
+        startPos.reset();
+        endPos.reset();
+        blockPosFilter = b -> true;
+        fluidFilter = Fluid.NONE;
+        entityFilter = e -> false;
+        entityCount = 0;
+        entitySize = 0;
+        entityEnd = false;
+        blockShape = Block.COLLIDER;
+        collisionContext = CollisionContext.empty();
     }
 
     public record Block(ShapeGetter shapeGetter) implements ShapeGetter {

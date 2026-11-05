@@ -66,8 +66,8 @@ public class ScreenshakeHandler{
             Level level = Tridot.PROXY.getLevel();
             if(level != null){
                 RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(origin, target).setBlockShape(RayCastContext.Block.VISUAL));
-                Vec3 hitPos = hitResult.getPos();
-                double distance = Math.max(0f, origin.dst((float) hitPos.x, (float) hitPos.y, (float) hitPos.z) - 0.1f);
+                Vec3f hitPos = hitResult.getPos();
+                double distance = Math.max(0f, origin.dst(hitPos) - 0.1f);
 
                 double dX = origin.x() - hitPos.x();
                 double dY = origin.y() - hitPos.y();

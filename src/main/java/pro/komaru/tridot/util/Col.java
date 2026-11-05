@@ -468,6 +468,34 @@ public class Col {
         return RGBtoHSV(c.r, c.g, c.b);
     }
 
+
+    /**
+     * Converts RGB to HSV color system
+     * @param r red 0-1
+     * @param g green 0-1
+     * @param b blue 0-1
+     * @return 3 element int array with hue (0-360), saturation (0-1) and value (0-1)
+     */
+    public static float[] RGBtoHSV(float r, float g, float b, float[] out){
+        float max = Math.max(Math.max(r, g), b);
+        float min = Math.min(Math.min(r, g), b);
+        float range = max - min;
+
+        if(range == 0){
+            out[0] = 0;
+        }else if(max == r){
+            out[0] = (60 * (g - b) / range + 360) % 360;
+        }else if(max == g){
+            out[0] = 60 * (b - r) / range + 120;
+        }else{
+            out[0] = 60 * (r - g) / range + 240;
+        }
+
+        out[1] = max > 0 ? 1 - min / max : 0;
+        out[2] = max;
+        return out;
+    }
+
     /**
      * Converts RGB to HSV color system
      * @param r red 0-1

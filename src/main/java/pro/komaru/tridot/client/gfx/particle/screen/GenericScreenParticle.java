@@ -96,10 +96,9 @@ public class GenericScreenParticle extends TextureSheetScreenParticle{
         this.vo = random.nextFloat();
         spriteData.init(this);
 
-        Tmp.c1.set(r1,g1,b1);
-        hsv1 = Tmp.c1.toHsv(hsv1);
-        Tmp.c2.set(r2,g2,b2);
-        hsv2 = Tmp.c2.toHsv(hsv2);
+        Col.RGBtoHSV(r1, g1, b1, hsv1);
+        Col.RGBtoHSV(r2, g2, b2, hsv2);
+
         this.uo = random.nextFloat();
         this.vo = random.nextFloat();
         updateTraits();

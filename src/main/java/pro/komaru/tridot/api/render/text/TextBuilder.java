@@ -153,7 +153,14 @@ public class TextBuilder {
         int i = 0;
         for (FormattedCharSequence charseq : split) {
             float locw = Utils.mc().font.width(charseq);
-            g.drawString(Utils.mc().font, charseq, renderProps.xCentered ? w / 2f / renderProps.scaleX - locw / 2f : 0f, i * 9, Tmp.c1.set(1f, 1f, 1f, renderProps.alpha).argb8888(), renderProps.shadow);
+            g.drawString(
+                    Utils.mc().font,
+                    charseq,
+                    renderProps.xCentered ? w / 2f / renderProps.scaleX - locw / 2f : 0f,
+                    i * 9,
+                    Tmp.col.take().set(1f, 1f, 1f, renderProps.alpha).argb8888(),
+                    renderProps.shadow
+            );
             i++;
         }
 

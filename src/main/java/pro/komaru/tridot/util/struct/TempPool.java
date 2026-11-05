@@ -137,7 +137,8 @@ public class TempPool<T> {
 
         available--;
         T item = pool[current];
-        current = (current + 1) % pool.length;
+        current++;
+        if (current == pool.length) current = 0;
 
         if (resetState && resetter != null) {
             resetter.get(item);

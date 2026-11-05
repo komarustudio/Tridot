@@ -13,11 +13,13 @@ import pro.komaru.tridot.util.phys.Vec3f;
 import java.util.function.*;
 
 public class RayCastContext{
+    public static final Predicate<Entity> NO_ENTITIES = e -> false;
+
     public Vec3f startPos = Vec3f.zero();
     public Vec3f endPos = Vec3f.zero();
     public Predicate<BlockPos> blockPosFilter = (b) -> true;
     public Predicate<FluidState> fluidFilter = Fluid.NONE;
-    public Predicate<Entity> entityFilter = (e) -> false;
+    public Predicate<Entity> entityFilter = NO_ENTITIES;
     public int entityCount = 0;
     public float entitySize = 0;
     public boolean entityEnd = false;
@@ -156,7 +158,7 @@ public class RayCastContext{
         endPos.reset();
         blockPosFilter = b -> true;
         fluidFilter = Fluid.NONE;
-        entityFilter = e -> false;
+        entityFilter = NO_ENTITIES;
         entityCount = 0;
         entitySize = 0;
         entityEnd = false;

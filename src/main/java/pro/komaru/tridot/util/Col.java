@@ -101,6 +101,10 @@ public class Col {
         clamp();
     }
 
+    public Col() {
+        this(0,0,0,0);
+    }
+
     public Col(int rgba8888){
         rgba8888(rgba8888);
     }

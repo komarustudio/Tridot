@@ -23,12 +23,7 @@ public class Tmp {
             BlockPos.MutableBlockPos::new,
             bp -> bp.set(0, 0, 0)
     );
-
-    public static void main(String[] args) {
-        var p = Tmp.vec3f.request(2);
-        var v1 = p.next();
-        var v2 = p.next();
-    }
+    
     @Deprecated
     public static final Col
             c1 = new Col(),

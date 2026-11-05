@@ -8,7 +8,7 @@ import pro.komaru.tridot.util.comps.phys.Y;
 import pro.komaru.tridot.util.comps.phys.Z;
 import pro.komaru.tridot.util.math.Interp;
 
-import java.io.Serializable;
+import java.io.*;
 
 public class Vec3f implements Pos3, Serializable {
     public static final Vec3f ZERO = new Vec3f();
@@ -97,6 +97,10 @@ public class Vec3f implements Pos3, Serializable {
         return this;
     }
 
+    public Vec3f add(double x, double y, double z) {
+        return add((float) x, (float) y, (float) z);
+    }
+
     public Vec3f sub(Pos3 xyz) {
         return sub((X & Y & Z) xyz);
     }
@@ -113,6 +117,10 @@ public class Vec3f implements Pos3, Serializable {
         return add(-x, -y, -z);
     }
 
+    public Vec3f sub(double x, double y, double z) {
+        return add(-x, -y, -z);
+    }
+
     public Vec3f set(Vec3 other) {
         return set((float) other.x(), (float) other.y(), (float) other.z());
     }
@@ -126,6 +134,10 @@ public class Vec3f implements Pos3, Serializable {
         this.y(y);
         this.z(z);
         return this;
+    }
+
+    public Vec3f set(double x, double y, double z) {
+        return set((float) x, (float) y, (float) z);
     }
 
     public Vec3f clear() {
@@ -195,52 +207,54 @@ public class Vec3f implements Pos3, Serializable {
         return set(x, y, z);
     }
 
-    public Vec3f lerp(float x, float y, float z, float progress) {
-        return lerp(x, y, z, progress, Interp.linear);
-    }
+    public Vec3f rotate(float degX, float degY, float degZ) {
+        float radiansX = (float) Math.toRadians(degX);
+        float radiansY = (float) Math.toRadians(degY);
+        float radiansZ = (float) Math.toRadians(degZ);
 
-    public Vec3f lerp(float x, float y, float z, float progress, Interp interp) {
-        float lx = interp.apply(progress, x(), x);
-        float ly = interp.apply(progress, y(), y);
-        float lz = interp.apply(progress, z(), z);
-        return set(lx, ly, lz);
-    }
+        float cosX = (float) Math.cos(radiansX);
+        float sinX = (float) Math.sin(radiansX);
 
-    public Vec3f lerp(Vec3 pos, float progress) {
-        return lerp((float) pos.x, (float) pos.y, (float) pos.z, progress, Interp.linear);
-    }
+        float cosY = (float) Math.cos(radiansY);
+        float sinY = (float) Math.sin(radiansY);
 
-    public Vec3f lerp(Vec3 pos, float progress, Interp interp) {
-        return lerp((float) pos.x, (float) pos.y, (float) pos.z, progress, interp);
-    }
+        float cosZ = (float) Math.cos(radiansZ);
+        float sinZ = (float) Math.sin(radiansZ);
 
-    public Vec3f rotX(float angle) {
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
-        float y = y() * cos - z() * sin;
-        float z = y() * sin + z() * cos;
-        y(y);
-        z(z);
+        float x = x();
+        float y = y();
+        float z = z();
+
+        float tempY = y * cosX - z * sinX;
+        float tempZ = y * sinX + z * cosX;
+
+        float tempX = x * cosY + tempZ * sinY;
+        tempZ = -x * sinY + tempZ * cosY;
+
+        set(tempX * cosZ - tempY * sinZ, tempX * sinZ + tempY * cosZ, tempZ);
+
         return this;
     }
 
-    public Vec3f rotY(float angle) {
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
-        float x = x() * cos + z() * sin;
-        float z = -x() * sin + z() * cos;
-        x(x);
-        z(z);
-        return this;
+    public Vec3f angle() {
+        Pos3 normalized = cpy().nor();
+        float yaw = (float) Math.atan2(normalized.z(), normalized.x());
+        float pitch = (float) Math.asin(normalized.y());
+        return set(pitch, yaw, 0);
     }
 
-    public Vec3f rotZ(float angle) {
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
-        float x = x() * cos - y() * sin;
-        float y = x() * sin + y() * cos;
-        x(x);
-        y(y);
+    public Vec3f angleBetween(Pos3 other) {
+        return other.cpypos().vec().sub(this).angle().rotationFix();
+    }
+
+    public float cross(Pos3 other) {
+        return x() * other.y() - y() * other.x();
+    }
+
+    public Vec3f rotationFix() {
+        if (x() > 180) this.x(x() - 360);
+        if (y() > 180) this.y(y() - 360);
+        if (z() > 180) z(z() - 360);
         return this;
     }
 
@@ -276,5 +290,46 @@ public class Vec3f implements Pos3, Serializable {
 
     public boolean posEquals(Pos3 b) {
         return b.x() == x() && b.y() == y() && b.z() == z();
+    }
+
+    public void constrain(Vec3f target, float targetDist, boolean less, boolean greater) {
+        var delta = target.cpy().sub(this);
+        float dst = delta.len();
+
+        if (less && dst < targetDist) return;
+        if (greater && dst > targetDist) return;
+        if (dst == 0) {
+            add(targetDist, 0, 0);
+            return;
+        }
+
+        float scale = targetDist / dst;
+        float newX = target.x() + delta.x() * scale;
+        float newY = target.y() + delta.y() * scale;
+        float newZ = target.z() + delta.z() * scale;
+
+        set(newX, newY, newZ);
+    }
+
+    public void constrain2(Vec3f b, float targetDist, boolean less, boolean greater) {
+        var delta = b.cpy().sub(this);
+        float dst = delta.len();
+
+        if (less && dst < targetDist) return;
+        if (greater && dst > targetDist) return;
+        if (dst == 0) return;
+
+        float diff = (dst - targetDist) / dst / 2f;
+
+        float offsetX = delta.x() * diff;
+        float offsetY = delta.y() * diff;
+        float offsetZ = delta.z() * diff;
+
+        add(offsetX, offsetY, offsetZ);
+        b.sub(offsetX, offsetY, offsetZ);
+    }
+
+    public void reset() {
+        set(0, 0, 0);
     }
 }

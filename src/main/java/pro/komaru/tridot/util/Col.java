@@ -101,6 +101,10 @@ public class Col {
         clamp();
     }
 
+    public Col() {
+        this(0,0,0,0);
+    }
+
     public Col(int rgba8888){
         rgba8888(rgba8888);
     }
@@ -775,5 +779,9 @@ public class Col {
             total += Character.digit(c, 16) * (i == from ? 16 : 1);
         }
         return total;
+    }
+
+    public void reset() {
+        set(0);
     }
 }

@@ -97,6 +97,10 @@ public class Vec3f implements Pos3, Serializable {
         return this;
     }
 
+    public Vec3f add(double x, double y, double z) {
+        return add((float) x, (float) y, (float) z);
+    }
+
     public Vec3f sub(Pos3 xyz) {
         return sub((X & Y & Z) xyz);
     }
@@ -113,6 +117,10 @@ public class Vec3f implements Pos3, Serializable {
         return add(-x, -y, -z);
     }
 
+    public Vec3f sub(double x, double y, double z) {
+        return add(-x, -y, -z);
+    }
+
     public Vec3f set(Vec3 other) {
         return set((float) other.x(), (float) other.y(), (float) other.z());
     }
@@ -126,6 +134,10 @@ public class Vec3f implements Pos3, Serializable {
         this.y(y);
         this.z(z);
         return this;
+    }
+
+    public Vec3f set(double x, double y, double z) {
+        return set((float) x, (float) y, (float) z);
     }
 
     public Vec3f clear() {
@@ -315,5 +327,9 @@ public class Vec3f implements Pos3, Serializable {
 
         add(offsetX, offsetY, offsetZ);
         b.sub(offsetX, offsetY, offsetZ);
+    }
+
+    public void reset() {
+        set(0, 0, 0);
     }
 }

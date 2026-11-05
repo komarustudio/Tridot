@@ -238,4 +238,8 @@ public class Vec2f implements Pos2, Serializable {
         add(offsetX, offsetY);
         b.sub(offsetX, offsetY);
     }
+
+    public void reset() {
+        set(0, 0);
+    }
 }

@@ -77,10 +77,8 @@ public class SparkParticleBehavior extends ParticleBehavior{
         component.ms = GenericParticle.pickRandomValue(scaleData.middleValue, scaleData.rm1, scaleData.rm2);
         component.es = GenericParticle.pickRandomValue(scaleData.endingValue, scaleData.re1, scaleData.re2);
 
-        Tmp.c1.set(r1,g1,b1);
-        hsv1 = Tmp.c1.toHsv(component.hsv1);
-        Tmp.c2.set(r2,g2,b2);
-        hsv2 = Tmp.c2.toHsv(component.hsv2);
+        Col.RGBtoHSV(r1, g1, b1, hsv1);
+        Col.RGBtoHSV(r2, g2, b2, hsv2);
     }
 
     public void pickColor(GenericParticle particle, float coeff){

@@ -73,10 +73,8 @@ public class TrailParticleBehavior extends ParticleBehavior implements ICustomBe
         component.mt = GenericParticle.pickRandomValue(transparencyData.middleValue, transparencyData.rm1, transparencyData.rm2);
         component.et = GenericParticle.pickRandomValue(transparencyData.endingValue, transparencyData.re1, transparencyData.re2);
 
-        Tmp.c1.set(r1,g1,b1);
-        component.hsv1 = Tmp.c1.toHsv(component.hsv1);
-        Tmp.c2.set(r2,g2,b2);
-        component.hsv2 = Tmp.c2.toHsv(component.hsv2);
+        Col.RGBtoHSV(r1, g1, b1, component.hsv1);
+        Col.RGBtoHSV(r2, g2, b2, component.hsv2);
     }
 
     public void pickColor(GenericParticle particle, float coeff){

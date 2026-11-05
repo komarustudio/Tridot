@@ -12,7 +12,6 @@ import pro.komaru.tridot.*;
 import pro.komaru.tridot.common.networking.*;
 import pro.komaru.tridot.common.networking.packets.*;
 import pro.komaru.tridot.util.struct.data.*;
-import pro.komaru.tridot.util.struct.stash.net.*;
 
 import java.util.function.*;
 
@@ -30,7 +29,6 @@ public class PacketHandler extends AbstractPacketHandler {
         registrar.playToClient(DungeonSoundPacket.TYPE, DungeonSoundPacket.STREAM_CODEC, DungeonSoundPacket::handle);
         registrar.playToClient(UpdateBossbarPacket.TYPE, UpdateBossbarPacket.STREAM_CODEC, UpdateBossbarPacket::handle);
         registrar.playToClient(SynchronizeCapabilityPacket.TYPE, SynchronizeCapabilityPacket.STREAM_CODEC, Packet::handle);
-        registrar.playToClient(SyncStashObjectPacket.TYPE, SyncStashObjectPacket.STREAM_CODEC, Packet::handle);
         registrar.playToServer(CutsceneSkippedPacket.TYPE, CutsceneSkippedPacket.STREAM_CODEC, CutsceneSkippedPacket::handle);
         registrar.playToClient(ParryParticlePacket.TYPE, ParryParticlePacket.STREAM_CODEC, ParryParticlePacket::handle);
         registrar.playToClient(ScreenshakePacket.TYPE, ScreenshakePacket.STREAM_CODEC, Packet::handle);

@@ -1,9 +1,13 @@
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
 plugins{
     id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.147'
+    id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version '1.1.26'
 }
 
 group = "pro.komaru"
@@ -156,6 +160,30 @@ jar {
 tasks.withType(JavaCompile).configureEach{
     options.encoding = 'UTF-8'
     options.compilerArgs.addAll(['-Xmaxerrs', '10000'])
+}
+
+task curseforge(type: TaskPublishCurseForge) {
+    apiToken = System.getenv("cursetoken")
+    def projectId = "1239146"
+    def mainFile = upload(projectId, jar)
+    mainFile.displayName = "Tridot-${version}"
+    mainFile.releaseType = "release"
+    mainFile.gameVersions = ["Server", "Client"]
+
+    mainFile.addGameVersion("${minecraft_version}")
+    mainFile.changelog = "API updates"
+    mainFile.addModLoader("NeoForge")
+    mainFile.addJavaVersion("Java 21")
+}
+
+modrinth {
+    token = System.getenv("modrinthtoken")
+    projectId = "tridot"
+    versionNumber = "${version}";
+    changelog = "API updates"
+    versionType = "release"
+    versionName = "${version}"
+    uploadFile = tasks.jar
 }
 
 idea {

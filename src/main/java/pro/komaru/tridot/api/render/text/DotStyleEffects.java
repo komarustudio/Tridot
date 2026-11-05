@@ -258,6 +258,7 @@ public class DotStyleEffects {
             charIntensity = tag.getFloat("char_intensity");
         }
     }
+
     public static class RainbowFX extends StyleEffect {
         public static RainbowFX of(float intensity, boolean shiftSymbols) {
             RainbowFX fx = new RainbowFX();
@@ -279,7 +280,7 @@ public class DotStyleEffects {
         public void beforeGlyph(int index, Font.StringRenderOutput self, DotStyle style, int codePoint) {
             if(shiftSymbols) off = (index * 36f + ClientTick.getTotal() * 3.25f * intensity) % 360f;
             else off = ((index * 0.05f) + (ClientTick.getTotal() * 1 * intensity)) % 360f;
-            col = style.color == null ? Col.white : Col.fromARGB(style.color.getValue());
+            col = Col.fromARGB(style.getColor().getValue());
             style.color(Col.HSVtoRGB(off, 90, 100));
         }
 

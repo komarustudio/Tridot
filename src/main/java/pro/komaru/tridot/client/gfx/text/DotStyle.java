@@ -17,6 +17,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.komaru.tridot.api.render.text.DotStyleEffects;
 import pro.komaru.tridot.util.Col;
@@ -28,7 +29,6 @@ import java.awt.*;
 import java.lang.reflect.Type;
 
 public class DotStyle extends Style {
-
     public Seq<StyleEffect> effects = Seq.with();
 
     static {
@@ -43,15 +43,16 @@ public class DotStyle extends Style {
         });
     }
 
-    public DotStyle(@Nullable TextColor pColor, @Nullable Boolean pBold, @Nullable Boolean pItalic, @Nullable Boolean pUnderlined, @Nullable Boolean pStrikethrough, @Nullable Boolean pObfuscated, @Nullable ClickEvent pClickEvent, @Nullable HoverEvent pHoverEvent, @Nullable String pInsertion, @Nullable ResourceLocation pFont) {
+    public DotStyle(@NotNull TextColor pColor, @Nullable Boolean pBold, @Nullable Boolean pItalic, @Nullable Boolean pUnderlined, @Nullable Boolean pStrikethrough, @Nullable Boolean pObfuscated, @Nullable ClickEvent pClickEvent, @Nullable HoverEvent pHoverEvent, @Nullable String pInsertion, @Nullable ResourceLocation pFont) {
         super(pColor, pBold, pItalic, pUnderlined, pStrikethrough, pObfuscated, pClickEvent, pHoverEvent, pInsertion, pFont);
     }
+
     public DotStyle() {
-        super(null,null,null,null,null,null,null,null,null,null);
+        super(Col.white.toTextColor(), null,null,null,null,null,null,null,null,null);
     }
 
     public DotStyle from(Style style) {
-        color = style.color;
+        color = style.getColor();
         bold = style.bold;
         italic = style.italic;
         underlined = style.underlined;
@@ -62,6 +63,12 @@ public class DotStyle extends Style {
         insertion = style.insertion;
         font = style.font;
         return this;
+    }
+
+    @Override
+    @NotNull
+    public TextColor getColor() {
+        return this.color != null ? color : Col.white.toTextColor();
     }
 
     public static DotStyle of() {
@@ -169,8 +176,7 @@ public class DotStyle extends Style {
     }
 
     public Col color() {
-        if(color == null) return Col.white;
-        return Col.fromARGB(color.getValue());
+        return Col.fromARGB(this.getColor().getValue());
     }
 
     public static abstract class StyleEffect {
@@ -237,7 +243,7 @@ public class DotStyle extends Style {
             HoverEvent hoverevent = getHoverEvent(json);
             ResourceLocation resourcelocation = getFont(json);
 
-            DotStyle dot = new DotStyle(textcolor, obool, obool1, obool2, obool3, obool4, clickevent, hoverevent, s, resourcelocation);
+            DotStyle dot = new DotStyle(textcolor != null ? textcolor : Col.white.toTextColor(), obool, obool1, obool2, obool3, obool4, clickevent, hoverevent, s, resourcelocation);
 
             String[] effects;
             if (json.has("tridot_effects")) {
@@ -270,7 +276,7 @@ public class DotStyle extends Style {
             if (style.underlined != null) json.addProperty("underlined", style.underlined);
             if (style.strikethrough != null) json.addProperty("strikethrough", style.strikethrough);
             if (style.obfuscated != null) json.addProperty("obfuscated", style.obfuscated);
-            if (style.color != null) json.addProperty("color", style.color.serialize());
+            if (style.color != null) json.addProperty("color", style.getColor().serialize());
             if (style.insertion != null) json.add("insertion", ctx.serialize(style.insertion));
             if (style.clickEvent != null) {
                 JsonObject jsonobject1 = new JsonObject();

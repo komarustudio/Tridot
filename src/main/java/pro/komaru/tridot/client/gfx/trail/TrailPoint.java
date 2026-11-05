@@ -30,7 +30,8 @@ public class TrailPoint{
     }
 
     public Vector4f getMatrixPosition(){
-        return matrixPosition;
+        Vec3f position = getPosition();
+        return new Vector4f(position.x, position.y, position.z, 1.0f);
     }
 
     public Vec3f getPosition(){

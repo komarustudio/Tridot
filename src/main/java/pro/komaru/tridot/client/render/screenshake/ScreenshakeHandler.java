@@ -49,37 +49,38 @@ public class ScreenshakeHandler{
         }
 
         boolean cameraUpdate = false;
-        Tmp.v3.set(camera.getPosition());
-        Tmp.v4.set(Tmp.v3);
+        Vec3f target = Tmp.vec3f.take().set(camera.getPosition());
+        Vec3f origin = Tmp.vec3f.take().set(target);
+
         if(intensityPosition > 0){
-            Tmp.v3.set(intensityPosVec(Tmp.v3));
+            target.set(intensityPosVec(target));
             cameraUpdate = true;
         }
 
         if(!intensityVector.isZero() && !intensityVectorOld.isZero()){
-            Tmp.v3.set(intensityVec(Tmp.v3));
+            target.set(intensityVec(target));
             cameraUpdate = true;
         }
 
         if(cameraUpdate){
             Level level = Tridot.PROXY.getLevel();
             if(level != null){
-                RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(Tmp.v4, Tmp.v3).setBlockShape(RayCastContext.Block.VISUAL));
+                RayHitResult hitResult = RayCast.getHit(level, new RayCastContext(origin, target).setBlockShape(RayCastContext.Block.VISUAL));
                 Vec3 hitPos = hitResult.getPos();
-                double distance = Math.max(0f, Tmp.v4.dst((float) hitPos.x, (float) hitPos.y, (float) hitPos.z) - 0.1f);
+                double distance = Math.max(0f, origin.dst((float) hitPos.x, (float) hitPos.y, (float) hitPos.z) - 0.1f);
 
-                double dX = Tmp.v4.x() - hitPos.x();
-                double dY = Tmp.v4.y() - hitPos.y();
-                double dZ = Tmp.v4.z() - hitPos.z();
+                double dX = origin.x() - hitPos.x();
+                double dY = origin.y() - hitPos.y();
+                double dZ = origin.z() - hitPos.z();
 
                 float pitch = (float) (Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI);
                 float x = (float) (Math.sin(pitch) * Math.cos(Math.atan2(dZ, dX)) * distance);
                 float y = (float) (Math.cos(pitch) * distance);
                 float z = (float) (Math.sin(pitch) * Math.sin(Math.atan2(dZ, dX)) * distance);
-                Tmp.v3.set(Tmp.v4.add(x,y,z));
+                target.set(origin.add(x, y, z));
             }
 
-            camera.setPosition(Tmp.v3.x(), Tmp.v3.y(), Tmp.v3.z());
+            camera.setPosition(target.x(), target.y(), target.z());
         }
     }
 
@@ -134,6 +135,8 @@ public class ScreenshakeHandler{
         }
     }
 
+    private static final Vec3f SUM = new Vec3f();
+    private static final Vec3f TERM = new Vec3f();
     public static void clientTick(Camera camera){
         float intensity = (float) (double) ClientConfig.SCREENSHAKE_INTENSITY.get();
         float rotationNormalize = 0;
@@ -144,7 +147,7 @@ public class ScreenshakeHandler{
         float position = 0;
         float fov = 0;
 
-        Tmp.v3.clear();
+        SUM.clear();
         for(ScreenshakeInstance instance : INSTANCES){
             float update = instance.updateIntensity(camera);
             if(instance.isRotation) rotation = apply(instance, rotationNormalize, update);
@@ -162,11 +165,11 @@ public class ScreenshakeHandler{
             }
 
             if(instance.isVector){
-                Tmp.v4.set(instance.vx, instance.vy, instance.vz).scale(update * intensity);
-                if (instance.isNormalize) {
-                    Tmp.v3.add(Tmp.v4.sub(Tmp.v3));
-                } else {
-                    Tmp.v3.add(Tmp.v4);
+                TERM.set(instance.vx, instance.vy, instance.vz).scale(update * intensity);
+                if(instance.isNormalize){
+                    SUM.add(TERM.sub(SUM));
+                }else{
+                    SUM.add(TERM);
                 }
             }
         }
@@ -183,7 +186,7 @@ public class ScreenshakeHandler{
         intensityFov = Math.max(fovNorm, fov);
         intensityFovNormalize = fovNormalize;
         intensityVectorOld.set(intensityVector);
-        intensityVector.set(Tmp.v3);
+        intensityVector.set(SUM);
         INSTANCES.removeIf(i -> i.progress >= i.duration);
     }
 

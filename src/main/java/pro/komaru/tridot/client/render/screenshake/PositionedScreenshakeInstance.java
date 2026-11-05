@@ -44,8 +44,12 @@ public class PositionedScreenshakeInstance extends ScreenshakeInstance{
     public float updateIntensity(Camera camera){
         float intensity = super.updateIntensity(camera);
 
-        Tmp.v3.set(position).sub(Tmp.v4.set(camera.getPosition()));
-        float distance = Tmp.v3.len();
+        var cameraPos = camera.getPosition();
+        Vec3f dir = Tmp.vec3f.take()
+                .set(position)
+                .sub(cameraPos.x, cameraPos.y, cameraPos.z);
+
+        float distance = dir.len();
         if(distance > maxDistance){
             return 0;
         }
@@ -58,8 +62,8 @@ public class PositionedScreenshakeInstance extends ScreenshakeInstance{
         }
 
         Vector3f lookDirection = camera.getLookVector();
-        Tmp.v3.nor();
-        float angle = Math.max(0, lookDirection.dot(Tmp.v3.x(), Tmp.v3.y(), Tmp.v3.z()));
+        dir.nor();
+        float angle = Math.max(0, lookDirection.dot(dir.x(), dir.y(), dir.z()));
         return (intensity + (intensity * angle)) * 0.5f * distanceMultiplier;
     }
 }

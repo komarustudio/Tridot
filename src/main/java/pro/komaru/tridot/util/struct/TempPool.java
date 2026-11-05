@@ -65,8 +65,10 @@ public class TempPool<T> {
      * @throws IllegalArgumentException if {@code count} exceeds the total pool capacity
      * @throws IllegalStateException    if the previous session left unconsumed elements
      *                                  ({@code available > 0}), indicating a broken contract
+     *
+     * @return this
      */
-    public void request(int count) {
+    public TempPool<T> request(int count) {
         if (count > pool.length) {
             throw new IllegalArgumentException("Cannot request (%s) elements from TempPool: the pool size is (%s)"
                     .formatted(count, pool.length));
@@ -77,6 +79,7 @@ public class TempPool<T> {
         }
 
         available = count;
+        return this;
     }
 
     /**

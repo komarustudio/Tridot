@@ -124,13 +124,13 @@ public class TempPool<T> {
 
     /**
      * Returns the next element in the ring and consumes one unit of the current request.
-     * If a resetter was supplied, it is applied to the element before it is returned.
      *
-     * @return a pooled element, reset if a resetter was supplied
+     * @param resetState if {@code true} and a resetter was supplied, it is applied to the element first
+     * @return a pooled element
      * @throws IllegalStateException if there is no active request, or the request
      *                               quota has already been consumed
      */
-    public T next() {
+    public T next(boolean resetState) {
         if (available <= 0) {
             throw new IllegalStateException("Cannot retrieve next element from TempPool: no available elements");
         }
@@ -139,9 +139,21 @@ public class TempPool<T> {
         T item = pool[current];
         current = (current + 1) % pool.length;
 
-        if (resetter != null) {
+        if (resetState && resetter != null) {
             resetter.get(item);
         }
         return item;
+    }
+
+    /**
+     * Same as {@link #next(boolean)} with {@code resetState = false}.
+     * The returned element keeps whatever state it had before.
+     *
+     * @return a pooled element
+     * @throws IllegalStateException if there is no active request, or the request
+     *                               quota has already been consumed
+     */
+    public T next() {
+        return next(false);
     }
 }

@@ -1,12 +1,9 @@
 package pro.komaru.tridot.client.gfx.text;
 
 import com.google.gson.*;
-import com.mojang.blaze3d.font.GlyphInfo;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.font.FontSet;
-import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ClickEvent;

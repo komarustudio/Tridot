@@ -1,3 +1,5 @@
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
 buildscript{
     repositories{
         mavenLocal()
@@ -22,68 +24,8 @@ plugins{
     id 'org.spongepowered.mixin' version '[0.7,0.8)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id "com.modrinth.minotaur" version "2+"
+    id 'net.darkhax.curseforgegradle' version '1.1.15'
 }
-/*def loadEnv(String key) {
-    def path = Paths.get(".env")
-    if (Files.exists(path)) {
-        def env = Files.readAllLines(path).find { it.startsWith("${key}=") }
-        return env?.split("=")?.getAt(1)
-    }
-    return null
-}
-def modFile() {
-    def modFile = "build/libs/${project.name}-${mod_version}.jar"
-    return rootProject.file(modFile)
-}
-def modChangelog() {
-    return rootProject.file("changelog.md").text;
-}
-def modrinthToken = loadEnv("MODRINTH_TOKEN")
-def curseforgeToken = loadEnv("CURSEFORGE_TOKEN")
-def modrinthProjectId = loadEnv("MODRINTH_PROJECT")
-def curseforgeProjectId = loadEnv("CURSEFORGE_PROJECT")
-
-modrinth {
-    token = modrinthToken
-    projectId = modrinthProjectId
-    versionNumber = mod_version
-    uploadFile = modFile()
-    changelog = modChangelog()
-    loaders = ["forge"]
-    gameVersions = [minecraft_version]
-    versionType = mod_type
-}
-task beforeUpload {
-    doLast {
-        println "Введите версию мода: "
-        def vers = new Scanner(System.in).nextLine().trim()
-        println "Введите тип мода (alpha,beta,release): "
-        def type = new Scanner(System.in).nextLine().trim()
-
-        println "Замена версии мода..."
-        modrinth.versionNumber = vers
-        modrinth.versionType = type
-
-        mod_version = vers
-        version = vers
-
-        println "Билд мода..."
-    }
-}
-task prepareSettings {
-    tasks.build.mustRunAfter(beforeUpload)
-    dependsOn(beforeUpload,build)
-    doLast {
-        modrinth.uploadFile = modFile()
-    }
-}
-task modrinthUpload {
-    tasks.modrinth.mustRunAfter(prepareSettings)
-    dependsOn prepareSettings,tasks.modrinth
-    doLast {
-
-    }
-}*/
 
 group = "pro.komaru"
 version = "${version}"
@@ -230,4 +172,28 @@ jar {
 jar.finalizedBy('reobfJar')
 tasks.withType(JavaCompile).configureEach{
     options.encoding = 'UTF-8'
+}
+
+task curseforge(type: TaskPublishCurseForge) {
+    apiToken = System.getenv("cursetoken")
+    def projectId = "1239146"
+    def mainFile = upload(projectId, jar)
+    mainFile.displayName = "Tridot-${version}"
+    mainFile.releaseType = "release"
+    mainFile.gameVersions = ["Server", "Client"]
+
+    mainFile.addGameVersion("${minecraft_version}")
+    mainFile.changelog = "API updates"
+    mainFile.addModLoader("Forge", "NeoForge")
+    mainFile.addJavaVersion("Java 17")
+}
+
+modrinth {
+    token = System.getenv("modrinthtoken")
+    projectId = "tridot"
+    versionNumber = "${version}";
+    changelog = "API updates"
+    versionType = "release"
+    versionName = "${version}"
+    uploadFile = tasks.jar
 }

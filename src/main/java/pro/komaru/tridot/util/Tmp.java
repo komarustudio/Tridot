@@ -13,12 +13,16 @@ public class Tmp {
     private Tmp() {}
     public static ArcRandom rnd = new ArcRandom();
 
-    public static final TempPool<Col> col = new TempPool<>(4, Col::new);
-    public static final TempPool<Vec2f> vec2f = new TempPool<>(4, Vec2f::new);
-    public static final TempPool<Vec3f> vec3f = new TempPool<>(4, Vec3f::new);
-    public static final TempPool<Vector3f> vector3f = new TempPool<>(4, Vector3f::new);
-    public static final TempPool<Matrix4f> matrix4f = new TempPool<>(4, Matrix4f::new);
-    public static final TempPool<BlockPos.MutableBlockPos> blockPos = new TempPool<>(2, BlockPos.MutableBlockPos::new);
+    public static final TempPool<Col> col = new TempPool<>(4, Col::new, Col::reset);
+    public static final TempPool<Vec2f> vec2f = new TempPool<>(4, Vec2f::new, Vec2f::reset);
+    public static final TempPool<Vec3f> vec3f = new TempPool<>(4, Vec3f::new, Vec3f::reset);
+    public static final TempPool<Vector3f> vector3f = new TempPool<>(4, Vector3f::new, Vector3f::zero);
+    public static final TempPool<Matrix4f> matrix4f = new TempPool<>(4, Matrix4f::new, Matrix4f::zero);
+    public static final TempPool<BlockPos.MutableBlockPos> blockPos = new TempPool<>(
+            2,
+            BlockPos.MutableBlockPos::new,
+            bp -> bp.set(0, 0, 0)
+    );
 
     public static void main(String[] args) {
         var p = Tmp.vec3f.request(2);

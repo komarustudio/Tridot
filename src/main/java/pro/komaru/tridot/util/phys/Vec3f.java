@@ -328,4 +328,8 @@ public class Vec3f implements Pos3, Serializable {
         add(offsetX, offsetY, offsetZ);
         b.sub(offsetX, offsetY, offsetZ);
     }
+
+    public void reset() {
+        set(0, 0, 0);
+    }
 }

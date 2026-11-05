@@ -780,4 +780,8 @@ public class Col {
         }
         return total;
     }
+
+    public void reset() {
+        set(0);
+    }
 }

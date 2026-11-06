@@ -1,11 +1,11 @@
 package pro.komaru.tridot.client.ui.model;
 
-import lombok.Builder;
-import lombok.Value;
+public record RecomputeLayoutContext(float availableWidth, float availableHeight, float anchorX, float anchorY) {
+    public RecomputeLayoutContext(float availableWidth, float availableHeight) {
+        this(availableWidth, availableHeight, 0.0f, 0.0f);
+    }
 
-@Value
-@Builder(toBuilder = true)
-public class RecomputeLayoutContext {
-    float availableWidth, availableHeight;
-    float anchorX, anchorY;
+    public RecomputeLayoutContext withAnchor(float x, float y) {
+        return new RecomputeLayoutContext(availableWidth, availableHeight, x, y);
+    }
 }

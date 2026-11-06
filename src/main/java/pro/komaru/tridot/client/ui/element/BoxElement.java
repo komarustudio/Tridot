@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import stellar.qrix.neoforge.QrixNeoforge;
+import pro.komaru.tridot.*;
 import pro.komaru.tridot.client.ui.enums.MouseButtonType;
 import pro.komaru.tridot.client.ui.model.TextureSource;
 
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class BoxElement extends BaseElement<BoxElement> {
-    public static final ResourceLocation DEFAULT_ELEMENTS_TEXTURE = QrixNeoforge.location("textures/ui/default_ui_elements.png");
+    public static final ResourceLocation DEFAULT_ELEMENTS_TEXTURE = Tridot.ofTridot("textures/gui/default_ui_elements.png");
     public static final TextureSource
             BUTTON_DEFAULT = TextureSource.of(DEFAULT_ELEMENTS_TEXTURE, 0, 0,
             200, 22, 256, 256),
@@ -116,15 +116,15 @@ public class BoxElement extends BaseElement<BoxElement> {
 
         var source = currentTextureSource();
         if (source != null) {
-            gui.blit(source.getTextureLocation(),
+            gui.blit(source.textureLocation(),
                     0, 0,
                     (int) getWidth(), (int) getHeight(),
-                    source.getClipX(),
-                    source.getClipY(),
-                    source.getClipW(),
-                    source.getClipH(),
-                    source.getTextureWidth(),
-                    source.getTextureHeight()
+                    source.clipX(),
+                    source.clipY(),
+                    source.clipW(),
+                    source.clipH(),
+                    source.textureWidth(),
+                    source.textureHeight()
             );
             return;
         }
@@ -132,7 +132,6 @@ public class BoxElement extends BaseElement<BoxElement> {
         if (boxColor != null) {
             int color = boxColor;
             gui.fill(0, 0, (int) getWidth(), (int) getHeight(), color);
-            return;
         }
     }
 

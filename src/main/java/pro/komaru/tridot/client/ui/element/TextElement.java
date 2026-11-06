@@ -1,7 +1,5 @@
 package pro.komaru.tridot.client.ui.element;
 
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -11,7 +9,6 @@ import pro.komaru.tridot.client.ui.model.RecomputeMeasurementsContext;
 
 import java.util.List;
 
-@NoArgsConstructor
 public class TextElement extends BaseElement<TextElement> {
     Component text = Component.empty();
     boolean textWrap = false;
@@ -26,8 +23,11 @@ public class TextElement extends BaseElement<TextElement> {
 
     private List<FormattedCharSequence> lines = List.of();
 
-    @Setter
     public boolean linesCentered = false;
+
+    public void setLinesCentered(boolean linesCentered){
+        this.linesCentered = linesCentered;
+    }
 
     public TextElement centerLines() {
         setLinesCentered(true);
@@ -67,7 +67,7 @@ public class TextElement extends BaseElement<TextElement> {
 
             if (linesCentered) {
                 float lineWidth = mc.font.width(line);
-                float widthDiff = width - lineWidth;
+                float widthDiff = this.getWidth() - lineWidth;
                 xOff = widthDiff / 2f;
             }
 
@@ -83,10 +83,11 @@ public class TextElement extends BaseElement<TextElement> {
     @Override
     protected void recomputeInternalDimensions(RecomputeMeasurementsContext context) {
         Minecraft mc = Minecraft.getInstance();
-        int maxWidth = (int) Math.min(context.getAvailableWidth(), getMaxWidth() < 0f ? Float.MAX_VALUE : getMaxWidth());
+        int maxWidth = (int) Math.min(context.availableWidth(), getMaxWidth() < 0f ? Float.MAX_VALUE : getMaxWidth());
         lines = splitText(mc, text, maxWidth);
-        width = textWidth(mc, lines);
-        height = textHeight(mc, lines);
+
+        this.setWidth(textWidth(mc, lines));
+        this.setHeight(textHeight(mc, lines));
         super.recomputeInternalDimensions(context);
     }
 

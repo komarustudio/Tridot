@@ -1,7 +1,5 @@
 package pro.komaru.tridot.client.ui.element;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import pro.komaru.tridot.client.ui.enums.Alignment;
@@ -16,60 +14,269 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class BaseElement<T extends BaseElement<T>> implements UIElement {
-    @Getter
-    @Setter
-    float minWidth = -1f, minHeight = -1f;
-    @Getter
-    @Setter
-    float maxWidth = -1f, maxHeight = -1f;
+    private float minWidth = -1f, minHeight = -1f;
+    private float maxWidth = -1f, maxHeight = -1f;
 
-    @Getter
-    @Setter
-    UIElement parent;
+    private UIElement parent;
 
-    @Getter
-    float width, height;
+    private float width, height;
+    private float relativeX, relativeY;
+    private float absoluteX, absoluteY;
+    private float padLeft, padRight, padBottom, padTop;
+    private float marginLeft, marginRight, marginBottom, marginTop;
 
-    @Getter
-    float relativeX, relativeY;
+    public AlignmentDirection childrenAlignment = AlignmentDirection.ROW;
+    private int alignment;
 
-    float absoluteX, absoluteY;
-
-    @Getter
-    @Setter
-    float padLeft, padRight, padBottom, padTop;
-
-    @Getter
-    @Setter
-    float marginLeft, marginRight, marginBottom, marginTop;
-
-    @Getter
-    @Setter
-    AlignmentDirection childrenAlignment = AlignmentDirection.ROW;
-
-    @Getter
-    @Setter
-    int alignment;
-
-    @Getter
-    @Setter
     public float growX = 0f, growY = 0f;
-
-    @Getter
-    @Setter
     public boolean overflowX = false, overflowY = false;
-
-    @Getter
     private boolean hovered = false;
-
-    @Getter
     private boolean pressed = false;
-
-    @Getter
-    @Setter
     public float renderOffsetX, renderOffsetY;
 
-    List<UIElement> children = new CopyOnWriteArrayList<>();
+    private List<UIElement> children = new CopyOnWriteArrayList<>();
+
+    public float getMaxHeight(){
+        return this.maxHeight;
+    }
+
+    public float getMaxWidth(){
+        return this.maxWidth;
+    }
+
+    public void setMaxHeight(float maxHeight){
+        this.maxHeight = maxHeight;
+    }
+
+    public void setMaxWidth(float maxWidth){
+        this.maxWidth = maxWidth;
+    }
+
+    public float getHeight(){
+        return this.height;
+    }
+
+    public float getWidth(){
+        return this.width;
+    }
+
+    public void setHeight(float height){
+        this.height = height;
+    }
+
+    public void setWidth(float width){
+        this.width = width;
+    }
+
+    public float getMinHeight(){
+        return this.minHeight;
+    }
+
+    public float getMinWidth(){
+        return this.minWidth;
+    }
+
+    public void setMinHeight(float minHeight){
+        this.minHeight = minHeight;
+    }
+
+    public void setMinWidth(float minWidth){
+        this.minWidth = minWidth;
+    }
+
+    @Override
+    public UIElement getParent(){
+        return parent;
+    }
+
+    @Override
+    public void setParent(UIElement parent){
+        this.parent = parent;
+    }
+
+    public float getRelativeY(){
+        return this.relativeY;
+    }
+
+    public float getRelativeX(){
+        return this.relativeX;
+    }
+
+    public void setRelativeY(float relativeY){
+        this.relativeY = relativeY;
+    }
+
+    public void setRelativeX(float relativeX){
+        this.relativeX = relativeX;
+    }
+
+    public int getAlignment(){
+        return alignment;
+    }
+
+    public void setAlignment(int alignment){
+        this.alignment = alignment;
+    }
+
+    public AlignmentDirection getChildrenAlignment(){
+        return childrenAlignment;
+    }
+
+    public void setChildrenAlignment(AlignmentDirection childrenAlignment){
+        this.childrenAlignment = childrenAlignment;
+    }
+
+    public void setChildren(List<UIElement> children){
+        this.children = children;
+    }
+
+    public void setHovered(boolean hovered){
+        this.hovered = hovered;
+    }
+
+    public boolean isHovered(){
+        return hovered;
+    }
+
+    public boolean isPressed(){
+        return pressed;
+    }
+
+    public void setPressed(boolean pressed){
+        this.pressed = pressed;
+    }
+
+    public float getAbsoluteY(){
+        return this.absoluteY;
+    }
+
+    public float getAbsoluteX(){
+        return this.absoluteX;
+    }
+
+    public void setAbsoluteY(float absoluteY){
+        this.absoluteY = absoluteY;
+    }
+
+    public void setAbsoluteX(float absoluteX){
+        this.absoluteX = absoluteX;
+    }
+
+    public float getPadLeft(){
+        return padLeft;
+    }
+
+    public void setPadLeft(float padLeft){
+        this.padLeft = padLeft;
+    }
+
+    public float getPadBottom(){
+        return padBottom;
+    }
+
+    public void setPadBottom(float padBottom){
+        this.padBottom = padBottom;
+    }
+
+    public float getPadRight(){
+        return padRight;
+    }
+
+    public void setPadRight(float padRight){
+        this.padRight = padRight;
+    }
+
+    public float getPadTop(){
+        return padTop;
+    }
+
+    public void setPadTop(float padTop){
+        this.padTop = padTop;
+    }
+
+    @Override
+    public float getMarginLeft(){
+        return marginLeft;
+    }
+
+    public void setMarginLeft(float marginLeft){
+        this.marginLeft = marginLeft;
+    }
+
+    @Override
+    public float getMarginBottom(){
+        return marginBottom;
+    }
+
+    public void setMarginBottom(float marginBottom){
+        this.marginBottom = marginBottom;
+    }
+
+    @Override
+    public float getMarginRight(){
+        return marginRight;
+    }
+
+    public void setMarginRight(float marginRight){
+        this.marginRight = marginRight;
+    }
+
+    @Override
+    public float getMarginTop(){
+        return marginTop;
+    }
+
+    public void setMarginTop(float marginTop){
+        this.marginTop = marginTop;
+    }
+
+    public float getRenderOffsetX(){
+        return renderOffsetX;
+    }
+
+    public float getRenderOffsetY(){
+        return renderOffsetY;
+    }
+
+    public void setRenderOffsetX(float renderOffsetX){
+        this.renderOffsetX = renderOffsetX;
+    }
+
+    public void setRenderOffsetY(float renderOffsetY){
+        this.renderOffsetY = renderOffsetY;
+    }
+
+    public boolean isOverflowX(){
+        return overflowX;
+    }
+
+    public void setOverflowX(boolean overflowX){
+        this.overflowX = overflowX;
+    }
+
+    public boolean isOverflowY(){
+        return overflowY;
+    }
+
+    public void setOverflowY(boolean overflowY){
+        this.overflowY = overflowY;
+    }
+
+    public float getGrowX(){
+        return growX;
+    }
+
+    public void setGrowX(float growX){
+        this.growX = growX;
+    }
+
+    public float getGrowY(){
+        return growY;
+    }
+
+    public void setGrowY(float growY){
+        this.growY = growY;
+    }
 
     public abstract void renderElement(Minecraft mc, GuiGraphics gui, float pt);
 
@@ -207,7 +414,6 @@ public abstract class BaseElement<T extends BaseElement<T>> implements UIElement
 
     public T alignChildren(AlignmentDirection direction) {
         setChildrenAlignment(direction);
-
         return self();
     }
 
@@ -314,22 +520,18 @@ public abstract class BaseElement<T extends BaseElement<T>> implements UIElement
         float maxW = maxWidth < 0 ? Float.MAX_VALUE : maxWidth;
         float maxH = maxHeight < 0 ? Float.MAX_VALUE : maxHeight;
 
-        float currentAvailW = Math.min(context.getAvailableWidth(), maxW - (padLeft + padRight));
-        float currentAvailH = Math.min(context.getAvailableHeight(), maxH - (padTop + padBottom));
+        float currentAvailW = Math.min(context.availableWidth(), maxW - (padLeft + padRight));
+        float currentAvailH = Math.min(context.availableHeight(), maxH - (padTop + padBottom));
 
         for (UIElement child : children) {
-            var childContext = context.toBuilder()
-                    .availableWidth(currentAvailW - (child.getMarginLeft() + child.getMarginRight()))
-                    .availableHeight(currentAvailH - (child.getMarginTop() + child.getMarginBottom()))
-                    .build();
-
+            var childContext = new RecomputeMeasurementsContext(currentAvailW - (child.getMarginLeft() + child.getMarginRight()), currentAvailH - (child.getMarginTop() + child.getMarginBottom()));
             child.recomputeMeasurements(childContext);
-
             switch (childrenAlignment) {
                 case ROW -> {
                     float occupied = child.getWidth() + child.getMarginLeft() + child.getMarginRight();
                     currentAvailW = Math.max(0, currentAvailW - occupied);
                 }
+                
                 case COLUMN -> {
                     float occupied = child.getHeight() + child.getMarginTop() + child.getMarginBottom();
                     currentAvailH = Math.max(0, currentAvailH - occupied);
@@ -376,15 +578,8 @@ public abstract class BaseElement<T extends BaseElement<T>> implements UIElement
         float anchorY = padTop;
 
         for (UIElement child : children) {
-            var updatedContext = context.toBuilder()
-                    .availableWidth(availableWidth - anchorX)
-                    .availableHeight(availableHeight - anchorY)
-                    .anchorX(anchorX)
-                    .anchorY(anchorY)
-                    .build();
-
+            var updatedContext = new RecomputeLayoutContext(availableWidth - anchorX, availableHeight - anchorY, anchorX, anchorY);
             child.recomputeLayout(updatedContext);
-
             switch (childrenAlignment) {
                 case ROW -> anchorX += child.getWidth() + child.getMarginLeft() + child.getMarginRight();
                 case COLUMN -> anchorY += child.getHeight() + child.getMarginTop() + child.getMarginBottom();
@@ -429,14 +624,14 @@ public abstract class BaseElement<T extends BaseElement<T>> implements UIElement
         float w = getWidth();
         float h = getHeight();
 
-        float growW = context.getAvailableWidth() * growX;
-        float growH = context.getAvailableHeight() * growY;
+        float growW = context.availableWidth() * growX;
+        float growH = context.availableHeight() * growY;
 
         w = Math.max(w, growW);
         h = Math.max(h, growH);
 
-        if (!overflowX) w = Math.min(w, context.getAvailableWidth());
-        if (!overflowY) h = Math.min(h, context.getAvailableHeight());
+        if (!overflowX) w = Math.min(w, context.availableWidth());
+        if (!overflowY) h = Math.min(h, context.availableHeight());
 
         if (minWidth > 0) w = Math.max(w, minWidth);
         if (maxWidth > 0) w = Math.min(w, maxWidth);
@@ -456,13 +651,13 @@ public abstract class BaseElement<T extends BaseElement<T>> implements UIElement
         float alignX = align.first();
         float alignY = align.second();
 
-        relativeX = context.getAnchorX() + x + alignX;
-        relativeY = context.getAnchorY() + y + alignY;
+        relativeX = context.anchorX() + x + alignX;
+        relativeY = context.anchorY() + y + alignY;
     }
 
     protected Pair<Float, Float> recomputeAlignment(RecomputeLayoutContext context) {
-        float freeW = Math.max(0, context.getAvailableWidth() - width);
-        float freeH = Math.max(0, context.getAvailableHeight() - height);
+        float freeW = Math.max(0, context.availableWidth() - width);
+        float freeH = Math.max(0, context.availableHeight() - height);
 
         float alignX = 0f;
         float alignY = 0f;

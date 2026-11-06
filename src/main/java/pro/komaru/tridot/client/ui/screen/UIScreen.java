@@ -1,6 +1,5 @@
 package pro.komaru.tridot.client.ui.screen;
 
-import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
@@ -11,10 +10,11 @@ import pro.komaru.tridot.client.ui.enums.MouseButtonType;
 import pro.komaru.tridot.client.ui.model.RecomputeLayoutContext;
 import pro.komaru.tridot.client.ui.model.RecomputeMeasurementsContext;
 
+import javax.annotation.*;
+
 public abstract class UIScreen extends Screen {
     private WindowElement origin;
     private boolean uiDirty = false;
-
     private boolean renderDefaultBackground = false;
 
     protected UIScreen() {
@@ -29,16 +29,8 @@ public abstract class UIScreen extends Screen {
         float w = width;
         float h = height;
 
-        var measureContext = RecomputeMeasurementsContext.builder()
-                .availableWidth(w)
-                .availableHeight(h)
-                .build();
-
-        var recomputeContext = RecomputeLayoutContext.builder()
-                .availableWidth(w)
-                .availableHeight(h)
-                .build();
-
+        var measureContext = new RecomputeMeasurementsContext(w, h);
+        var recomputeContext = new RecomputeLayoutContext(w, h);
         origin.recomputeMeasurements(measureContext);
         origin.recomputeLayout(recomputeContext);
 
@@ -53,10 +45,10 @@ public abstract class UIScreen extends Screen {
     }
 
     @Override
-    public void render(@NonNull GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
+    public void render(@Nonnull GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         var mc = Minecraft.getInstance();
 
-        if (renderDefaultBackground) this.renderBackground(gui, mouseX, mouseY, partialTick);
+        if (renderDefaultBackground) this.renderBackground(gui);
         for (Renderable renderable : this.renderables) renderable.render(gui, mouseX, mouseY, partialTick);
 
         if (uiDirty) recomputeUI(mc);
@@ -74,6 +66,7 @@ public abstract class UIScreen extends Screen {
             case 2 -> MouseButtonType.WHEEL;
             default -> MouseButtonType.LEFT;
         };
+
         if (origin.mouseDown((float) mouseX, (float) mouseY, buttonType)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -85,6 +78,7 @@ public abstract class UIScreen extends Screen {
             case 2 -> MouseButtonType.WHEEL;
             default -> MouseButtonType.LEFT;
         };
+
         origin.mouseUp((float) mouseX, (float) mouseY, buttonType);
         return super.mouseReleased(mouseX, mouseY, button);
     }

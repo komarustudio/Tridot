@@ -24,7 +24,6 @@ public class Col {
     cyan = new Col(0, 255, 255),
     blue = new Col(0, 0, 255);
 
-
     public static Color getColor(int color) {
         return new Color(getRed(color), getGreen(color), getBlue(color), getAlpha(color));
     }
@@ -474,9 +473,8 @@ public class Col {
      * @param r red 0-1
      * @param g green 0-1
      * @param b blue 0-1
-     * @return 3 element int array with hue (0-360), saturation (0-1) and value (0-1)
      */
-    public static float[] RGBtoHSV(float r, float g, float b, float[] out){
+    public static void RGBtoHSV(float r, float g, float b, float[] out){
         float max = Math.max(Math.max(r, g), b);
         float min = Math.min(Math.min(r, g), b);
         float range = max - min;
@@ -493,7 +491,6 @@ public class Col {
 
         out[1] = max > 0 ? 1 - min / max : 0;
         out[2] = max;
-        return out;
     }
 
     /**

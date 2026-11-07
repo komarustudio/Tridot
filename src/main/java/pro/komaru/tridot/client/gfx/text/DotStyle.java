@@ -23,15 +23,15 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class DotStyle extends Style {
-
     public Seq<StyleEffect> effects = Seq.with();
-
+    public static final TextColor white = Col.white.toTextColor();
+    
     public DotStyle(@NotNull TextColor pColor, @Nullable Boolean pBold, @Nullable Boolean pItalic, @Nullable Boolean pUnderlined, @Nullable Boolean pStrikethrough, @Nullable Boolean pObfuscated, @Nullable ClickEvent pClickEvent, @Nullable HoverEvent pHoverEvent, @Nullable String pInsertion, @Nullable ResourceLocation pFont) {
         super(pColor, pBold, pItalic, pUnderlined, pStrikethrough, pObfuscated, pClickEvent, pHoverEvent, pInsertion, pFont);
     }
 
     public DotStyle() {
-        super(Col.white.toTextColor(), null, null, null, null, null, null, null, null, null);
+        super(white, null, null, null, null, null, null, null, null, null);
     }
 
     public static DotStyle of() {
@@ -56,7 +56,7 @@ public class DotStyle extends Style {
     @Override
     @NotNull
     public TextColor getColor() {
-        return this.color != null ? color : Col.white.toTextColor();
+        return this.color != null ? color : white;
     }
 
     @Override

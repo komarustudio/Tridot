@@ -24,7 +24,6 @@ public class Col {
     cyan = new Col(0, 255, 255),
     blue = new Col(0, 0, 255);
 
-
     public static Color getColor(int color) {
         return new Color(getRed(color), getGreen(color), getBlue(color), getAlpha(color));
     }

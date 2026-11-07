@@ -48,7 +48,7 @@ public abstract class UIScreen extends Screen {
     public void render(@Nonnull GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         var mc = Minecraft.getInstance();
 
-        if (renderDefaultBackground) this.renderBackground(gui);
+        if (renderDefaultBackground) this.renderBackground(gui, mouseX, mouseY, partialTick);
         for (Renderable renderable : this.renderables) renderable.render(gui, mouseX, mouseY, partialTick);
 
         if (uiDirty) recomputeUI(mc);
